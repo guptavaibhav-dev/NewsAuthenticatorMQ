@@ -30,6 +30,29 @@ _STOP = {
     "For",
     "And",
     "But",
+    "He",
+    "She",
+    "We",
+    "They",
+    "It",
+    "His",
+    "Her",
+    "If",
+    "There",
+    "Since",
+    "News",
+    "Asked",
+    "No",
+    "Let",
+    "May",
+    "My",
+    "Our",
+    "Your",
+    "Not",
+    "After",
+    "Last",
+    "Experts",
+    "Democracy",
     "Monday",
     "Tuesday",
     "Wednesday",
@@ -37,6 +60,10 @@ _STOP = {
     "Friday",
     "Saturday",
     "Sunday",
+}
+_STOP_LOWER = {s.lower() for s in _STOP} | {
+    "we", "if", "there", "it", "his", "since", "news", "asked", "no", "let",
+    "may", "he", "she", "they", "experts", "democracy", "my", "our", "your",
 }
 
 
@@ -149,7 +176,10 @@ def heuristic_ner(text: str) -> list[Entity]:
             out.append(Entity(text=value, type="DATE", source="ner"))
     for match in _PROPER.finditer(text):
         value = match.group(1)
-        if value.split()[0] in _STOP:
+        first = value.split()[0]
+        if first in _STOP or first.lower() in _STOP_LOWER or value.lower() in _STOP_LOWER:
+            continue
+        if len(value.split()) == 1 and len(value) < 4:
             continue
         if value.lower() in seen:
             continue

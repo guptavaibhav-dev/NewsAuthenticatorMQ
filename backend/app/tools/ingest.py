@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import html as html_lib
+import json
+import re
 from datetime import datetime, timezone
 
 import httpx
@@ -55,11 +58,11 @@ async def ingest_input(
         title = None
         body = ""
         if extracted:
-            import json
-
             data = json.loads(extracted)
             title = data.get("title")
             body = data.get("text") or ""
+        if not title:
+            title = _title_from_html(html)
         if not body:
             body = trafilatura.extract(html) or ""
         combined = body.strip()
@@ -83,3 +86,21 @@ async def ingest_input(
         payload.fetched_title = None
         payload.fetch_error = str(exc)[:240]
         return payload
+
+
+def _title_from_html(html: str) -> str | None:
+    patterns = (
+        r'<meta[^>]+property=["\']og:title["\'][^>]+content=["\']([^"\']+)',
+        r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:title["\']',
+        r'<meta[^>]+name=["\']twitter:title["\'][^>]+content=["\']([^"\']+)',
+        r"<title[^>]*>([^<]+)</title>",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, html or "", re.I)
+        if not match:
+            continue
+        title = html_lib.unescape(match.group(1)).strip()
+        title = re.sub(r"\s+", " ", title)
+        if title and title.lower() not in {"bbc news", "bbc"}:
+            return title[:240]
+    return None

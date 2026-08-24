@@ -156,8 +156,77 @@ export type RunEnvelope = {
   trace: TraceEvent[]
 }
 
+export type HealthStatus =
+  | 'working'
+  | 'configured'
+  | 'missing'
+  | 'error'
+  | 'fallback'
+  | 'unavailable'
+  | 'ready'
+  | 'degraded'
+
+export type HealthKey = {
+  id: string
+  env: string
+  label: string
+  used_by: string[]
+  configured: boolean
+  status: HealthStatus
+  detail: string
+}
+
+export type HealthEngine = {
+  id: string
+  role: string
+  model: string
+  key: string | null
+  status: HealthStatus
+  detail: string
+}
+
+export type HealthService = {
+  id: string
+  label: string
+  kind: string
+  status: HealthStatus
+  detail: string
+  key: string | null
+}
+
+export type HealthModule = {
+  id: string
+  label: string
+  layer: string
+  status: HealthStatus
+  detail: string
+}
+
+export type HealthLayer = {
+  id: string
+  order: number
+  label: string
+  status: HealthStatus
+  detail: string
+  depends_on: string[]
+}
+
 export type Health = {
   ok: boolean
+  probed?: boolean
+  checked_at?: string
+  summary?: {
+    keys_working: number
+    keys_configured: number
+    keys_total: number
+    layers_ready: number
+    layers_total: number
+  }
+  keys?: HealthKey[]
+  engines?: HealthEngine[]
+  services?: HealthService[]
+  modules?: HealthModule[]
+  layers?: HealthLayer[]
   providers: Record<string, boolean>
   models: Record<string, string>
 }

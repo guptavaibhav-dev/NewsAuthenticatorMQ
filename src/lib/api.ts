@@ -1,8 +1,8 @@
 import type { EditorialDecision, Health, RunEnvelope, TraceEvent } from '../types/run'
 
-export async function fetchHealth(): Promise<Health | null> {
+export async function fetchHealth(probe = false): Promise<Health | null> {
   try {
-    const res = await fetch('/api/health')
+    const res = await fetch(`/api/health?probe=${probe ? 'true' : 'false'}`)
     if (!res.ok) return null
     return (await res.json()) as Health
   } catch {

@@ -73,6 +73,24 @@ input {
   max-width: 28rem;
 }
 
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.tab {
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--line);
+  background: transparent;
+  cursor: pointer;
+}
+
+.tab.on {
+  background: var(--fg);
+  color: var(--bg);
+}
+
 .main {
   display: grid;
   gap: 2rem;
@@ -355,6 +373,11 @@ input {
   background: #eee;
 }
 
+.stepper li.degraded {
+  background: #f3f3f3;
+  outline: 1px dashed #000;
+}
+
 .timeline {
   list-style: none;
   margin: 0;
@@ -456,4 +479,116 @@ input {
 
 .record p {
   margin: 0.6rem 0 0;
+}
+
+.system-health h2 {
+  margin: 2rem 0 0.75rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.system-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.layer-health {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.layer-health li {
+  display: grid;
+  grid-template-columns: 2rem 1fr auto;
+  gap: 0.8rem;
+  align-items: start;
+  border: 1px solid var(--line);
+  padding: 0.75rem 0.9rem;
+}
+
+.layer-order {
+  font-weight: 600;
+}
+
+.card-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.card-grid li {
+  border: 1px solid var(--line);
+  padding: 0.8rem 0.9rem;
+}
+
+.item-title {
+  margin: 0.4rem 0 0.2rem;
+  font-weight: 600;
+}
+
+.item-detail,
+.item-meta {
+  margin: 0.15rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.table-wrap {
+  overflow: auto;
+  border: 1px solid var(--line);
+}
+
+.status-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.status-table th,
+.status-table td {
+  text-align: left;
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid #ddd;
+  vertical-align: top;
+}
+
+.status-table th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.badge {
+  display: inline-block;
+  border: 1px solid var(--line);
+  padding: 0.1rem 0.45rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.badge.is-good,
+.layer-health li.is-good .badge,
+.card-grid li.is-good .badge {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.badge.is-warn {
+  background: #eee;
+}
+
+.badge.is-bad {
+  outline: 1px solid var(--line);
 }

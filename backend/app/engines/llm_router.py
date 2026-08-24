@@ -7,6 +7,34 @@ from typing import Any
 import httpx
 
 from app.config import Settings
+from app.logutil import get_logger, http_error_detail, short_error
+
+log = get_logger("llm")
+
+MODEL_FALLBACKS = {
+    "openai": ["gpt-4.1", "gpt-4o", "gpt-4o-mini"],
+    "anthropic": [
+        "claude-sonnet-4-6",
+        "claude-sonnet-4-5",
+        "claude-sonnet-4-5-20250929",
+        "claude-3-5-sonnet-latest",
+    ],
+    "gemini": [
+        "gemini-2.5-flash",
+        "gemini-2.0-flash",
+        "gemini-flash-latest",
+        "gemini-2.5-pro",
+    ],
+}
+
+
+def _models_to_try(provider: str, requested: str) -> list[str]:
+    chain = [requested]
+    for alt in MODEL_FALLBACKS.get(provider, []):
+        if alt not in chain:
+            chain.append(alt)
+    return chain
+
 
 _JSON_BLOCK = re.compile(r"\{.*\}", re.DOTALL)
 
@@ -78,13 +106,44 @@ class LLMRouter:
         temperature: float = 0.1,
         json_mode: bool = False,
     ) -> str:
-        if provider == "openai":
-            return await self._openai(model, system, user, temperature, json_mode)
-        if provider == "anthropic":
-            return await self._anthropic(model, system, user, temperature)
-        if provider == "gemini":
-            return await self._gemini(model, system, user, temperature, json_mode)
-        raise ValueError(f"unknown provider {provider}")
+        last_error: Exception | None = None
+        for candidate in _models_to_try(provider, model):
+            log.info("llm request provider=%s model=%s json=%s", provider, candidate, json_mode)
+            try:
+                if provider == "openai":
+                    text = await self._openai(candidate, system, user, temperature, json_mode)
+                elif provider == "anthropic":
+                    text = await self._anthropic(candidate, system, user, temperature)
+                elif provider == "gemini":
+                    text = await self._gemini(candidate, system, user, temperature, json_mode)
+                else:
+                    raise ValueError(f"unknown provider {provider}")
+            except httpx.HTTPStatusError as exc:
+                detail = http_error_detail(exc.response)
+                log.error("llm error provider=%s model=%s %s", provider, candidate, detail)
+                last_error = RuntimeError(detail)
+                if exc.response.status_code in {404, 400, 410} and candidate != _models_to_try(provider, model)[-1]:
+                    log.warning("llm trying next model after %s failed", candidate)
+                    continue
+                raise RuntimeError(detail) from exc
+            except Exception as exc:
+                log.error(
+                    "llm error provider=%s model=%s %s",
+                    provider,
+                    candidate,
+                    short_error(exc),
+                )
+                last_error = exc
+                message = str(exc)
+                if "HTTP 404" in message or "HTTP 410" in message or "no longer available" in message:
+                    log.warning("llm trying next model after %s failed", candidate)
+                    continue
+                raise
+            log.info("llm ok provider=%s model=%s chars=%s", provider, candidate, len(text))
+            return text
+        if last_error:
+            raise last_error
+        raise RuntimeError(f"no model available for {provider}")
 
     async def _openai(
         self,

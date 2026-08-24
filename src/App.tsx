@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchHealth, fetchRun, startRun, submitDecision, subscribeRun } from './lib/api'
+import SystemHealth from './SystemHealth'
 import type {
   EditorialDecision,
   Health,
@@ -9,8 +10,10 @@ import type {
 import { DECISIONS, LAYERS } from './types/run'
 
 type Status = 'idle' | 'running' | 'done' | 'error'
+type Tab = 'authenticate' | 'system'
 
 export default function App() {
+  const [tab, setTab] = useState<Tab>('authenticate')
   const [text, setText] = useState('')
   const [url, setUrl] = useState('')
   const [status, setStatus] = useState<Status>('idle')
@@ -18,13 +21,33 @@ export default function App() {
   const [run, setRun] = useState<RunEnvelope | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [health, setHealth] = useState<Health | null>(null)
+  const [healthLoading, setHealthLoading] = useState(false)
+  const [healthError, setHealthError] = useState<string | null>(null)
   const [decision, setDecision] = useState<EditorialDecision | null>(null)
   const [notes, setNotes] = useState('')
   const [decisionSaved, setDecisionSaved] = useState(false)
 
+  async function loadHealth(probe: boolean) {
+    setHealthLoading(true)
+    setHealthError(null)
+    const next = await fetchHealth(probe)
+    if (!next) {
+      setHealthError('Could not reach the API. Start it with npm run api.')
+    } else {
+      setHealth(next)
+    }
+    setHealthLoading(false)
+  }
+
   useEffect(() => {
-    void fetchHealth().then(setHealth)
+    void loadHealth(false)
   }, [])
+
+  useEffect(() => {
+    if (tab === 'system') {
+      void loadHealth(true)
+    }
+  }, [tab])
 
   const canRun = Boolean(text.trim() || url.trim())
 
@@ -93,18 +116,34 @@ export default function App() {
         <p className="tagline">
           A journalist-centred framework for authenticating news content
         </p>
-        {health && (
-          <ul className="health" aria-label="Configured engines and APIs">
-            {Object.entries(health.providers).map(([name, on]) => (
-              <li key={name} className={on ? 'on' : 'off'}>
-                {name}
-              </li>
-            ))}
-          </ul>
-        )}
+        <nav className="tabs" aria-label="Main">
+          <button
+            type="button"
+            className={tab === 'authenticate' ? 'tab on' : 'tab'}
+            onClick={() => setTab('authenticate')}
+          >
+            Authenticate
+          </button>
+          <button
+            type="button"
+            className={tab === 'system' ? 'tab on' : 'tab'}
+            onClick={() => setTab('system')}
+          >
+            System
+          </button>
+        </nav>
       </header>
 
       <main className="main">
+        {tab === 'system' ? (
+          <SystemHealth
+            health={health}
+            loading={healthLoading}
+            error={healthError}
+            onRefresh={() => void loadHealth(true)}
+          />
+        ) : (
+          <>
         <section className="panel input-panel" aria-labelledby="input-heading">
           <h1 id="input-heading">Authenticate</h1>
           <p className="lede">
@@ -257,7 +296,9 @@ export default function App() {
               )}
             </section>
           )}
-        </section>
+            </section>
+          </>
+        )}
       </main>
 
       <footer className="footer">
@@ -477,14 +518,30 @@ function RunResults({ run }: { run: RunEnvelope }) {
 
 function layerStatuses(trace: TraceEvent[], status: Status): Record<string, string> {
   const map: Record<string, string> = {}
+  const hadError = new Set<string>()
+  const recovered = new Set<string>()
   for (const event of trace) {
     if (event.layer === 'pipeline') continue
-    if (event.status === 'error') map[event.layer] = 'error'
-    else if (event.status === 'running' && map[event.layer] !== 'error') {
-      map[event.layer] = 'running'
-    } else if (map[event.layer] !== 'error') {
-      map[event.layer] = event.status === 'skipped' ? 'skipped' : 'ok'
+    if (event.status === 'error') hadError.add(event.layer)
+    if (event.status === 'ok' || event.status === 'empty' || event.status === 'skipped') {
+      if (hadError.has(event.layer)) recovered.add(event.layer)
     }
+    if (event.status === 'running') {
+      if (map[event.layer] !== 'error' && map[event.layer] !== 'ok' && map[event.layer] !== 'degraded') {
+        map[event.layer] = 'running'
+      }
+    } else if (event.status === 'skipped') {
+      map[event.layer] = 'skipped'
+    } else if (event.status === 'empty') {
+      map[event.layer] = recovered.has(event.layer) ? 'degraded' : 'ok'
+    } else if (event.status === 'error') {
+      map[event.layer] = 'error'
+    } else {
+      map[event.layer] = recovered.has(event.layer) ? 'degraded' : 'ok'
+    }
+  }
+  for (const layer of recovered) {
+    if (map[layer] !== 'error') map[layer] = 'degraded'
   }
   if (status === 'running') {
     const order = LAYERS.map((l) => l.id)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import datetime, timedelta
 
 from app.config import Settings
@@ -238,41 +239,93 @@ async def plan_queries(envelope, *, settings: Settings, llm: LLMRouter, emit) ->
         return fallback
 
 
+_QUERY_STOP = {
+    "the", "a", "an", "this", "that", "these", "those", "and", "but", "for",
+    "president", "minister", "sacked", "tells", "said", "should", "asked",
+    "about", "what", "knew", "from", "with", "after", "last", "month", "week",
+}
+
+_EVENT_HINTS = (
+    "corruption", "ukraine", "zelensky", "zelenskyy", "fedorov", "federov",
+    "minister", "investigation", "defence", "defense", "drone",
+)
+
+
+def _short_search_name(text: str) -> str | None:
+    parts = [p for p in text.replace(",", " ").split() if p]
+    if not parts:
+        return None
+    token = parts[-1].strip(".,;:\"'")
+    if len(token) < 4 or token.lower() in _QUERY_STOP:
+        return None
+    return token
+
+
 def deterministic_queries(envelope: RunEnvelope) -> SearchQueries:
-    headline = envelope.classification.headline or envelope.input.fetched_title or ""
-    if not headline:
-        first = envelope.input.raw_text.strip().split("\n")[0][:120]
-        headline = first
-    people = [e.text for e in envelope.classification.entities if e.type in {"PERSON", "ORG"}]
-    places = [e.text for e in envelope.classification.entities if e.type == "GPE"]
-    events = [e.text for e in envelope.classification.entities if e.type == "EVENT"]
+    headline = (envelope.classification.headline or envelope.input.fetched_title or "").strip()
+    if len(headline) > 90:
+        cut = headline[:90]
+        headline = cut.rsplit(" ", 1)[0] if " " in cut else cut
     claim = envelope.classification.claims[0].text if envelope.classification.claims else headline
-    nouns = " ".join((events or claim.split()[:6])[:6])
-    parts = []
-    if people:
-        parts.append("(" + " OR ".join(people[:3]) + ")")
-    if places:
-        parts.append("(" + " OR ".join(places[:2]) + ")")
-    if nouns:
-        parts.append(nouns)
-    event_boolean = " AND ".join(parts) if parts else headline
+    people = [
+        e.text
+        for e in envelope.classification.entities
+        if e.type in {"PERSON", "ORG"} and len(e.text) > 2
+    ]
+    places = [
+        e.text
+        for e in envelope.classification.entities
+        if e.type == "GPE" and len(e.text) > 3 and e.text.lower() not in _QUERY_STOP
+    ]
+    names = []
+    for raw in people or _proper_nouns(claim + " " + headline):
+        short = _short_search_name(raw)
+        if short and short not in names:
+            names.append(short)
+    places_short = []
+    for raw in places:
+        short = _short_search_name(raw)
+        if short and short not in places_short and short not in names:
+            places_short.append(short)
+    haystack = f"{headline} {claim}".lower()
+    hints = [h.title() if h != "ukraine" else "Ukraine" for h in _EVENT_HINTS if h in haystack]
+    parts: list[str] = []
+    if names:
+        parts.append("(" + " OR ".join(names[:3]) + ")")
+    if places_short:
+        parts.append(places_short[0])
+    elif "Ukraine" in hints:
+        parts.append("Ukraine")
+    if hints:
+        extra = next((h for h in hints if h.lower() not in {n.lower() for n in names} and h != "Ukraine"), None)
+        if extra:
+            parts.append(extra)
+    event_boolean = " AND ".join(parts) if parts else (headline or claim)[:80]
     window = envelope.classification.date_window
     start, end = window.start, window.end
-    if not start and window.confidence == "none":
+    if not start:
         recent = datetime.utcnow()
-        start = (recent - timedelta(days=14)).date().isoformat()
+        start = (recent - timedelta(days=30)).date().isoformat()
         end = recent.date().isoformat()
-    entities = people + places
+    entities = (people + places_short)[:5] or names[:5]
+    quoted = headline.strip('"')
+    if len(quoted) > 90:
+        quoted = quoted[:90].rsplit(" ", 1)[0]
     return SearchQueries(
-        quoted_headline=headline.strip('"'),
-        event_boolean=event_boolean[:180],
+        quoted_headline=quoted,
+        event_boolean=event_boolean[:160],
         date_from=start,
         date_to=end,
-        entity_queries=entities[:5],
-        factcheck_query=claim[:180],
+        entity_queries=entities,
+        factcheck_query=(claim[:120] if claim else quoted),
         planner_model="deterministic",
         planner_mode="deterministic",
     )
+
+
+def _proper_nouns(text: str) -> list[str]:
+    found = re.findall(r"\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3})\b", text or "")
+    return [item for item in found if item.lower() not in _QUERY_STOP][:6]
 
 
 def _planner_user(envelope: RunEnvelope, fallback: SearchQueries) -> str:
@@ -318,11 +371,18 @@ async def _rank(
         item.similarity = sim
         scored.append(item)
     scored.sort(key=lambda x: x.similarity or 0, reverse=True)
-    # keep unique publisher families first, then fill
+    relevant = [
+        item
+        for item in scored
+        if (item.similarity or 0) >= 0.22
+        or token_jaccard(claim_text, f"{item.title} {item.snippet}") >= 0.08
+    ]
+    if not relevant:
+        relevant = []
     families_seen: set[str] = set()
     preferred: list[EvidenceItem] = []
     rest: list[EvidenceItem] = []
-    for item in scored:
+    for item in relevant:
         fam = item.publisher_family or publisher_family(item.url)
         if fam not in families_seen:
             families_seen.add(fam)

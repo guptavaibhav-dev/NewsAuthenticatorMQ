@@ -37,6 +37,8 @@ npm run dev
 
 Open http://localhost:5173/ — Vite proxies `/api` to the FastAPI server.
 
+Watch the **API terminal** for pipeline logs: layer steps, skipped tools, LLM calls, and errors. Keys are redacted. Set `LOG_LEVEL=DEBUG` in `backend/.env` for HTTP request traces.
+
 ## Keys
 
 See [`backend/.env.example`](backend/.env.example). You do not need every key for a demo: the pipeline completes with skipped tools recorded as uncertainty, not as “fake”.

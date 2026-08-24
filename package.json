@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "api": "cd backend && .venv/Scripts/python -m uvicorn app.main:app --reload --port 8000",
+    "api": "cd backend && .venv\\Scripts\\python.exe -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview"
   },

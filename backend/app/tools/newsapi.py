@@ -38,9 +38,18 @@ async def search_newsapi(
         params["searchIn"] = search_in
     try:
         response = await client.get("https://newsapi.org/v2/everything", params=params)
-        if response.status_code == 429:
-            return [], ToolResult(tool="newsapi", status="error", detail="rate limited")
-        response.raise_for_status()
+        if response.status_code >= 400:
+            message = ""
+            try:
+                payload = response.json()
+                message = str(payload.get("message") or payload.get("code") or payload)
+            except Exception:
+                message = response.text[:200]
+            return [], ToolResult(
+                tool="newsapi",
+                status="error",
+                detail=f"HTTP {response.status_code} {message}"[:240],
+            )
         articles = response.json().get("articles") or []
         items: list[EvidenceItem] = []
         for i, article in enumerate(articles):
