@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
+
 import httpx
 
 from app.config import Settings
@@ -31,7 +33,7 @@ async def search_newsapi(
         "apiKey": settings.newsapi_key,
     }
     if date_from:
-        params["from"] = date_from
+        params["from"] = _clamp_newsapi_from(date_from)
     if date_to:
         params["to"] = date_to
     if search_in:
@@ -74,3 +76,15 @@ async def search_newsapi(
         return items, ToolResult(tool="newsapi", status=status, hit_count=len(items))
     except Exception as exc:
         return [], ToolResult(tool="newsapi", status="error", detail=str(exc)[:240])
+
+
+def _clamp_newsapi_from(date_from: str) -> str:
+    """Developer NewsAPI plans reject windows older than about one month."""
+    floor = (datetime.now(timezone.utc) - timedelta(days=29)).date()
+    try:
+        requested = datetime.fromisoformat(date_from[:10]).date()
+    except ValueError:
+        return floor.isoformat()
+    if requested < floor:
+        return floor.isoformat()
+    return date_from[:10]

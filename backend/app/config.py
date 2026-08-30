@@ -31,14 +31,17 @@ class Settings(BaseSettings):
 
     preprocess_model: str = "gpt-4.1"
     query_planner_model: str = "claude-sonnet-4-6"
-    evidence_llm_model: str = "gemini-2.5-flash"
+    evidence_llm_model: str = "gemini-3.6-flash"
     uncertainty_model: str = "gpt-4o-mini"
     documentation_model: str = "claude-sonnet-4-6"
     nli_model: str = "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+    nli_fallback_model: str = "facebook/bart-large-mnli"
     embedding_model: str = "sentence-transformers/all-mpnet-base-v2"
     ner_model: str = "dslim/bert-base-NER"
 
     http_timeout_s: float = 25.0
+    llm_timeout_s: float = 90.0
+    hf_timeout_s: float = 60.0
     max_evidence_items: int = 12
     nli_threshold: float = 0.6
     near_duplicate_threshold: float = 0.88

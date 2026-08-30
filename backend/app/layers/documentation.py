@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from app.config import Settings
 from app.engines.llm_router import LLMRouter
+from app.logutil import short_error
 from app.schemas.envelope import DocumentationPayload, RunEnvelope
 
 DOC_SYSTEM = """You are the Output and Documentation layer.
@@ -31,11 +32,15 @@ async def run_documentation(
         detail="Producing an audit record, not an authenticity judgement.",
     )
     model_used = "template"
-    if llm.anthropic_ready():
+    attempts = [
+        ("anthropic", settings.documentation_model),
+        ("gemini", settings.evidence_llm_model),
+        ("openai", settings.uncertainty_model),
+    ]
+    if any(llm.provider_ready(p) for p, _ in attempts):
         try:
-            data = await llm.chat_json(
-                provider="anthropic",
-                model=settings.documentation_model,
+            data, provider, model_used = await llm.chat_json_any(
+                attempts=attempts,
                 system=DOC_SYSTEM,
                 user=_doc_user(envelope),
             )
@@ -51,18 +56,30 @@ async def run_documentation(
                     data.get("editorial_recommendation") or templated.editorial_recommendation
                 ),
                 citations=[str(c) for c in (data.get("citations") or templated.citations)],
-                model=settings.documentation_model,
+                model=model_used,
             )
-            model_used = settings.documentation_model
+            if (provider, model_used) != attempts[0]:
+                await emit(
+                    layer="documentation",
+                    parameter="verification_record",
+                    process="citation-backed documentation",
+                    tool=model_used,
+                    status="skipped",
+                    detail=(
+                        f"{settings.documentation_model} unavailable; "
+                        f"record written with {provider}/{model_used}."
+                    ),
+                )
         except Exception as exc:
-            templated.model = f"template (documentation LLM error: {exc})"[:200]
+            templated.model = f"template ({short_error(exc)})"[:200]
+            model_used = "template"
             await emit(
                 layer="documentation",
                 parameter="verification_record",
                 process="citation-backed documentation",
                 tool=settings.documentation_model,
                 status="error",
-                detail=str(exc)[:240],
+                detail=short_error(exc),
             )
     templated.model = model_used
     envelope.engines_used["documentation"] = model_used

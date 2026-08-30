@@ -42,25 +42,26 @@ async def run_uncertainty(
     payload = rule_based_uncertainty(envelope)
     model_used = "rule-based"
 
-    if llm.openai_ready():
+    attempts = [
+        ("openai", settings.uncertainty_model),
+        ("anthropic", settings.documentation_model),
+        ("gemini", settings.evidence_llm_model),
+    ]
+    if any(llm.provider_ready(p) for p, _ in attempts):
         user = (
             "STRUCTURED SIGNALS (do not assume missing tools imply fabrication):\n"
             + _json(structured)
         )
-        for model in (settings.uncertainty_model, "gpt-4.1", "gpt-4o"):
-            try:
-                data = await llm.chat_json(
-                    provider="openai",
-                    model=model,
-                    system=UNCERTAINTY_SYSTEM,
-                    user=user,
-                    temperature=0,
-                )
-                payload = _from_llm(data, payload)
-                model_used = model
-                break
-            except Exception:
-                continue
+        try:
+            data, _provider, model_used = await llm.chat_json_any(
+                attempts=attempts,
+                system=UNCERTAINTY_SYSTEM,
+                user=user,
+                temperature=0,
+            )
+            payload = _from_llm(data, payload)
+        except Exception:
+            model_used = "rule-based"
 
     payload.model = model_used
     envelope.engines_used["uncertainty"] = model_used

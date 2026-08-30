@@ -14,6 +14,7 @@ from app.schemas.envelope import (
 )
 from app.scoring.corroboration import build_payload, fuse_claim
 from app.scoring.source_independence import independent_family_count, publisher_family
+from app.logutil import short_error
 
 GEMINI_SYSTEM = """You are Engine B of the Evidence Analysis Layer in a journalist-centred authentication framework.
 Compare claims against retrieved evidence items. Cite evidence by source_id only.
@@ -62,6 +63,28 @@ async def run_evidence(
             for item in evidence:
                 nli_inputs.append((claim.id, item.source_id, item.snippet or item.title, claim.text))
         scored = await nli.score_pairs([(p, h) for _, _, p, h in nli_inputs])
+        if nli.engine_name.startswith("lexical"):
+            await emit(
+                layer="evidence",
+                parameter="claim×evidence",
+                process="DeBERTa MNLI stance",
+                tool=nli.engine_name,
+                status="skipped",
+                detail=(
+                    "Hugging Face NLI unavailable"
+                    + (f" ({nli.last_error})" if nli.last_error else "")
+                    + "; using lexical overlap fallback."
+                ),
+            )
+        else:
+            await emit(
+                layer="evidence",
+                parameter="claim×evidence",
+                process="DeBERTa MNLI stance",
+                tool=nli.engine_name,
+                status="ok",
+                detail=f"Scored {len(scored)} pairs with {nli.engine_name}.",
+            )
         for (claim_id, source_id, _, _), (label, score, probs) in zip(nli_inputs, scored):
             item = next(e for e in evidence if e.source_id == source_id)
             pairs.append(
@@ -79,7 +102,7 @@ async def run_evidence(
                 layer="evidence",
                 parameter=f"claim[{claim_id}]",
                 process=f"NLI vs {item.outlet}",
-                tool="deberta-mnli",
+                tool=nli.engine_name if nli.engine_name.startswith("hf:") else "lexical-nli",
                 status="ok",
                 detail=f"{label} ({score:.2f}) — {item.title[:80]}",
             )
@@ -97,48 +120,57 @@ async def run_evidence(
     envelope.engines_used["nli"] = nli.engine_name
 
     gemini_rows: list[GeminiClaimAnalysis] = []
-    if claims and evidence and llm.gemini_ready():
+    analyst_model = "skipped"
+    analyst_attempts = [
+        ("gemini", settings.evidence_llm_model),
+        ("anthropic", settings.documentation_model),
+    ]
+    if claims and evidence and any(llm.provider_ready(p) for p, _ in analyst_attempts):
         await emit(
             layer="evidence",
             parameter="claims",
-            process="blinded Gemini multi-document analysis",
+            process="blinded multi-document analysis",
             tool=settings.evidence_llm_model,
             status="running",
-            detail="Gemini does not receive DeBERTa labels or an authenticity target.",
+            detail="Analyst does not receive DeBERTa labels or an authenticity target.",
         )
         try:
-            gemini_rows = await _gemini_analyse(envelope, settings, llm)
+            gemini_rows, provider, analyst_model = await _blinded_analyse(
+                envelope, llm, analyst_attempts
+            )
             await emit(
                 layer="evidence",
                 parameter="claims",
-                process="blinded Gemini multi-document analysis",
-                tool=settings.evidence_llm_model,
+                process="blinded multi-document analysis",
+                tool=analyst_model,
                 status="ok",
-                detail=f"Structured stance for {len(gemini_rows)} claim(s); hallucinated IDs will be dropped.",
+                detail=(
+                    f"{provider}/{analyst_model} structured stance for {len(gemini_rows)} claim(s); "
+                    "hallucinated IDs will be dropped."
+                ),
             )
         except Exception as exc:
+            analyst_model = "skipped"
             await emit(
                 layer="evidence",
                 parameter="claims",
-                process="blinded Gemini multi-document analysis",
+                process="blinded multi-document analysis",
                 tool=settings.evidence_llm_model,
-                status="error",
-                detail=str(exc)[:240],
+                status="skipped",
+                detail=f"Analyst LLM failed ({short_error(exc)}); fusion will use NLI only.",
             )
     else:
         await emit(
             layer="evidence",
             parameter="claims",
-            process="blinded Gemini multi-document analysis",
+            process="blinded multi-document analysis",
             tool=settings.evidence_llm_model,
             status="skipped",
-            detail="Gemini unavailable or no evidence; fusion will use NLI only.",
+            detail="Analyst LLM unavailable or no evidence; fusion will use NLI only.",
         )
 
     envelope.gemini_analysis = gemini_rows
-    envelope.engines_used["evidence_llm"] = (
-        settings.evidence_llm_model if gemini_rows else "skipped"
-    )
+    envelope.engines_used["evidence_llm"] = analyst_model if gemini_rows else "skipped"
 
     gemini_by_claim = {row.claim_id: row for row in gemini_rows}
     fused = []
@@ -171,9 +203,11 @@ async def run_evidence(
     )
 
 
-async def _gemini_analyse(
-    envelope: RunEnvelope, settings: Settings, llm: LLMRouter
-) -> list[GeminiClaimAnalysis]:
+async def _blinded_analyse(
+    envelope: RunEnvelope,
+    llm: LLMRouter,
+    attempts: list[tuple[str, str]],
+) -> tuple[list[GeminiClaimAnalysis], str, str]:
     evidence_blob = [
         {
             "source_id": item.source_id,
@@ -192,15 +226,14 @@ async def _gemini_analyse(
         + "\nEVIDENCE:\n"
         + _json(evidence_blob)
     )
-    data = await llm.chat_json(
-        provider="gemini",
-        model=settings.evidence_llm_model,
+    data, provider, model = await llm.chat_json_any(
+        attempts=attempts,
         system=GEMINI_SYSTEM,
         user=user,
     )
     rows = data.get("claims") if isinstance(data, dict) else None
     if not isinstance(rows, list):
-        return []
+        return [], provider, model
     valid = {item.source_id for item in envelope.evidence_items}
     out: list[GeminiClaimAnalysis] = []
     for row in rows:
@@ -239,7 +272,7 @@ async def _gemini_analyse(
             stance_map.setdefault((row.claim_id, sid), "unrelated")
     for pair in envelope.analysis:
         pair.gemini_stance = stance_map.get((pair.claim_id, pair.source_id))
-    return out
+    return out, provider, model
 
 
 def _json(value) -> str:

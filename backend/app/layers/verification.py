@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from app.config import Settings
 from app.engines.embeddings import EmbeddingEngine, token_jaccard
 from app.engines.llm_router import LLMRouter
+from app.logutil import short_error
 from app.schemas.envelope import (
     EvidenceItem,
     ExistenceResult,
@@ -188,22 +189,27 @@ async def run_verification(
 
 async def plan_queries(envelope, *, settings: Settings, llm: LLMRouter, emit) -> SearchQueries:
     fallback = deterministic_queries(envelope)
-    if not llm.anthropic_ready():
+    attempts = [
+        ("anthropic", settings.query_planner_model),
+        ("gemini", settings.evidence_llm_model),
+        ("openai", settings.uncertainty_model),
+    ]
+    if not any(llm.provider_ready(p) for p, _ in attempts):
         await emit(
             layer="verification",
             parameter="queries",
-            process="Claude query planner",
+            process="query planner",
             tool=settings.query_planner_model,
             status="skipped",
-            detail="ANTHROPIC_API_KEY not set; using deterministic queries.",
+            detail="No LLM provider is configured; using deterministic queries.",
         )
         fallback.planner_mode = "deterministic"
         return fallback
+
     user = _planner_user(envelope, fallback)
     try:
-        data = await llm.chat_json(
-            provider="anthropic",
-            model=settings.query_planner_model,
+        data, provider, model = await llm.chat_json_any(
+            attempts=attempts,
             system=PLANNER_SYSTEM,
             user=user,
         )
@@ -214,26 +220,26 @@ async def plan_queries(envelope, *, settings: Settings, llm: LLMRouter, emit) ->
             date_to=data.get("date_to") or fallback.date_to,
             entity_queries=data.get("entity_queries") or fallback.entity_queries,
             factcheck_query=data.get("factcheck_query") or fallback.factcheck_query,
-            planner_model=settings.query_planner_model,
+            planner_model=model,
             planner_mode="llm",
         )
         await emit(
             layer="verification",
             parameter="queries",
-            process="Claude query planner",
-            tool=settings.query_planner_model,
+            process="query planner",
+            tool=model,
             status="ok",
-            detail="Search queries produced; planner did not score truth.",
+            detail=f"Search queries produced by {provider}/{model}; planner did not score truth.",
         )
         return queries
     except Exception as exc:
         await emit(
             layer="verification",
             parameter="queries",
-            process="Claude query planner",
+            process="query planner",
             tool=settings.query_planner_model,
-            status="error",
-            detail=f"{exc}; falling back to deterministic queries."[:240],
+            status="skipped",
+            detail=f"{short_error(exc)}; falling back to deterministic queries.",
         )
         fallback.planner_mode = "deterministic"
         return fallback

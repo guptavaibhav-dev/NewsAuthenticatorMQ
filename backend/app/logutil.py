@@ -62,6 +62,12 @@ def redact_url(url: str) -> str:
 
 def short_error(exc: BaseException, limit: int = 240) -> str:
     text = str(exc).replace("\n", " ").strip()
+    if not text:
+        name = type(exc).__name__
+        if "Timeout" in name:
+            text = f"{name}: request exceeded timeout"
+        else:
+            text = name
     return text[:limit]
 
 

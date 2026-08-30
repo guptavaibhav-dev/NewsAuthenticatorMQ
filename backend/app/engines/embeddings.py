@@ -6,6 +6,11 @@ from collections import Counter
 
 import numpy as np
 
+from app.engines.hf_inference import hf_infer
+from app.logutil import get_logger, short_error
+
+log = get_logger("embed")
+
 _WORD = re.compile(r"[a-z0-9]+")
 
 
@@ -50,18 +55,22 @@ class EmbeddingEngine:
                 vectors = await self._hf_embed(cleaned)
                 self.engine_name = f"hf:{self.settings.embedding_model}"
                 return vectors
-            except Exception:
-                pass
+            except Exception as exc:
+                log.warning("hf embeddings failed: %s", short_error(exc))
         self.engine_name = "char-ngram-cosine"
         return [ngram_vector(text) for text in cleaned]
 
     async def _hf_embed(self, texts: list[str]) -> list[np.ndarray]:
-        return await hf_feature_extraction(
+        timeout_s = float(getattr(self.settings, "hf_timeout_s", 60.0) or 60.0)
+        payload = await hf_infer(
             self.client,
             self.settings.hf_token,
             self.settings.embedding_model,
-            texts,
+            {"inputs": texts, "options": {"wait_for_model": True}},
+            timeout_s=timeout_s,
+            pipeline="feature-extraction",
         )
+        return _vectors_from_hf(payload)
 
 
 def ngram_vector(text: str) -> np.ndarray:
@@ -84,14 +93,12 @@ def cosine_dense(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.dot(a, b) / denom)
 
 
-async def hf_feature_extraction(client, token: str, model: str, texts: list[str]):
-    response = await client.post(
-        f"https://api-inference.huggingface.co/pipeline/feature-extraction/{model}",
-        headers={"Authorization": f"Bearer {token}"},
-        json={"inputs": texts, "options": {"wait_for_model": True}},
-    )
-    response.raise_for_status()
-    payload = response.json()
+def _vectors_from_hf(payload: object) -> list[np.ndarray]:
+    if not isinstance(payload, list) or not payload:
+        raise ValueError("Hugging Face embeddings returned an empty payload")
+    # Single text can come back as one vector or as token vectors.
+    if payload and isinstance(payload[0], (int, float)):
+        payload = [payload]
     vectors: list[np.ndarray] = []
     for item in payload:
         arr = np.array(item, dtype=np.float32)

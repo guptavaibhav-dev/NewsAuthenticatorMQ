@@ -5,6 +5,7 @@ from datetime import timedelta
 from app.config import Settings
 from app.engines.llm_router import LLMRouter
 from app.engines.ner import NerEngine, parse_date_hint
+from app.logutil import short_error
 from app.schemas.envelope import (
     Claim,
     ClassificationPayload,
@@ -48,42 +49,49 @@ async def run_preprocess(
 
     llm_payload: dict = {}
     model_used = None
-    if llm.openai_ready():
+    attempts = [
+        ("openai", settings.preprocess_model),
+        ("anthropic", settings.query_planner_model),
+        ("gemini", settings.evidence_llm_model),
+    ]
+    if any(llm.provider_ready(p) for p, _ in attempts):
         try:
-            llm_payload = await llm.chat_json(
-                provider="openai",
-                model=settings.preprocess_model,
+            llm_payload, provider, model_used = await llm.chat_json_any(
+                attempts=attempts,
                 system=PREPROCESS_SYSTEM,
                 user=_user_prompt(envelope.input),
             )
-            model_used = settings.preprocess_model
-        except Exception as exc:
-            try:
-                llm_payload = await llm.chat_json(
-                    provider="openai",
-                    model="gpt-4o",
-                    system=PREPROCESS_SYSTEM,
-                    user=_user_prompt(envelope.input),
-                )
-                model_used = "gpt-4o"
-            except Exception:
-                llm_payload = {}
+            if (provider, model_used) != attempts[0] or model_used != settings.preprocess_model:
                 await emit(
                     layer="preprocess",
                     parameter="claims",
-                    process="GPT-4.1 claim extraction",
-                    tool=settings.preprocess_model,
-                    status="error",
-                    detail=str(exc)[:240],
+                    process="claim extraction failover",
+                    tool=model_used,
+                    status="skipped",
+                    detail=(
+                        f"{settings.preprocess_model} unavailable; "
+                        f"extracted claims with {provider}/{model_used}."
+                    ),
                 )
+        except Exception as exc:
+            llm_payload = {}
+            model_used = None
+            await emit(
+                layer="preprocess",
+                parameter="claims",
+                process="LLM claim extraction",
+                tool=settings.preprocess_model,
+                status="error",
+                detail=short_error(exc),
+            )
     else:
         await emit(
             layer="preprocess",
             parameter="claims",
-            process="GPT-4.1 claim extraction",
+            process="LLM claim extraction",
             tool=settings.preprocess_model,
             status="skipped",
-            detail="OPENAI_API_KEY not set; using heuristic claims.",
+            detail="No LLM provider is configured; using heuristic claims.",
         )
 
     await emit(

@@ -113,7 +113,7 @@ async def _key_reports(
             "id": "gemini",
             "env": "GEMINI_API_KEY",
             "label": "Gemini (AI Studio)",
-            "used_by": ["Evidence analysis (Gemini 2.5 Pro)"],
+            "used_by": ["Evidence analysis (Gemini 3.6 Flash)"],
             "present": bool(settings.gemini_api_key or settings.google_api_key),
             "probe": lambda: _probe_gemini(client, settings.gemini_key),
         },

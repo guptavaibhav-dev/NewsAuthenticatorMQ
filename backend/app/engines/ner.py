@@ -6,7 +6,11 @@ from datetime import datetime
 import httpx
 
 from app.config import Settings
+from app.engines.hf_inference import hf_infer
+from app.logutil import get_logger, short_error
 from app.schemas.envelope import Entity, EntityType
+
+log = get_logger("ner")
 
 _DATE = re.compile(
     r"\b(?:\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4}"
@@ -83,8 +87,8 @@ class NerEngine:
                 if entities:
                     self.engine_name = f"hf:{self.settings.ner_model}"
                     return entities
-            except Exception:
-                pass
+            except Exception as exc:
+                log.warning("hf ner failed: %s", short_error(exc))
         try:
             entities = _spacy_ner(sample)
             if entities:
@@ -96,15 +100,18 @@ class NerEngine:
         return heuristic_ner(sample)
 
     async def _hf_ner(self, text: str) -> list[Entity]:
-        response = await self.client.post(
-            f"https://api-inference.huggingface.co/models/{self.settings.ner_model}",
-            headers={"Authorization": f"Bearer {self.settings.hf_token}"},
-            json={"inputs": text, "options": {"wait_for_model": True}},
+        timeout_s = float(getattr(self.settings, "hf_timeout_s", 60.0) or 60.0)
+        payload = await hf_infer(
+            self.client,
+            self.settings.hf_token,
+            self.settings.ner_model,
+            {"inputs": text, "options": {"wait_for_model": True}},
+            timeout_s=timeout_s,
         )
-        response.raise_for_status()
-        payload = response.json()
         if not isinstance(payload, list):
             return []
+        if payload and isinstance(payload[0], list):
+            payload = [row for group in payload for row in group if isinstance(row, dict)]
         mapped: list[Entity] = []
         seen: set[tuple[str, str]] = set()
         for row in payload:
