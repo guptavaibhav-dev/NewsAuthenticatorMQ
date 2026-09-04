@@ -23,6 +23,7 @@ backend/__pycache__
 # Secrets
 .env
 backend/.env
+backend/.runs/
 
 # Editor directories and files
 .vscode/*

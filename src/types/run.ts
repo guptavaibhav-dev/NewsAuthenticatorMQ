@@ -1,5 +1,11 @@
 export type TraceStatus = 'running' | 'ok' | 'empty' | 'error' | 'skipped'
 export type RunStatus = 'queued' | 'running' | 'complete' | 'error'
+export type RunPhase =
+  | 'idle'
+  | 'running_layer'
+  | 'awaiting_decision'
+  | 'complete'
+  | 'error'
 export type EditorialDecision =
   | 'verified'
   | 'misleading'
@@ -60,6 +66,8 @@ export type ClaimCorroboration = {
   nli_contradict: number
   llm_support: number
   llm_contradict: number
+  independent_support_outlets?: number
+  independent_contradict_outlets?: number
   agreement: string
   state: string
 }
@@ -83,6 +91,9 @@ export type WikiHit = {
 export type RunEnvelope = {
   run_id: string
   status: RunStatus
+  phase: RunPhase
+  current_layer: number | null
+  completed_layer: number
   error: string | null
   input: {
     raw_text: string
@@ -90,8 +101,11 @@ export type RunEnvelope = {
     fetched_title: string | null
     canonical_url: string | null
     publisher_domain: string | null
+    fetch_timestamp: string | null
     fetch_status: string
     fetch_error: string | null
+    extracted_char_count: number
+    text_merged: boolean
   }
   classification: {
     content_type: string
@@ -109,6 +123,9 @@ export type RunEnvelope = {
     factcheck_query: string | null
     planner_model: string | null
     planner_mode: string
+    entity_queries?: string[]
+    date_from?: string | null
+    date_to?: string | null
   }
   evidence_items: EvidenceItem[]
   wiki_hits: WikiHit[]
@@ -232,14 +249,45 @@ export type Health = {
 }
 
 export const LAYERS = [
-  { id: 'input', label: 'Input' },
-  { id: 'preprocess', label: 'Pre-process' },
-  { id: 'verification', label: 'Verification' },
-  { id: 'evidence', label: 'Evidence' },
-  { id: 'uncertainty', label: 'Uncertainty' },
-  { id: 'documentation', label: 'Record' },
-  { id: 'editorial', label: 'Editorial' },
+  { id: 'input', label: 'Input', n: 1 },
+  { id: 'preprocess', label: 'Pre-process', n: 2 },
+  { id: 'verification', label: 'Verification', n: 3 },
+  { id: 'evidence', label: 'Evidence', n: 4 },
+  { id: 'uncertainty', label: 'Uncertainty', n: 5 },
+  { id: 'editorial', label: 'Editorial', n: 6 },
+  { id: 'documentation', label: 'Record', n: 7 },
 ] as const
+
+export const PIPELINE_LAYERS = [
+  { n: 1, id: 'input', title: 'Input' },
+  { n: 2, id: 'preprocess', title: 'Pre-processing and Classification' },
+  { n: 3, id: 'verification', title: 'Verification Tool Layer' },
+  { n: 4, id: 'evidence', title: 'Evidence Analysis' },
+  { n: 5, id: 'uncertainty', title: 'Uncertainty and Risk Assessment' },
+  { n: 6, id: 'editorial', title: 'Human Editorial Decision' },
+  { n: 7, id: 'documentation', title: 'Output and Documentation' },
+] as const
+
+export const EDITORIAL_LAYER = 6
+export const LAST_LAYER = 7
+
+export type ChatMessage =
+  | {
+      id: string
+      kind: 'layer'
+      layer: number
+      envelope: RunEnvelope
+      superseded?: boolean
+    }
+  | {
+      id: string
+      kind: 'error'
+      layer: number
+      detail: string
+      superseded?: boolean
+    }
+  | { id: string; kind: 'question'; layer: number; text: string }
+  | { id: string; kind: 'answer'; layer: number; text: string }
 
 export const DECISIONS: EditorialDecision[] = [
   'verified',

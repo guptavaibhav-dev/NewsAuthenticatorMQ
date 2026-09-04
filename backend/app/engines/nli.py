@@ -22,6 +22,7 @@ class NliEngine:
         self.engine_name = "lexical-nli-fallback"
         self.last_error: str | None = None
         self._payload_index: int | None = None
+        self._hf_disabled = False
 
     async def score_pair(self, premise: str, hypothesis: str) -> NliResult:
         results = await self.score_pairs([(premise, hypothesis)])
@@ -37,7 +38,7 @@ class NliEngine:
         if fallback not in models:
             models.append(fallback)
 
-        if self.settings.hf_token:
+        if self.settings.hf_token and not self._hf_disabled:
             for model in models:
                 try:
                     self._payload_index = None
@@ -48,8 +49,10 @@ class NliEngine:
                 except Exception as exc:
                     self.last_error = short_error(exc)
                     log.warning("hf nli model=%s failed: %s", model, self.last_error)
+            self._hf_disabled = True
         else:
-            self.last_error = "HF_TOKEN not set"
+            if not self.settings.hf_token:
+                self.last_error = "HF_TOKEN not set"
 
         self.engine_name = "lexical-nli-fallback"
         log.warning("nli using lexical fallback (%s)", self.last_error or "no HF token")

@@ -30,6 +30,8 @@ async def ingest_input(
             raw_text=cleaned_text,
             url=None,
             fetch_status="skipped",
+            extracted_char_count=0,
+            text_merged=False,
         )
 
     payload = InputPayload(
@@ -66,12 +68,16 @@ async def ingest_input(
         if not body:
             body = trafilatura.extract(html) or ""
         combined = body.strip()
-        if cleaned_text and cleaned_text not in combined:
+        extracted_chars = len(combined)
+        text_merged = bool(cleaned_text and combined and cleaned_text not in combined)
+        if text_merged:
             combined = f"{cleaned_text}\n\n{combined}".strip()
         payload.raw_text = combined or cleaned_text
         payload.fetched_title = title
         payload.canonical_url = canonical_url(str(response.url))
         payload.publisher_domain = registrable_domain(str(response.url))
+        payload.extracted_char_count = extracted_chars
+        payload.text_merged = text_merged
         if combined:
             payload.fetch_status = "ok"
         elif response.is_success:

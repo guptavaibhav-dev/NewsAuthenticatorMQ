@@ -44,6 +44,8 @@ EditorialDecision = Literal[
 ]
 PublicationRisk = Literal["low", "moderate", "high", "unknown"]
 RunStatus = Literal["queued", "running", "complete", "error"]
+RunPhase = Literal["idle", "running_layer", "awaiting_decision", "complete", "error"]
+StepAction = Literal["proceed", "rerun"]
 
 
 class RunRequest(BaseModel):
@@ -54,6 +56,15 @@ class RunRequest(BaseModel):
 class DecisionRequest(BaseModel):
     decision: EditorialDecision
     notes: str = ""
+
+
+class StepRequest(BaseModel):
+    action: StepAction = "proceed"
+
+
+class AskRequest(BaseModel):
+    layer: int
+    question: str = ""
 
 
 class TraceEvent(BaseModel):
@@ -75,6 +86,8 @@ class InputPayload(BaseModel):
     fetch_timestamp: str | None = None
     fetch_status: ToolStatus = "skipped"
     fetch_error: str | None = None
+    extracted_char_count: int = 0
+    text_merged: bool = False
 
 
 class Claim(BaseModel):
@@ -245,6 +258,9 @@ class HumanDecision(BaseModel):
 class RunEnvelope(BaseModel):
     run_id: str
     status: RunStatus = "queued"
+    phase: RunPhase = "idle"
+    current_layer: int | None = None
+    completed_layer: int = 0
     error: str | None = None
     created_at: str = Field(default_factory=utc_now)
     completed_at: str | None = None

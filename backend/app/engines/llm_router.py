@@ -159,6 +159,42 @@ class LLMRouter:
             raise last_error
         raise RuntimeError("no LLM provider is configured")
 
+    async def chat_any(
+        self,
+        *,
+        attempts: list[tuple[str, str]],
+        system: str,
+        user: str,
+        temperature: float = 0.2,
+    ) -> tuple[str, str, str]:
+        """Try (provider, model) pairs in order. Returns (text, provider, model)."""
+        last_error: Exception | None = None
+        for provider, model in attempts:
+            if not self.provider_ready(provider):
+                continue
+            try:
+                text = await self.chat(
+                    provider=provider,
+                    model=model,
+                    system=system,
+                    user=user,
+                    temperature=temperature,
+                    json_mode=False,
+                )
+                return text, provider, model
+            except Exception as exc:
+                last_error = exc
+                log.warning(
+                    "llm failover provider=%s model=%s failed: %s",
+                    provider,
+                    model,
+                    short_error(exc),
+                )
+                continue
+        if last_error:
+            raise last_error
+        raise RuntimeError("no LLM provider is configured")
+
     async def chat(
         self,
         *,

@@ -43,6 +43,7 @@ class EmbeddingEngine:
         self.settings = settings
         self.client = client
         self.engine_name = "char-ngram-cosine"
+        self._hf_disabled = False
 
     async def similarity(self, a: str, b: str) -> float:
         vectors = await self.embed([a, b])
@@ -50,13 +51,17 @@ class EmbeddingEngine:
 
     async def embed(self, texts: list[str]) -> list[np.ndarray]:
         cleaned = [t[:4000] if t else "" for t in texts]
-        if self.settings.hf_token:
+        if self.settings.hf_token and not self._hf_disabled:
             try:
                 vectors = await self._hf_embed(cleaned)
                 self.engine_name = f"hf:{self.settings.embedding_model}"
                 return vectors
             except Exception as exc:
-                log.warning("hf embeddings failed: %s", short_error(exc))
+                self._hf_disabled = True
+                log.warning(
+                    "hf embeddings disabled for this run; using char-ngram fallback (%s)",
+                    short_error(exc),
+                )
         self.engine_name = "char-ngram-cosine"
         return [ngram_vector(text) for text in cleaned]
 

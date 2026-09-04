@@ -159,6 +159,7 @@ def _doc_user(envelope: RunEnvelope) -> str:
         "evidence": [e.model_dump() for e in envelope.evidence_items],
         "corroboration": envelope.corroboration.model_dump(),
         "uncertainty": envelope.uncertainty.model_dump(),
+        "human_decision": envelope.human_decision.model_dump(),
         "wiki": [w.model_dump() for w in envelope.wiki_hits],
         "engines": envelope.engines_used,
     }
