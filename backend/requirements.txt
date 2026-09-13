@@ -7,3 +7,4 @@ trafilatura>=2.0.0
 python-dotenv>=1.0.0
 numpy>=2.0.0
 tldextract>=5.1.0
+pytest>=8.0.0

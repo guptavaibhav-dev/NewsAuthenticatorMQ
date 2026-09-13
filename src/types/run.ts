@@ -25,11 +25,24 @@ export type TraceEvent = {
   type?: string
 }
 
+export type Grounding = 'exact' | 'normalised' | 'not_found'
+
+/** Which extraction pass found the claim. Extractor overlap only — never truth. */
+export type ClaimAgreement = 'both' | 'pass_a_only' | 'pass_b_only'
+
 export type Claim = {
   id: string
   text: string
   checkworthy: boolean
   kind: string
+  source_quote?: string | null
+  span_start?: number | null
+  span_end?: number | null
+  grounding?: Grounding
+  claim_source?: 'pasted' | 'fetched' | 'spans_both' | null
+  agreement?: ClaimAgreement
+  agreement_note?: string | null
+  variant_texts?: string[]
 }
 
 export type Entity = {
@@ -100,10 +113,19 @@ export type RunEnvelope = {
     url: string | null
     fetched_title: string | null
     canonical_url: string | null
+    canonical_source?: string | null
     publisher_domain: string | null
+    publisher_id?: string | null
+    publisher_is_platform?: boolean
     fetch_timestamp: string | null
     fetch_status: string
+    fetch_reason?: string
     fetch_error: string | null
+    http_status?: number | null
+    final_url?: string | null
+    content_type?: string | null
+    redirect_chain?: string[]
+    retry_after?: string | null
     extracted_char_count: number
     text_merged: boolean
   }
@@ -114,6 +136,12 @@ export type RunEnvelope = {
     entities: Entity[]
     date_window: { start: string | null; end: string | null; confidence: string }
     disagreements: string[]
+    ungrounded_claim_count?: number
+    total_claims?: number
+    claim_agreement_rate?: number
+    pass_a_model?: string | null
+    pass_b_model?: string | null
+    passes_independent?: boolean
     preprocess_model: string | null
     ner_engine: string | null
   }

@@ -14,7 +14,6 @@ from app.logutil import get_logger, short_error
 from app.pipeline.store import RunState
 from app.schemas.envelope import RunEnvelope, TraceEvent, utc_now
 from app.tools.ingest import ingest_input
-from app.tools.media import inspect_media
 
 log = get_logger("run")
 
@@ -216,8 +215,6 @@ async def _run_input(state: RunState, *, client, emit) -> None:
             f"domain={envelope.input.publisher_domain or 'n/a'}"
         ),
     )
-    media = await inspect_media(envelope.input)
-    envelope.tool_results = [media]
     envelope.engines_used["input"] = "ingest"
 
 
@@ -228,13 +225,24 @@ async def _run_preprocess(envelope: RunEnvelope, *, settings: Settings, client, 
         envelope, settings=settings, llm=llm, ner=ner, emit=emit
     )
     log.info(
-        "run %s preprocess done claims=%s entities=%s model=%s ner=%s",
+        "run %s preprocess done claims=%s ungrounded=%s agreement=%s entities=%s "
+        "passes=%s/%s independent=%s ner=%s",
         envelope.run_id[:8],
         len(envelope.classification.claims),
+        envelope.classification.ungrounded_claim_count,
+        envelope.classification.claim_agreement_rate,
         len(envelope.classification.entities),
-        envelope.classification.preprocess_model,
+        envelope.classification.pass_a_model,
+        envelope.classification.pass_b_model,
+        envelope.classification.passes_independent,
         envelope.classification.ner_engine,
     )
+    if envelope.classification.ungrounded_claim_count:
+        log.warning(
+            "run %s %s claim(s) quote text absent from the article; kept and flagged.",
+            envelope.run_id[:8],
+            envelope.classification.ungrounded_claim_count,
+        )
 
 
 async def _run_verification(envelope: RunEnvelope, *, settings: Settings, client, emit) -> None:

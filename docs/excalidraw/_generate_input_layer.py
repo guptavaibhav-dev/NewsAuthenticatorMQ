@@ -495,7 +495,7 @@ def build() -> dict:
         "orch-trace",
         84,
         636,
-        400,
+        490,
         108,
         "Emit trace",
         "layer=input · tool=ingest\nprocess=content intake (running)\nparameter=text_or_url",
@@ -503,9 +503,9 @@ def build() -> dict:
     )
     box(
         "orch-ingest",
-        504,
+        594,
         636,
-        400,
+        490,
         108,
         "ingest_input()",
         "tools/ingest.py\nAlways runs. HTTP only if a URL\nwas supplied.",
@@ -513,41 +513,29 @@ def build() -> dict:
     )
     box(
         "orch-guard",
-        924,
+        1104,
         636,
-        420,
+        520,
         108,
         "Empty-text guard",
         "If raw_text is still blank → ValueError.\nPaste content or a reachable URL.\nRun phase = error.",
         fill=RED,
     )
     box(
-        "orch-media",
-        1364,
-        636,
-        400,
-        108,
-        "inspect_media()",
-        "tools/media.py\nAlways skipped in v1.\nC2PA / reverse-image reserved.",
-        fill=GRAY,
-        dashed=True,
-    )
-    box(
         "orch-engine",
-        1784,
+        1644,
         636,
-        372,
+        512,
         108,
         "engines_used",
-        'input = "ingest"\nNo model is called in this layer.',
+        'input = "ingest"\nNo model is called in this layer.\nNo media hook: tools/media.py is documentation only.',
         fill=GREEN,
     )
     arrow("a-ui-api", "ui-run", "api-create")
     arrow("a-api-orch", "api-create", "orch-ingest")
     arrow("a-tr-ing", "orch-trace", "orch-ingest", src_side="right", dst_side="left")
     arrow("a-ing-guard", "orch-ingest", "orch-guard", src_side="right", dst_side="left")
-    arrow("a-guard-media", "orch-guard", "orch-media", src_side="right", dst_side="left")
-    arrow("a-media-eng", "orch-media", "orch-engine", src_side="right", dst_side="left")
+    arrow("a-guard-eng", "orch-guard", "orch-engine", src_side="right", dst_side="left")
 
     # 5. Decision
     diamond("d-url", 900, 800, 280, 150, "URL\nprovided?")
@@ -561,7 +549,7 @@ def build() -> dict:
         1028,
         652,
         130,
-        "fetch_status = skipped",
+        "fetch_status = skipped · fetch_reason = skipped_no_url",
         "No GET. canonical_url and publisher_domain stay empty.\nextracted_char_count = 0 · text_merged = false.",
         fill=GRAY,
     )
@@ -572,7 +560,7 @@ def build() -> dict:
         652,
         130,
         "raw_text = pasted content",
-        "Strip whitespace. This string is what Layer 2 classifies.\nIf paste is also empty, the empty-text guard fails the run.",
+        "Strip whitespace. This string is what Layer 2 classifies.\nsegments = one pasted span covering all of raw_text.\nIf paste is also empty, the empty-text guard fails the run.",
         fill=GREEN,
     )
     box(
@@ -587,7 +575,7 @@ def build() -> dict:
     )
 
     # URL path
-    frame("f-url", 800, 990, 1380, 420, "5b. URL fetch path  ·  tools/ingest.py  +  scoring/urls.py")
+    frame("f-url", 800, 990, 1380, 420, "5b. URL fetch path  ·  tools/ingest.py  +  scoring/urls.py  +  config.py")
     box(
         "url-get",
         824,
@@ -595,28 +583,28 @@ def build() -> dict:
         420,
         150,
         "HTTP GET",
-        "follow_redirects = true\nUser-Agent: NewsAuthBot/1.0\nAccept: text/html\nRecords fetch_timestamp (UTC)",
+        "follow_redirects = true\nUser-Agent: NewsAuthBot/1.0 (+CONTACT_URL)\nAccept: html, xhtml, pdf;q=0.8, */*;q=0.5\nconnect 5s · read 20s (separate budgets)\nRecords fetch_timestamp (UTC)",
         fill=PALE_BLUE,
     )
     box(
-        "url-traf",
+        "url-type",
         1264,
         1028,
         420,
         150,
-        "trafilatura extract",
-        "JSON output: title + text\ncomments/tables off\nEXTRACTION_TIMEOUT = 20s",
-        fill=BLUE,
+        "Branch on Content-Type",
+        "text/html → extract as now\napplication/pdf → error_unsupported_type\n(TODO: no PDF parser in this change)\n429 → error_blocked + Retry-After",
+        fill=ORANGE,
     )
     box(
-        "url-fb",
+        "url-traf",
         1704,
         1028,
         452,
         150,
-        "Fallbacks",
-        "Title: og:title → twitter:title → <title>\nBody: trafilatura.extract() plain\nGeneric “BBC News” titles ignored",
-        fill=ORANGE,
+        "trafilatura extract",
+        "JSON: title + text · comments/tables off\nTitle fallback: og:title → twitter:title → <title>\nBody fallback: trafilatura.extract() plain\nEXTRACTION_TIMEOUT = 20s (parsing only)",
+        fill=BLUE,
     )
     box(
         "url-norm",
@@ -624,8 +612,8 @@ def build() -> dict:
         1190,
         420,
         196,
-        "Normalize identity",
-        "canonical_url: strip www + trailing /\npublisher_domain: eTLD+1 via tldextract\n(bbc.com and bbc.co.uk stay distinct hosts;\nindependence is a later-layer concern)",
+        "Resolve canonical identity",
+        "1 rel=canonical  2 og:url  3 final URL\nDeclared URLs accepted only if the\nregistrable domain matches; else fall\nthrough and log · canonical_source records it\nUnwrap redirectors + AMP, strip utm_*, fbclid\npublisher_id splits platform authors",
         fill=PALE_BLUE,
     )
     box(
@@ -634,8 +622,8 @@ def build() -> dict:
         1190,
         420,
         196,
-        "Merge pasted + fetched",
-        "If paste is non-empty and not already\ninside the fetched body, prepend it.\ntext_merged = true in that case.\nOtherwise keep fetched body only.",
+        "Attribute pasted vs fetched",
+        "Overlap check on normalised forms only:\ncasefold, NFKC, collapse spaces,\ncurly quotes/dashes → ASCII\nraw_text itself is never mutated\nsegments tile raw_text exactly\ntext_merged is derived from segments",
         fill=VIOLET,
     )
     box(
@@ -644,8 +632,8 @@ def build() -> dict:
         1190,
         452,
         196,
-        "fetch_status",
-        "ok — extracted body is non-empty\nempty — HTTP success, no article text\nerror — HTTP failure or exception\nOn error, keep the journalist’s paste.\nNever treat a failed fetch as “fake”.",
+        "fetch_reason → fetch_status",
+        "fetch_reason is the precise outcome;\nfetch_status is derived from it by a single\nmapping function, so they cannot disagree.\nfetch_error is diagnostic only — nothing\ndownstream branches on its contents.\nOn failure the journalist’s paste is kept.",
         fill=YELLOW,
     )
 
@@ -653,11 +641,11 @@ def build() -> dict:
     arrow("a-d-yes", "d-url", "url-get", src_side="right", dst_side="top", label="yes")
     arrow("a-t1", "txt-skip", "txt-raw")
     arrow("a-t2", "txt-raw", "txt-note")
-    arrow("a-u1", "url-get", "url-traf", src_side="right", dst_side="left")
-    arrow("a-u2", "url-traf", "url-fb", src_side="right", dst_side="left")
+    arrow("a-u1", "url-get", "url-type", src_side="right", dst_side="left")
+    arrow("a-u2", "url-type", "url-traf", src_side="right", dst_side="left")
     arrow("a-u3", "url-get", "url-norm")
-    arrow("a-u4", "url-traf", "url-merge")
-    arrow("a-u5", "url-fb", "url-status")
+    arrow("a-u4", "url-type", "url-merge")
+    arrow("a-u5", "url-traf", "url-status")
 
     box(
         "merge",
@@ -673,24 +661,43 @@ def build() -> dict:
     # InputPayload
     frame("f-out", 60, 1516, 1480, 310, "6. Output written onto the run envelope  ·  schemas/envelope.py  InputPayload")
     box(
-        "out-payload",
+        "out-payload-a",
         84,
         1554,
-        1432,
+        700,
         250,
-        "envelope.input",
-        "raw_text                 body Layer 2 will classify\n"
+        "envelope.input  ·  content and identity",
+        "raw_text                 concatenation Layer 2 classifies\n"
+        "segments                 ordered spans tiling raw_text exactly\n"
         "url                      journalist-supplied URL (or null)\n"
         "fetched_title            extracted headline, if any\n"
-        "canonical_url            normalized final URL after redirects\n"
-        "publisher_domain         registrable domain (eTLD+1)\n"
+        "canonical_url            dedup key after unwrap + param strip\n"
+        "canonical_source         link_rel | og_url | final_url\n"
+        "publisher_domain         registrable domain (eTLD+1), unchanged\n"
+        "publisher_id             platform identity, e.g. medium.com/@alice\n"
+        "publisher_is_platform    host listed in PLATFORM_HOSTS\n"
         "fetch_timestamp          UTC ISO-8601 when the GET started\n"
-        "fetch_status             ok | empty | error | skipped\n"
-        "fetch_error              truncated exception / HTTP code\n"
-        "extracted_char_count     fetched body length (0 if skipped)\n"
-        "text_merged              paste prepended to fetched body",
+        "text_merged              derived: both source kinds present",
         fill=GREEN,
-        body_size=15,
+    )
+    box(
+        "out-payload-b",
+        800,
+        1554,
+        700,
+        250,
+        "envelope.input  ·  fetch outcome and observables",
+        "fetch_status             ok | empty | error | skipped (derived)\n"
+        "fetch_reason             precise outcome — taxonomy below\n"
+        "fetch_error              diagnostic only; never branch on it\n"
+        "http_status              final HTTP code, if a response arrived\n"
+        "final_url                URL after redirects\n"
+        "content_type             response type/subtype\n"
+        "redirect_chain           request → … → final_url\n"
+        "response_bytes           encoded body size, when known\n"
+        "retry_after              Retry-After header value, if sent\n"
+        "extracted_char_count     fetched body length (0 if skipped)",
+        fill=GREEN,
     )
 
     # Inspector + gate
@@ -702,7 +709,7 @@ def build() -> dict:
         568,
         250,
         "Inspector — Layer 1 card",
-        "Resolved URL\nPublisher domain\nFetch status + timestamp\nExtracted headline\nExtracted body (char count)\nPasted text merged? yes/no\nMedia-provenance hook: skipped\nFetch error, if any",
+        "Resolved URL + canonical source\nPublisher domain · publisher id\nFetch status + fetch reason\nHTTP status · content type\nFetch timestamp\nExtracted headline\nExtracted body (char count)\nPasted text merged? yes/no\nFetch error · Retry-After, if any",
         fill=PALE_BLUE,
         body_size=14,
     )
@@ -748,7 +755,7 @@ def build() -> dict:
         568,
         110,
         "No classification, retrieval, or verdict",
-        "Does not extract claims, call news APIs,\nrun NLI, or score authenticity. Failed or\nempty fetches are coverage gaps, not “fake”.",
+        "Does not extract claims, call news APIs,\nrun NLI, or score authenticity. Failed,\nblocked, paywalled, or PDF fetches are\ncoverage gaps, not “fake”.",
         fill=RED,
         title_size=15,
         body_size=13,
@@ -756,26 +763,83 @@ def build() -> dict:
 
     arrow("a-txt-out", "txt-note", "merge", src_side="bottom", dst_side="left")
     arrow("a-url-out", "url-status", "merge", src_side="bottom", dst_side="right")
-    arrow("a-merge-out", "merge", "out-payload")
-    arrow("a-out-insp", "out-payload", "insp", src_side="right", dst_side="left")
-    arrow("a-out-gate", "out-payload", "gate-pause")
+    arrow("a-merge-out", "merge", "out-payload-a")
+    arrow("a-out-insp", "out-payload-b", "insp", src_side="right", dst_side="left")
+    arrow("a-out-gate", "out-payload-a", "gate-pause")
     arrow("a-g1", "gate-pause", "gate-acts", src_side="right", dst_side="left")
     arrow("a-g2", "gate-acts", "gate-l2", src_side="right", dst_side="left")
 
-    # Legend
-    text("leg-h", 80, 2046, "fetch_status legend  ·  ToolStatus in the envelope", size=15)
+    # Legend — coarse status (unchanged for backwards compatibility)
+    text("leg-h", 80, 2046, "fetch_status legend  ·  ToolStatus in the envelope, unchanged", size=15)
     box("leg-ok", 80, 2080, 240, 56, "ok — body extracted", fill=GREEN, title_size=13)
     box("leg-empty", 340, 2080, 280, 56, "empty — page had no article text", fill=YELLOW, title_size=13)
-    box("leg-err", 640, 2080, 300, 56, "error — HTTP/network failure; paste kept", fill=RED, title_size=13)
+    box("leg-err", 640, 2080, 300, 56, "error — fetch did not yield a page", fill=RED, title_size=13)
     box("leg-skip", 960, 2080, 280, 56, "skipped — no URL supplied", fill=GRAY, title_size=13)
-    box("leg-media", 1260, 2080, 400, 56, "media hook — skipped (later iteration)", fill=WHITE, dashed=True, title_size=13)
-    box("leg-engine", 1680, 2080, 500, 56, "Engine: ingest (deterministic)  ·  no API key", fill=VIOLET, title_size=13)
+    box("leg-engine", 1260, 2080, 500, 56, "Engine: ingest (deterministic)  ·  no API key", fill=VIOLET, title_size=13)
+
+    # Legend — precise reason taxonomy
+    text(
+        "leg2-h",
+        80,
+        2160,
+        "fetch_reason taxonomy  ·  one mapping function derives fetch_status, so the two can never disagree",
+        size=15,
+    )
+    box(
+        "r-ok",
+        80,
+        2194,
+        420,
+        96,
+        "ok  ·  skipped_no_url",
+        "Article body extracted · no URL was supplied",
+        fill=GREEN,
+        title_size=13,
+        body_size=13,
+    )
+    box(
+        "r-empty",
+        520,
+        2194,
+        520,
+        96,
+        "empty_paywall · empty_js_required · empty_not_article",
+        "HTML arrived but carried no article text.\nCoverage gap, not a falsity signal.",
+        fill=YELLOW,
+        title_size=13,
+        body_size=13,
+    )
+    box(
+        "r-transport",
+        1060,
+        2194,
+        520,
+        96,
+        "error_dns · error_timeout · error_tls · error_other",
+        "No usable response from the network.\nThe journalist’s paste is kept.",
+        fill=ORANGE,
+        title_size=13,
+        body_size=13,
+    )
+    box(
+        "r-http",
+        1600,
+        2194,
+        580,
+        96,
+        "error_blocked · error_not_found · error_server",
+        "401/403/429 · 404/410 · 5xx\nerror_unsupported_type (PDF) · error_too_large",
+        fill=RED,
+        title_size=13,
+        body_size=13,
+    )
 
     text(
         "footer",
         80,
-        2156,
-        "Source of truth: backend/app/tools/ingest.py, backend/app/pipeline/orchestrator.py (_run_input), backend/app/schemas/envelope.py (InputPayload), src/App.tsx, src/components/layerOutputs.tsx.",
+        2320,
+        "Source of truth: backend/app/tools/ingest.py, backend/app/scoring/urls.py, backend/app/config.py, backend/app/data/platform_hosts.json,\n"
+        "backend/app/pipeline/orchestrator.py (_run_input), backend/app/schemas/envelope.py (InputPayload), src/App.tsx, src/components/layerOutputs.tsx. Tests: backend/tests/.",
         size=12,
         color="#868e96",
         width=2100,

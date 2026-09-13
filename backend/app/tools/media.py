@@ -1,11 +1,15 @@
-"""Media verification hook (C2PA, reverse image). Not used in v1."""
+"""Media provenance is not wired into Layer 1.
 
-from app.schemas.envelope import ToolResult
+Intended later design (not implemented):
 
+- C2PA / Content Credentials: if an image or video carries a signed manifest,
+  record issuer, signing time, and whether the manifest validates. A valid
+  credential is provenance, not proof that the depicted event is true. A
+  missing credential is a coverage gap, never a signal of falsity.
+- Reverse image / video search: find earlier or alternative appearances of
+  the same media. Earlier appearances can inform reuse and context; they do
+  not by themselves classify the story as authentic or inauthentic.
 
-async def inspect_media(_payload) -> ToolResult:
-    return ToolResult(
-        tool="media",
-        status="skipped",
-        detail="Visual/provenance tools are reserved for a later thesis iteration.",
-    )
+``inspect_media`` is intentionally absent. Layer 1 must not emit a media
+trace entry or InputPayload field until this work is implemented.
+"""

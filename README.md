@@ -56,3 +56,7 @@ Useful free/developer keys:
 - Aggregator APIs cover a subset of the web and recency windows on free tiers.
 - Snippets are not full articles; NLI can miss context.
 - Multi-engine disagreement is shown on purpose.
+
+## Future work
+
+- **Media provenance (not wired).** `backend/app/tools/media.py` documents the intended C2PA / Content Credentials and reverse-image-search design. Layer 1 does not call it: a skipped media stub is noise, and a missing credential must not be treated as falsity.

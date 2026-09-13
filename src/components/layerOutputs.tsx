@@ -1,6 +1,6 @@
 import { LayerProcess } from './layerProcess'
 import type { ReactNode } from 'react'
-import type { Entity, RunEnvelope } from '../types/run'
+import type { Claim, Entity, RunEnvelope } from '../types/run'
 import { PIPELINE_LAYERS } from '../types/run'
 
 export function layerTitle(layer: number) {
@@ -62,13 +62,26 @@ export function LayerOutput({
 
 function InputOutput({ run }: { run: RunEnvelope }) {
   const input = run.input
-  const media = run.tool_results.find((row) => row.tool === 'media')
   const resolved = input.canonical_url || input.url || 'none (pasted text only)'
   return (
     <dl className="chat-dl">
       <Row label="Resolved URL" value={resolved} />
+      <Row label="Canonical source" value={input.canonical_source || 'n/a'} />
       <Row label="Publisher domain" value={input.publisher_domain || 'n/a'} />
+      <Row
+        label="Publisher id"
+        value={
+          input.publisher_id
+            ? `${input.publisher_id}${input.publisher_is_platform ? ' (platform)' : ''}`
+            : 'n/a'
+        }
+      />
       <Row label="Fetch status" value={input.fetch_status} />
+      <Row label="Fetch reason" value={input.fetch_reason || 'n/a'} />
+      {input.http_status != null && (
+        <Row label="HTTP status" value={String(input.http_status)} />
+      )}
+      {input.content_type && <Row label="Content type" value={input.content_type} />}
       <Row label="Fetch timestamp" value={input.fetch_timestamp || 'n/a'} />
       <Row label="Extracted headline" value={input.fetched_title || 'n/a'} />
       <Row
@@ -79,18 +92,99 @@ function InputOutput({ run }: { run: RunEnvelope }) {
         label="Pasted text merged"
         value={input.text_merged ? 'yes — pasted text prepended to the fetched body' : 'no'}
       />
-      <Row
-        label="Media-provenance hook"
-        value={media ? `${media.status}: ${media.detail}` : 'skipped'}
-      />
       {input.fetch_error && <Row label="Fetch error" value={input.fetch_error} />}
+      {input.retry_after && <Row label="Retry-After" value={input.retry_after} />}
     </dl>
+  )
+}
+
+function ClaimRow({ claim }: { claim: Claim }) {
+  const grounding = claim.grounding ?? 'not_found'
+  const ungrounded = grounding === 'not_found'
+  return (
+    <li className={ungrounded ? 'claim-unverified' : undefined}>
+      <code>{claim.id}</code> {claim.text}{' '}
+      <span className="muted">({claim.kind})</span>
+      {claim.agreement_note && <p className="claim-note muted">{claim.agreement_note}</p>}
+      {claim.variant_texts && claim.variant_texts.length > 1 && (
+        <p className="claim-note muted">
+          Other pass worded it: “{claim.variant_texts.filter((t) => t !== claim.text)[0]}”
+        </p>
+      )}
+      {ungrounded ? (
+        <>
+          {' '}
+          <strong className="claim-flag">unverified — quote not found in article</strong>
+          {claim.source_quote ? (
+            <p className="claim-quote muted">
+              Model supplied: “{claim.source_quote}” — this text does not appear in the
+              article. Treat the claim as unsourced until you check it.
+            </p>
+          ) : (
+            <p className="claim-quote muted">
+              The model supplied no supporting quote. Treat the claim as unsourced until you
+              check it.
+            </p>
+          )}
+        </>
+      ) : (
+        <p className="claim-quote">
+          “{claim.source_quote}”{' '}
+          <span className="muted">
+            {grounding === 'exact' ? 'verbatim' : 'matched after normalisation'}
+            {claim.span_start != null ? ` · chars ${claim.span_start}–${claim.span_end}` : ''}
+            {claim.claim_source ? ` · ${claim.claim_source}` : ''}
+          </span>
+        </p>
+      )}
+    </li>
+  )
+}
+
+function ClaimGroup({
+  title,
+  blurb,
+  claims,
+}: {
+  title: string
+  blurb: string
+  claims: Claim[]
+}) {
+  return (
+    <section className="claim-group">
+      <h5>
+        {title} <span className="muted">({claims.length})</span>
+      </h5>
+      {claims.length === 0 ? (
+        <p className="muted">None.</p>
+      ) : (
+        <>
+          <p className="muted">{blurb}</p>
+          <ol className="plain-list">
+            {claims.map((claim) => (
+              <ClaimRow key={claim.id} claim={claim} />
+            ))}
+          </ol>
+        </>
+      )}
+    </section>
   )
 }
 
 function PreprocessOutput({ run }: { run: RunEnvelope }) {
   const cls = run.classification
   const grouped = groupEntities(cls.entities)
+  const ungrounded =
+    cls.ungrounded_claim_count ??
+    cls.claims.filter((claim) => (claim.grounding ?? 'not_found') === 'not_found').length
+  const crossChecked = Boolean(cls.pass_b_model)
+  const byAgreement = {
+    both: cls.claims.filter((claim) => (claim.agreement ?? 'both') === 'both'),
+    pass_a_only: cls.claims.filter((claim) => claim.agreement === 'pass_a_only'),
+    pass_b_only: cls.claims.filter((claim) => claim.agreement === 'pass_b_only'),
+  }
+  const totalClaims = cls.total_claims ?? cls.claims.length
+  const agreementRate = cls.claim_agreement_rate ?? 0
   return (
     <div className="chat-block">
       <p>
@@ -100,15 +194,66 @@ function PreprocessOutput({ run }: { run: RunEnvelope }) {
         <strong>Headline.</strong> {cls.headline || 'none extracted'}
       </p>
       <h4>Atomic claims</h4>
+      <p>
+        <strong>Claims extracted.</strong> {totalClaims}
+        {crossChecked ? (
+          <>
+            {' '}· {Math.round(agreementRate * 100)}% found by both passes (
+            {byAgreement.both.length} of {totalClaims})
+          </>
+        ) : null}
+      </p>
+      {crossChecked ? (
+        <p className="muted">
+          Extracted twice, independently, by {cls.pass_a_model} and {cls.pass_b_model}, then
+          matched on where each claim sits in the article. Agreement means the two extractors
+          picked the same passage — it is not a verdict on whether the claim is true.
+          {cls.passes_independent === false && (
+            <>
+              {' '}
+              <strong>
+                Both passes ran on the same model, so this is not an independent cross-check.
+              </strong>
+            </>
+          )}
+        </p>
+      ) : (
+        <p className="muted">
+          Extracted in a single pass ({cls.pass_a_model ?? cls.preprocess_model}); claims were
+          not cross-checked against a second pass.
+        </p>
+      )}
+      {ungrounded > 0 && (
+        <p className="claim-warning">
+          {ungrounded} of {cls.claims.length} claim{cls.claims.length === 1 ? '' : 's'} quote
+          text that is not in the article. They are kept below and marked unverified. This
+          reflects extraction quality, not the truth of the article.
+        </p>
+      )}
       {cls.claims.length === 0 ? (
         <p className="muted">No atomic claims were extracted.</p>
+      ) : crossChecked ? (
+        <>
+          <ClaimGroup
+            title="Agreed by both passes"
+            blurb="Both extraction passes picked out the same passage. They agreed on what the article says — that is not a judgement that the claim is true."
+            claims={byAgreement.both}
+          />
+          <ClaimGroup
+            title={`Pass A only (${cls.pass_a_model})`}
+            blurb="Only the first pass extracted these. Lower extraction confidence, not wrong — check them yourself."
+            claims={byAgreement.pass_a_only}
+          />
+          <ClaimGroup
+            title={`Pass B only (${cls.pass_b_model})`}
+            blurb="Only the cross-check pass extracted these. Lower extraction confidence, not wrong — check them yourself."
+            claims={byAgreement.pass_b_only}
+          />
+        </>
       ) : (
         <ol className="plain-list">
           {cls.claims.map((claim) => (
-            <li key={claim.id}>
-              <code>{claim.id}</code> {claim.text}{' '}
-              <span className="muted">({claim.kind})</span>
-            </li>
+            <ClaimRow key={claim.id} claim={claim} />
           ))}
         </ol>
       )}

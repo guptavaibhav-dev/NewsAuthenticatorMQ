@@ -1,0 +1,57 @@
+---
+description: Regenerate the Excalidraw layer diagrams whenever pipeline behaviour changes
+alwaysApply: true
+---
+
+# Keep the architecture diagrams in sync
+
+`docs/excalidraw/*.excalidraw` are generated artefacts. Never hand-edit them —
+edit the matching `_generate_*_layer.py` and regenerate.
+
+| Layer | Generator |
+|-------|-----------|
+| 1 Input | `_generate_input_layer.py` |
+| 2 Pre-process | `_generate_preprocess_layer.py` |
+| 3 Verification | `_generate_verification_layer.py` |
+| 4 Evidence | `_generate_evidence_layer.py` |
+| 5 Uncertainty | `_generate_uncertainty_layer.py` |
+| 6 Editorial | `_generate_editorial_layer.py` |
+| 7 Documentation | `_generate_documentation_layer.py` |
+
+## When to update
+
+Update the affected layer's diagram in the same change as the code whenever you
+alter: envelope/payload fields, control flow or branches, enum values, HTTP or
+engine behaviour, or which modules a layer calls. Each generator ends with a
+"Source of truth" footer listing the files it documents — if you touched one of
+those files, the diagram is stale.
+
+## How
+
+```bash
+backend\.venv\Scripts\python.exe docs\excalidraw\_generate_input_layer.py
+```
+
+Then check the output before finishing:
+
+```bash
+backend\.venv\Scripts\python.exe docs\excalidraw\_check.py docs\excalidraw\01-input-layer.excalidraw
+```
+
+`_check.py` verifies that every text element fits inside its box, that no
+`*-title` wraps, that boxes do not overlap, and that arrows bind to elements
+that exist. It exits non-zero on any problem. Prose bodies in `_lib.py` boxes
+wrap on purpose, so growing a body means growing the box height and shifting the
+rows below it; a wrapping title means the box is too narrow, so widen it.
+
+Still do one thing by hand: grep the generated file for terminology you just
+removed.
+
+Boxes use absolute coordinates, so inserting a row means re-spacing everything
+below it. Frames are the `f-*` rectangles; keep child boxes fully inside them.
+
+## Thesis framing
+
+Diagram copy follows the same constraint as the code: a failed, blocked,
+paywalled, or unsupported fetch is a coverage gap, never a signal of falsity.
+Do not add diagram language that implies Layer 1 scores authenticity.

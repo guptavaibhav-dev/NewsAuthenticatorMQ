@@ -1,0 +1,8 @@
+{
+  "substack.com": "subdomain",
+  "medium.com": "first_path_segment",
+  "wordpress.com": "subdomain",
+  "blogspot.com": "subdomain",
+  "github.io": "subdomain",
+  "x.com": "first_path_segment"
+}

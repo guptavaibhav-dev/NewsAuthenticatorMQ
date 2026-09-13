@@ -537,6 +537,58 @@ input {
   color: inherit;
 }
 
+.claim-quote {
+  margin: 0.2rem 0 0.55rem;
+  font-size: 0.9rem;
+}
+
+.claim-unverified {
+  border-left: 3px solid var(--line);
+  background: #f3f3f3;
+  padding: 0.35rem 0.6rem;
+  margin: 0.35rem 0 0.35rem -0.6rem;
+}
+
+.claim-flag {
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--line);
+  padding: 0.1rem 0.4rem;
+  white-space: nowrap;
+}
+
+.claim-warning {
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--line);
+  background: #f3f3f3;
+  font-size: 0.9rem;
+}
+
+.claim-note {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+}
+
+.claim-group {
+  margin: 0.9rem 0 0;
+  padding-left: 0.7rem;
+  border-left: 2px solid var(--line);
+}
+
+.claim-group h5 {
+  margin: 0 0 0.25rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.claim-group > p.muted {
+  margin: 0 0 0.4rem;
+  font-size: 0.85rem;
+}
+
 .matrix-wrap {
   overflow: auto;
   border: 1px solid var(--line);

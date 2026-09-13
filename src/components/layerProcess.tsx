@@ -142,7 +142,6 @@ function toolsForLayer(run: RunEnvelope | null, layer: number) {
         detail: run.input.fetch_error || run.input.publisher_domain || '',
         hit_count: run.input.extracted_char_count || 0,
       },
-      ...run.tool_results.filter((row) => row.tool === 'media'),
     ]
   }
   if (layer === 4) {

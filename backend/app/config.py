@@ -1,14 +1,40 @@
+from __future__ import annotations
+
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _BACKEND_DIR = Path(__file__).resolve().parent.parent
 
-APP_USER_AGENT = (
-    "NewsAuthBot/1.0 (https://github.com/guptavaibhav-dev/"
-    "A-Framework-for-Authenticating-News-Content; thesis prototype)"
-)
+DEV_CONTACT_PLACEHOLDER = "https://localhost/newsauth-dev"
+INGEST_ACCEPT = "text/html,application/xhtml+xml,application/pdf;q=0.8,*/*;q=0.5"
+
+
+def build_user_agent(
+    contact_url: str = "",
+    environment: str = "development",
+    override: str = "",
+) -> str:
+    """Identify the bot to publishers.
+
+    Default: ``NewsAuthBot/1.0 (+<CONTACT_URL>)``. CONTACT_URL is required in
+    production so operators can be reached; a placeholder is allowed in
+    development. This is crawler courtesy, not a trust or authenticity claim.
+    """
+    if (override or "").strip():
+        return override.strip()
+    url = (contact_url or "").strip()
+    env = (environment or "development").lower()
+    if not url:
+        if env in {"production", "prod"}:
+            raise RuntimeError(
+                "CONTACT_URL must be set in production so publishers can reach "
+                "the operator (User-Agent NewsAuthBot/1.0 (+<CONTACT_URL>))."
+            )
+        url = DEV_CONTACT_PLACEHOLDER
+    return f"NewsAuthBot/1.0 (+{url})"
 
 
 class Settings(BaseSettings):
@@ -40,12 +66,24 @@ class Settings(BaseSettings):
     ner_model: str = "dslim/bert-base-NER"
 
     http_timeout_s: float = 25.0
+    ingest_connect_timeout_s: float = 5.0
+    ingest_read_timeout_s: float = 20.0
     llm_timeout_s: float = 90.0
     hf_timeout_s: float = 60.0
     max_evidence_items: int = 12
+    # 2 = extract claims twice and cross-check by span; 1 = single pass.
+    claim_passes: int = 2
+    # How many Layer 2 claims Layer 3 plans retrieval queries for.
+    retrieval_top_k_claims: int = 5
+    # Let an LLM reword planned queries. Off by default: the deterministic
+    # planner is reproducible, and a rewrite is only ever accepted whole.
+    planner_use_llm: bool = False
     nli_threshold: float = 0.6
     near_duplicate_threshold: float = 0.88
     log_level: str = "INFO"
+    contact_url: str = ""
+    environment: str = "development"
+    user_agent: str = ""
 
     @property
     def gemini_key(self) -> str:
@@ -55,7 +93,27 @@ class Settings(BaseSettings):
     def factcheck_key(self) -> str:
         return self.factcheck_api_key or self.google_api_key or self.gemini_api_key
 
+    @property
+    def app_user_agent(self) -> str:
+        return build_user_agent(self.contact_url, self.environment, self.user_agent)
+
+    @model_validator(mode="after")
+    def _require_contact_url_in_production(self) -> Settings:
+        _ = self.app_user_agent
+        return self
+
+    @model_validator(mode="after")
+    def _clamp_claim_passes(self) -> Settings:
+        if self.claim_passes not in {1, 2}:
+            raise ValueError("CLAIM_PASSES must be 1 or 2")
+        return self
+
 
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+
+# Wikipedia and the shared HTTP client import this name. Resolved from Settings
+# (env / .env) at import so Layer 3 files do not need a call-site change.
+APP_USER_AGENT = get_settings().app_user_agent

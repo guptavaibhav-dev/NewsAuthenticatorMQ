@@ -572,12 +572,34 @@ function RunResults({
         <>
           <h3>Claims</h3>
           <ul className="plain-list">
-            {run.classification.claims.map((claim) => (
-              <li key={claim.id}>
-                <code>{claim.id}</code> {claim.text}{' '}
-                <span className="muted">({claim.kind})</span>
-              </li>
-            ))}
+            {run.classification.claims.map((claim) => {
+              const ungrounded = (claim.grounding ?? 'not_found') === 'not_found'
+              return (
+                <li key={claim.id} className={ungrounded ? 'claim-unverified' : undefined}>
+                  <code>{claim.id}</code> {claim.text}{' '}
+                  <span className="muted">({claim.kind})</span>
+                  {claim.agreement && claim.agreement !== 'both' && (
+                    <>
+                      {' '}
+                      <span className="claim-flag">
+                        {claim.agreement === 'pass_a_only' ? 'pass A only' : 'pass B only'} —
+                        one extraction pass, lower confidence
+                      </span>
+                    </>
+                  )}
+                  {ungrounded ? (
+                    <>
+                      {' '}
+                      <strong className="claim-flag">
+                        unverified — quote not found in article
+                      </strong>
+                    </>
+                  ) : (
+                    <p className="claim-quote">“{claim.source_quote}”</p>
+                  )}
+                </li>
+              )
+            })}
           </ul>
         </>
       )}

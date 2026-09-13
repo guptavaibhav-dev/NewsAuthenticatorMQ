@@ -1778,7 +1778,7 @@
       "type": "rectangle",
       "x": 84,
       "y": 636,
-      "width": 400,
+      "width": 490,
       "height": 108,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -1815,7 +1815,7 @@
       "type": "text",
       "x": 98,
       "y": 646,
-      "width": 372,
+      "width": 462,
       "height": 20.0,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -1854,7 +1854,7 @@
       "type": "text",
       "x": 98,
       "y": 670.0,
-      "width": 372,
+      "width": 462,
       "height": 52.5,
       "angle": 0,
       "strokeColor": "#343a40",
@@ -1891,9 +1891,9 @@
     {
       "id": "orch-ingest",
       "type": "rectangle",
-      "x": 504,
+      "x": 594,
       "y": 636,
-      "width": 400,
+      "width": 490,
       "height": 108,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -1940,9 +1940,9 @@
     {
       "id": "orch-ingest-title",
       "type": "text",
-      "x": 518,
+      "x": 608,
       "y": 646,
-      "width": 372,
+      "width": 462,
       "height": 20.0,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -1979,9 +1979,9 @@
     {
       "id": "orch-ingest-body",
       "type": "text",
-      "x": 518,
+      "x": 608,
       "y": 670.0,
-      "width": 372,
+      "width": 462,
       "height": 52.5,
       "angle": 0,
       "strokeColor": "#343a40",
@@ -2018,9 +2018,9 @@
     {
       "id": "orch-guard",
       "type": "rectangle",
-      "x": 924,
+      "x": 1104,
       "y": 636,
-      "width": 420,
+      "width": 520,
       "height": 108,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -2048,7 +2048,7 @@
           "type": "arrow"
         },
         {
-          "id": "a-guard-media",
+          "id": "a-guard-eng",
           "type": "arrow"
         }
       ],
@@ -2059,9 +2059,9 @@
     {
       "id": "orch-guard-title",
       "type": "text",
-      "x": 938,
+      "x": 1118,
       "y": 646,
-      "width": 392,
+      "width": 492,
       "height": 20.0,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -2098,9 +2098,9 @@
     {
       "id": "orch-guard-body",
       "type": "text",
-      "x": 938,
+      "x": 1118,
       "y": 670.0,
-      "width": 392,
+      "width": 492,
       "height": 52.5,
       "angle": 0,
       "strokeColor": "#343a40",
@@ -2135,130 +2135,11 @@
       "lineHeight": 1.25
     },
     {
-      "id": "orch-media",
-      "type": "rectangle",
-      "x": 1364,
-      "y": 636,
-      "width": 400,
-      "height": 108,
-      "angle": 0,
-      "strokeColor": "#1e1e1e",
-      "backgroundColor": "#e9ecef",
-      "fillStyle": "solid",
-      "strokeWidth": 2,
-      "strokeStyle": "dashed",
-      "roughness": 1,
-      "opacity": 100,
-      "groupIds": [
-        "g-orch-media"
-      ],
-      "frameId": null,
-      "index": "f8",
-      "roundness": {
-        "type": 3
-      },
-      "seed": 1931863086,
-      "version": 1,
-      "versionNonce": 16427312,
-      "isDeleted": false,
-      "boundElements": [
-        {
-          "id": "a-guard-media",
-          "type": "arrow"
-        },
-        {
-          "id": "a-media-eng",
-          "type": "arrow"
-        }
-      ],
-      "updated": 1773320000000,
-      "link": null,
-      "locked": false
-    },
-    {
-      "id": "orch-media-title",
-      "type": "text",
-      "x": 1378,
-      "y": 646,
-      "width": 372,
-      "height": 20.0,
-      "angle": 0,
-      "strokeColor": "#1e1e1e",
-      "backgroundColor": "transparent",
-      "fillStyle": "solid",
-      "strokeWidth": 2,
-      "strokeStyle": "solid",
-      "roughness": 1,
-      "opacity": 100,
-      "groupIds": [
-        "g-orch-media"
-      ],
-      "frameId": null,
-      "index": "f9",
-      "roundness": null,
-      "seed": 1579802328,
-      "version": 1,
-      "versionNonce": 217757193,
-      "isDeleted": false,
-      "boundElements": null,
-      "updated": 1773320000000,
-      "link": null,
-      "locked": false,
-      "text": "inspect_media()",
-      "originalText": "inspect_media()",
-      "fontSize": 16,
-      "fontFamily": 2,
-      "textAlign": "left",
-      "verticalAlign": "top",
-      "containerId": null,
-      "autoResize": false,
-      "lineHeight": 1.25
-    },
-    {
-      "id": "orch-media-body",
-      "type": "text",
-      "x": 1378,
-      "y": 670.0,
-      "width": 372,
-      "height": 52.5,
-      "angle": 0,
-      "strokeColor": "#343a40",
-      "backgroundColor": "transparent",
-      "fillStyle": "solid",
-      "strokeWidth": 2,
-      "strokeStyle": "solid",
-      "roughness": 1,
-      "opacity": 100,
-      "groupIds": [
-        "g-orch-media"
-      ],
-      "frameId": null,
-      "index": "g0",
-      "roundness": null,
-      "seed": 1692445643,
-      "version": 1,
-      "versionNonce": 1057616143,
-      "isDeleted": false,
-      "boundElements": null,
-      "updated": 1773320000000,
-      "link": null,
-      "locked": false,
-      "text": "tools/media.py\nAlways skipped in v1.\nC2PA / reverse-image reserved.",
-      "originalText": "tools/media.py\nAlways skipped in v1.\nC2PA / reverse-image reserved.",
-      "fontSize": 14,
-      "fontFamily": 2,
-      "textAlign": "left",
-      "verticalAlign": "top",
-      "containerId": null,
-      "autoResize": false,
-      "lineHeight": 1.25
-    },
-    {
       "id": "orch-engine",
       "type": "rectangle",
-      "x": 1784,
+      "x": 1644,
       "y": 636,
-      "width": 372,
+      "width": 512,
       "height": 108,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -2272,7 +2153,7 @@
         "g-orch-engine"
       ],
       "frameId": null,
-      "index": "g1",
+      "index": "f8",
       "roundness": {
         "type": 3
       },
@@ -2282,7 +2163,7 @@
       "isDeleted": false,
       "boundElements": [
         {
-          "id": "a-media-eng",
+          "id": "a-guard-eng",
           "type": "arrow"
         }
       ],
@@ -2293,9 +2174,9 @@
     {
       "id": "orch-engine-title",
       "type": "text",
-      "x": 1798,
+      "x": 1658,
       "y": 646,
-      "width": 344,
+      "width": 484,
       "height": 20.0,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -2309,7 +2190,7 @@
         "g-orch-engine"
       ],
       "frameId": null,
-      "index": "g2",
+      "index": "f9",
       "roundness": null,
       "seed": 443622696,
       "version": 1,
@@ -2332,10 +2213,10 @@
     {
       "id": "orch-engine-body",
       "type": "text",
-      "x": 1798,
+      "x": 1658,
       "y": 670.0,
-      "width": 344,
-      "height": 35.0,
+      "width": 484,
+      "height": 52.5,
       "angle": 0,
       "strokeColor": "#343a40",
       "backgroundColor": "transparent",
@@ -2348,7 +2229,7 @@
         "g-orch-engine"
       ],
       "frameId": null,
-      "index": "g3",
+      "index": "g0",
       "roundness": null,
       "seed": 938381225,
       "version": 1,
@@ -2358,8 +2239,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "input = \"ingest\"\nNo model is called in this layer.",
-      "originalText": "input = \"ingest\"\nNo model is called in this layer.",
+      "text": "input = \"ingest\"\nNo model is called in this layer.\nNo media hook: tools/media.py is documentation only.",
+      "originalText": "input = \"ingest\"\nNo model is called in this layer.\nNo media hook: tools/media.py is documentation only.",
       "fontSize": 14,
       "fontFamily": 2,
       "textAlign": "left",
@@ -2385,7 +2266,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g4",
+      "index": "g1",
       "roundness": {
         "type": 2
       },
@@ -2427,7 +2308,7 @@
       "type": "arrow",
       "x": 830.0,
       "y": 550,
-      "width": 126.0,
+      "width": 9.0,
       "height": 86,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -2439,7 +2320,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g5",
+      "index": "g2",
       "roundness": {
         "type": 2
       },
@@ -2470,7 +2351,7 @@
           0
         ],
         [
-          -126.0,
+          9.0,
           86
         ]
       ],
@@ -2479,7 +2360,7 @@
     {
       "id": "a-tr-ing",
       "type": "arrow",
-      "x": 484,
+      "x": 574,
       "y": 690.0,
       "width": 20,
       "height": 0,
@@ -2493,7 +2374,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g6",
+      "index": "g3",
       "roundness": {
         "type": 2
       },
@@ -2533,7 +2414,7 @@
     {
       "id": "a-ing-guard",
       "type": "arrow",
-      "x": 904,
+      "x": 1084,
       "y": 690.0,
       "width": 20,
       "height": 0,
@@ -2547,7 +2428,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g7",
+      "index": "g4",
       "roundness": {
         "type": 2
       },
@@ -2585,9 +2466,9 @@
       "lastCommittedPoint": null
     },
     {
-      "id": "a-guard-media",
+      "id": "a-guard-eng",
       "type": "arrow",
-      "x": 1344,
+      "x": 1624,
       "y": 690.0,
       "width": 20,
       "height": 0,
@@ -2601,13 +2482,13 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g8",
+      "index": "g5",
       "roundness": {
         "type": 2
       },
-      "seed": 432736656,
+      "seed": 1320913047,
       "version": 1,
-      "versionNonce": 1664621623,
+      "versionNonce": 1466174694,
       "isDeleted": false,
       "boundElements": null,
       "updated": 1773320000000,
@@ -2615,60 +2496,6 @@
       "locked": false,
       "startBinding": {
         "elementId": "orch-guard",
-        "focus": 0,
-        "gap": 6
-      },
-      "endBinding": {
-        "elementId": "orch-media",
-        "focus": 0,
-        "gap": 6
-      },
-      "startArrowhead": null,
-      "endArrowhead": "arrow",
-      "elbowed": false,
-      "points": [
-        [
-          0,
-          0
-        ],
-        [
-          20,
-          0.0
-        ]
-      ],
-      "lastCommittedPoint": null
-    },
-    {
-      "id": "a-media-eng",
-      "type": "arrow",
-      "x": 1764,
-      "y": 690.0,
-      "width": 20,
-      "height": 0,
-      "angle": 0,
-      "strokeColor": "#1e1e1e",
-      "backgroundColor": "transparent",
-      "fillStyle": "solid",
-      "strokeWidth": 2,
-      "strokeStyle": "solid",
-      "roughness": 1,
-      "opacity": 100,
-      "groupIds": [],
-      "frameId": null,
-      "index": "g9",
-      "roundness": {
-        "type": 2
-      },
-      "seed": 511695358,
-      "version": 1,
-      "versionNonce": 1485919349,
-      "isDeleted": false,
-      "boundElements": null,
-      "updated": 1773320000000,
-      "link": null,
-      "locked": false,
-      "startBinding": {
-        "elementId": "orch-media",
         "focus": 0,
         "gap": 6
       },
@@ -2711,7 +2538,7 @@
         "g-d-url"
       ],
       "frameId": null,
-      "index": "h0",
+      "index": "g6",
       "roundness": null,
       "seed": 1041643226,
       "version": 1,
@@ -2754,7 +2581,7 @@
         "g-d-url"
       ],
       "frameId": null,
-      "index": "h1",
+      "index": "g7",
       "roundness": null,
       "seed": 1467497739,
       "version": 1,
@@ -2777,9 +2604,9 @@
     {
       "id": "a-orch-d",
       "type": "arrow",
-      "x": 704.0,
+      "x": 839.0,
       "y": 744,
-      "width": 336.0,
+      "width": 201.0,
       "height": 56,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -2791,7 +2618,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "h2",
+      "index": "g8",
       "roundness": {
         "type": 2
       },
@@ -2822,7 +2649,7 @@
           0
         ],
         [
-          336.0,
+          201.0,
           56
         ]
       ],
@@ -2845,7 +2672,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "h3",
+      "index": "g9",
       "roundness": {
         "type": 3
       },
@@ -2875,7 +2702,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "h4",
+      "index": "h0",
       "roundness": null,
       "seed": 961351457,
       "version": 1,
@@ -2914,7 +2741,7 @@
         "g-txt-skip"
       ],
       "frameId": null,
-      "index": "h5",
+      "index": "h1",
       "roundness": {
         "type": 3
       },
@@ -2955,7 +2782,7 @@
         "g-txt-skip"
       ],
       "frameId": null,
-      "index": "h6",
+      "index": "h2",
       "roundness": null,
       "seed": 1889570604,
       "version": 1,
@@ -2965,8 +2792,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "fetch_status = skipped",
-      "originalText": "fetch_status = skipped",
+      "text": "fetch_status = skipped \u00b7 fetch_reason = skipped_no_url",
+      "originalText": "fetch_status = skipped \u00b7 fetch_reason = skipped_no_url",
       "fontSize": 16,
       "fontFamily": 2,
       "textAlign": "left",
@@ -2994,7 +2821,7 @@
         "g-txt-skip"
       ],
       "frameId": null,
-      "index": "h7",
+      "index": "h3",
       "roundness": null,
       "seed": 1338295872,
       "version": 1,
@@ -3033,7 +2860,7 @@
         "g-txt-raw"
       ],
       "frameId": null,
-      "index": "h8",
+      "index": "h4",
       "roundness": {
         "type": 3
       },
@@ -3074,7 +2901,7 @@
         "g-txt-raw"
       ],
       "frameId": null,
-      "index": "h9",
+      "index": "h5",
       "roundness": null,
       "seed": 2058142734,
       "version": 1,
@@ -3100,7 +2927,7 @@
       "x": 98,
       "y": 1208.0,
       "width": 624,
-      "height": 35.0,
+      "height": 52.5,
       "angle": 0,
       "strokeColor": "#343a40",
       "backgroundColor": "transparent",
@@ -3113,7 +2940,7 @@
         "g-txt-raw"
       ],
       "frameId": null,
-      "index": "i0",
+      "index": "h6",
       "roundness": null,
       "seed": 1303385302,
       "version": 1,
@@ -3123,8 +2950,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "Strip whitespace. This string is what Layer 2 classifies.\nIf paste is also empty, the empty-text guard fails the run.",
-      "originalText": "Strip whitespace. This string is what Layer 2 classifies.\nIf paste is also empty, the empty-text guard fails the run.",
+      "text": "Strip whitespace. This string is what Layer 2 classifies.\nsegments = one pasted span covering all of raw_text.\nIf paste is also empty, the empty-text guard fails the run.",
+      "originalText": "Strip whitespace. This string is what Layer 2 classifies.\nsegments = one pasted span covering all of raw_text.\nIf paste is also empty, the empty-text guard fails the run.",
       "fontSize": 14,
       "fontFamily": 2,
       "textAlign": "left",
@@ -3152,7 +2979,7 @@
         "g-txt-note"
       ],
       "frameId": null,
-      "index": "i1",
+      "index": "h7",
       "roundness": {
         "type": 3
       },
@@ -3193,7 +3020,7 @@
         "g-txt-note"
       ],
       "frameId": null,
-      "index": "i2",
+      "index": "h8",
       "roundness": null,
       "seed": 1799190624,
       "version": 1,
@@ -3230,7 +3057,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "i3",
+      "index": "h9",
       "roundness": {
         "type": 3
       },
@@ -3248,7 +3075,7 @@
       "type": "text",
       "x": 816,
       "y": 1000,
-      "width": 504.59999999999997,
+      "width": 626.4,
       "height": 18.75,
       "angle": 0,
       "strokeColor": "#495057",
@@ -3260,7 +3087,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "i4",
+      "index": "i0",
       "roundness": null,
       "seed": 370677225,
       "version": 1,
@@ -3270,8 +3097,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "5b. URL fetch path  \u00b7  tools/ingest.py  +  scoring/urls.py",
-      "originalText": "5b. URL fetch path  \u00b7  tools/ingest.py  +  scoring/urls.py",
+      "text": "5b. URL fetch path  \u00b7  tools/ingest.py  +  scoring/urls.py  +  config.py",
+      "originalText": "5b. URL fetch path  \u00b7  tools/ingest.py  +  scoring/urls.py  +  config.py",
       "fontSize": 15,
       "fontFamily": 2,
       "textAlign": "left",
@@ -3299,7 +3126,7 @@
         "g-url-get"
       ],
       "frameId": null,
-      "index": "i5",
+      "index": "i1",
       "roundness": {
         "type": 3
       },
@@ -3344,7 +3171,7 @@
         "g-url-get"
       ],
       "frameId": null,
-      "index": "i6",
+      "index": "i2",
       "roundness": null,
       "seed": 1559696996,
       "version": 1,
@@ -3370,7 +3197,7 @@
       "x": 838,
       "y": 1062.0,
       "width": 392,
-      "height": 70.0,
+      "height": 87.5,
       "angle": 0,
       "strokeColor": "#343a40",
       "backgroundColor": "transparent",
@@ -3383,7 +3210,7 @@
         "g-url-get"
       ],
       "frameId": null,
-      "index": "i7",
+      "index": "i3",
       "roundness": null,
       "seed": 1531593350,
       "version": 1,
@@ -3393,8 +3220,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "follow_redirects = true\nUser-Agent: NewsAuthBot/1.0\nAccept: text/html\nRecords fetch_timestamp (UTC)",
-      "originalText": "follow_redirects = true\nUser-Agent: NewsAuthBot/1.0\nAccept: text/html\nRecords fetch_timestamp (UTC)",
+      "text": "follow_redirects = true\nUser-Agent: NewsAuthBot/1.0 (+CONTACT_URL)\nAccept: html, xhtml, pdf;q=0.8, */*;q=0.5\nconnect 5s \u00b7 read 20s (separate budgets)\nRecords fetch_timestamp (UTC)",
+      "originalText": "follow_redirects = true\nUser-Agent: NewsAuthBot/1.0 (+CONTACT_URL)\nAccept: html, xhtml, pdf;q=0.8, */*;q=0.5\nconnect 5s \u00b7 read 20s (separate budgets)\nRecords fetch_timestamp (UTC)",
       "fontSize": 14,
       "fontFamily": 2,
       "textAlign": "left",
@@ -3404,7 +3231,7 @@
       "lineHeight": 1.25
     },
     {
-      "id": "url-traf",
+      "id": "url-type",
       "type": "rectangle",
       "x": 1264,
       "y": 1028,
@@ -3412,23 +3239,23 @@
       "height": 150,
       "angle": 0,
       "strokeColor": "#1e1e1e",
-      "backgroundColor": "#a5d8ff",
+      "backgroundColor": "#ffd8a8",
       "fillStyle": "solid",
       "strokeWidth": 2,
       "strokeStyle": "solid",
       "roughness": 1,
       "opacity": 100,
       "groupIds": [
-        "g-url-traf"
+        "g-url-type"
       ],
       "frameId": null,
-      "index": "i8",
+      "index": "i4",
       "roundness": {
         "type": 3
       },
-      "seed": 902404992,
+      "seed": 1554941492,
       "version": 1,
-      "versionNonce": 32507894,
+      "versionNonce": 1366676094,
       "isDeleted": false,
       "boundElements": [
         {
@@ -3449,7 +3276,7 @@
       "locked": false
     },
     {
-      "id": "url-traf-title",
+      "id": "url-type-title",
       "type": "text",
       "x": 1278,
       "y": 1038,
@@ -3464,10 +3291,129 @@
       "roughness": 1,
       "opacity": 100,
       "groupIds": [
+        "g-url-type"
+      ],
+      "frameId": null,
+      "index": "i5",
+      "roundness": null,
+      "seed": 1995920865,
+      "version": 1,
+      "versionNonce": 1315365543,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "text": "Branch on Content-Type",
+      "originalText": "Branch on Content-Type",
+      "fontSize": 16,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "autoResize": false,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "url-type-body",
+      "type": "text",
+      "x": 1278,
+      "y": 1062.0,
+      "width": 392,
+      "height": 70.0,
+      "angle": 0,
+      "strokeColor": "#343a40",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-url-type"
+      ],
+      "frameId": null,
+      "index": "i6",
+      "roundness": null,
+      "seed": 2005395531,
+      "version": 1,
+      "versionNonce": 1760814254,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "text": "text/html \u2192 extract as now\napplication/pdf \u2192 error_unsupported_type\n(TODO: no PDF parser in this change)\n429 \u2192 error_blocked + Retry-After",
+      "originalText": "text/html \u2192 extract as now\napplication/pdf \u2192 error_unsupported_type\n(TODO: no PDF parser in this change)\n429 \u2192 error_blocked + Retry-After",
+      "fontSize": 14,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "autoResize": false,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "url-traf",
+      "type": "rectangle",
+      "x": 1704,
+      "y": 1028,
+      "width": 452,
+      "height": 150,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#a5d8ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
         "g-url-traf"
       ],
       "frameId": null,
-      "index": "i9",
+      "index": "i7",
+      "roundness": {
+        "type": 3
+      },
+      "seed": 902404992,
+      "version": 1,
+      "versionNonce": 32507894,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "a-u2",
+          "type": "arrow"
+        },
+        {
+          "id": "a-u5",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "url-traf-title",
+      "type": "text",
+      "x": 1718,
+      "y": 1038,
+      "width": 424,
+      "height": 20.0,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-url-traf"
+      ],
+      "frameId": null,
+      "index": "i8",
       "roundness": null,
       "seed": 1069221075,
       "version": 1,
@@ -3490,10 +3436,10 @@
     {
       "id": "url-traf-body",
       "type": "text",
-      "x": 1278,
+      "x": 1718,
       "y": 1062.0,
-      "width": 392,
-      "height": 52.5,
+      "width": 424,
+      "height": 70.0,
       "angle": 0,
       "strokeColor": "#343a40",
       "backgroundColor": "transparent",
@@ -3506,7 +3452,7 @@
         "g-url-traf"
       ],
       "frameId": null,
-      "index": "j0",
+      "index": "i9",
       "roundness": null,
       "seed": 1375839530,
       "version": 1,
@@ -3516,127 +3462,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "JSON output: title + text\ncomments/tables off\nEXTRACTION_TIMEOUT = 20s",
-      "originalText": "JSON output: title + text\ncomments/tables off\nEXTRACTION_TIMEOUT = 20s",
-      "fontSize": 14,
-      "fontFamily": 2,
-      "textAlign": "left",
-      "verticalAlign": "top",
-      "containerId": null,
-      "autoResize": false,
-      "lineHeight": 1.25
-    },
-    {
-      "id": "url-fb",
-      "type": "rectangle",
-      "x": 1704,
-      "y": 1028,
-      "width": 452,
-      "height": 150,
-      "angle": 0,
-      "strokeColor": "#1e1e1e",
-      "backgroundColor": "#ffd8a8",
-      "fillStyle": "solid",
-      "strokeWidth": 2,
-      "strokeStyle": "solid",
-      "roughness": 1,
-      "opacity": 100,
-      "groupIds": [
-        "g-url-fb"
-      ],
-      "frameId": null,
-      "index": "j1",
-      "roundness": {
-        "type": 3
-      },
-      "seed": 2146469866,
-      "version": 1,
-      "versionNonce": 235227756,
-      "isDeleted": false,
-      "boundElements": [
-        {
-          "id": "a-u2",
-          "type": "arrow"
-        },
-        {
-          "id": "a-u5",
-          "type": "arrow"
-        }
-      ],
-      "updated": 1773320000000,
-      "link": null,
-      "locked": false
-    },
-    {
-      "id": "url-fb-title",
-      "type": "text",
-      "x": 1718,
-      "y": 1038,
-      "width": 424,
-      "height": 20.0,
-      "angle": 0,
-      "strokeColor": "#1e1e1e",
-      "backgroundColor": "transparent",
-      "fillStyle": "solid",
-      "strokeWidth": 2,
-      "strokeStyle": "solid",
-      "roughness": 1,
-      "opacity": 100,
-      "groupIds": [
-        "g-url-fb"
-      ],
-      "frameId": null,
-      "index": "j2",
-      "roundness": null,
-      "seed": 1464754271,
-      "version": 1,
-      "versionNonce": 62295768,
-      "isDeleted": false,
-      "boundElements": null,
-      "updated": 1773320000000,
-      "link": null,
-      "locked": false,
-      "text": "Fallbacks",
-      "originalText": "Fallbacks",
-      "fontSize": 16,
-      "fontFamily": 2,
-      "textAlign": "left",
-      "verticalAlign": "top",
-      "containerId": null,
-      "autoResize": false,
-      "lineHeight": 1.25
-    },
-    {
-      "id": "url-fb-body",
-      "type": "text",
-      "x": 1718,
-      "y": 1062.0,
-      "width": 424,
-      "height": 52.5,
-      "angle": 0,
-      "strokeColor": "#343a40",
-      "backgroundColor": "transparent",
-      "fillStyle": "solid",
-      "strokeWidth": 2,
-      "strokeStyle": "solid",
-      "roughness": 1,
-      "opacity": 100,
-      "groupIds": [
-        "g-url-fb"
-      ],
-      "frameId": null,
-      "index": "j3",
-      "roundness": null,
-      "seed": 1466789484,
-      "version": 1,
-      "versionNonce": 640055172,
-      "isDeleted": false,
-      "boundElements": null,
-      "updated": 1773320000000,
-      "link": null,
-      "locked": false,
-      "text": "Title: og:title \u2192 twitter:title \u2192 <title>\nBody: trafilatura.extract() plain\nGeneric \u201cBBC News\u201d titles ignored",
-      "originalText": "Title: og:title \u2192 twitter:title \u2192 <title>\nBody: trafilatura.extract() plain\nGeneric \u201cBBC News\u201d titles ignored",
+      "text": "JSON: title + text \u00b7 comments/tables off\nTitle fallback: og:title \u2192 twitter:title \u2192 <title>\nBody fallback: trafilatura.extract() plain\nEXTRACTION_TIMEOUT = 20s (parsing only)",
+      "originalText": "JSON: title + text \u00b7 comments/tables off\nTitle fallback: og:title \u2192 twitter:title \u2192 <title>\nBody fallback: trafilatura.extract() plain\nEXTRACTION_TIMEOUT = 20s (parsing only)",
       "fontSize": 14,
       "fontFamily": 2,
       "textAlign": "left",
@@ -3664,7 +3491,7 @@
         "g-url-norm"
       ],
       "frameId": null,
-      "index": "j4",
+      "index": "j0",
       "roundness": {
         "type": 3
       },
@@ -3701,7 +3528,7 @@
         "g-url-norm"
       ],
       "frameId": null,
-      "index": "j5",
+      "index": "j1",
       "roundness": null,
       "seed": 272948285,
       "version": 1,
@@ -3711,8 +3538,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "Normalize identity",
-      "originalText": "Normalize identity",
+      "text": "Resolve canonical identity",
+      "originalText": "Resolve canonical identity",
       "fontSize": 16,
       "fontFamily": 2,
       "textAlign": "left",
@@ -3727,7 +3554,7 @@
       "x": 838,
       "y": 1224.0,
       "width": 392,
-      "height": 70.0,
+      "height": 105.0,
       "angle": 0,
       "strokeColor": "#343a40",
       "backgroundColor": "transparent",
@@ -3740,7 +3567,7 @@
         "g-url-norm"
       ],
       "frameId": null,
-      "index": "j6",
+      "index": "j2",
       "roundness": null,
       "seed": 503371475,
       "version": 1,
@@ -3750,8 +3577,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "canonical_url: strip www + trailing /\npublisher_domain: eTLD+1 via tldextract\n(bbc.com and bbc.co.uk stay distinct hosts;\nindependence is a later-layer concern)",
-      "originalText": "canonical_url: strip www + trailing /\npublisher_domain: eTLD+1 via tldextract\n(bbc.com and bbc.co.uk stay distinct hosts;\nindependence is a later-layer concern)",
+      "text": "1 rel=canonical  2 og:url  3 final URL\nDeclared URLs accepted only if the\nregistrable domain matches; else fall\nthrough and log \u00b7 canonical_source records it\nUnwrap redirectors + AMP, strip utm_*, fbclid\npublisher_id splits platform authors",
+      "originalText": "1 rel=canonical  2 og:url  3 final URL\nDeclared URLs accepted only if the\nregistrable domain matches; else fall\nthrough and log \u00b7 canonical_source records it\nUnwrap redirectors + AMP, strip utm_*, fbclid\npublisher_id splits platform authors",
       "fontSize": 14,
       "fontFamily": 2,
       "textAlign": "left",
@@ -3779,7 +3606,7 @@
         "g-url-merge"
       ],
       "frameId": null,
-      "index": "j7",
+      "index": "j3",
       "roundness": {
         "type": 3
       },
@@ -3816,7 +3643,7 @@
         "g-url-merge"
       ],
       "frameId": null,
-      "index": "j8",
+      "index": "j4",
       "roundness": null,
       "seed": 532250519,
       "version": 1,
@@ -3826,8 +3653,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "Merge pasted + fetched",
-      "originalText": "Merge pasted + fetched",
+      "text": "Attribute pasted vs fetched",
+      "originalText": "Attribute pasted vs fetched",
       "fontSize": 16,
       "fontFamily": 2,
       "textAlign": "left",
@@ -3842,7 +3669,7 @@
       "x": 1278,
       "y": 1224.0,
       "width": 392,
-      "height": 70.0,
+      "height": 105.0,
       "angle": 0,
       "strokeColor": "#343a40",
       "backgroundColor": "transparent",
@@ -3855,7 +3682,7 @@
         "g-url-merge"
       ],
       "frameId": null,
-      "index": "j9",
+      "index": "j5",
       "roundness": null,
       "seed": 1014888011,
       "version": 1,
@@ -3865,8 +3692,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "If paste is non-empty and not already\ninside the fetched body, prepend it.\ntext_merged = true in that case.\nOtherwise keep fetched body only.",
-      "originalText": "If paste is non-empty and not already\ninside the fetched body, prepend it.\ntext_merged = true in that case.\nOtherwise keep fetched body only.",
+      "text": "Overlap check on normalised forms only:\ncasefold, NFKC, collapse spaces,\ncurly quotes/dashes \u2192 ASCII\nraw_text itself is never mutated\nsegments tile raw_text exactly\ntext_merged is derived from segments",
+      "originalText": "Overlap check on normalised forms only:\ncasefold, NFKC, collapse spaces,\ncurly quotes/dashes \u2192 ASCII\nraw_text itself is never mutated\nsegments tile raw_text exactly\ntext_merged is derived from segments",
       "fontSize": 14,
       "fontFamily": 2,
       "textAlign": "left",
@@ -3894,7 +3721,7 @@
         "g-url-status"
       ],
       "frameId": null,
-      "index": "k0",
+      "index": "j6",
       "roundness": {
         "type": 3
       },
@@ -3935,7 +3762,7 @@
         "g-url-status"
       ],
       "frameId": null,
-      "index": "k1",
+      "index": "j7",
       "roundness": null,
       "seed": 1547446885,
       "version": 1,
@@ -3945,8 +3772,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "fetch_status",
-      "originalText": "fetch_status",
+      "text": "fetch_reason \u2192 fetch_status",
+      "originalText": "fetch_reason \u2192 fetch_status",
       "fontSize": 16,
       "fontFamily": 2,
       "textAlign": "left",
@@ -3961,7 +3788,7 @@
       "x": 1718,
       "y": 1224.0,
       "width": 424,
-      "height": 87.5,
+      "height": 105.0,
       "angle": 0,
       "strokeColor": "#343a40",
       "backgroundColor": "transparent",
@@ -3974,7 +3801,7 @@
         "g-url-status"
       ],
       "frameId": null,
-      "index": "k2",
+      "index": "j8",
       "roundness": null,
       "seed": 1588463251,
       "version": 1,
@@ -3984,8 +3811,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "ok \u2014 extracted body is non-empty\nempty \u2014 HTTP success, no article text\nerror \u2014 HTTP failure or exception\nOn error, keep the journalist\u2019s paste.\nNever treat a failed fetch as \u201cfake\u201d.",
-      "originalText": "ok \u2014 extracted body is non-empty\nempty \u2014 HTTP success, no article text\nerror \u2014 HTTP failure or exception\nOn error, keep the journalist\u2019s paste.\nNever treat a failed fetch as \u201cfake\u201d.",
+      "text": "fetch_reason is the precise outcome;\nfetch_status is derived from it by a single\nmapping function, so they cannot disagree.\nfetch_error is diagnostic only \u2014 nothing\ndownstream branches on its contents.\nOn failure the journalist\u2019s paste is kept.",
+      "originalText": "fetch_reason is the precise outcome;\nfetch_status is derived from it by a single\nmapping function, so they cannot disagree.\nfetch_error is diagnostic only \u2014 nothing\ndownstream branches on its contents.\nOn failure the journalist\u2019s paste is kept.",
       "fontSize": 14,
       "fontFamily": 2,
       "textAlign": "left",
@@ -4011,7 +3838,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "k3",
+      "index": "j9",
       "roundness": {
         "type": 2
       },
@@ -4065,7 +3892,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "k4",
+      "index": "k0",
       "roundness": null,
       "seed": 2050865119,
       "version": 1,
@@ -4102,7 +3929,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "k5",
+      "index": "k1",
       "roundness": {
         "type": 2
       },
@@ -4156,7 +3983,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "k6",
+      "index": "k2",
       "roundness": null,
       "seed": 947467895,
       "version": 1,
@@ -4193,7 +4020,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "k7",
+      "index": "k3",
       "roundness": {
         "type": 2
       },
@@ -4247,7 +4074,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "k8",
+      "index": "k4",
       "roundness": {
         "type": 2
       },
@@ -4301,7 +4128,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "k9",
+      "index": "k5",
       "roundness": {
         "type": 2
       },
@@ -4319,7 +4146,7 @@
         "gap": 6
       },
       "endBinding": {
-        "elementId": "url-traf",
+        "elementId": "url-type",
         "focus": 0,
         "gap": 6
       },
@@ -4355,7 +4182,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "l0",
+      "index": "k6",
       "roundness": {
         "type": 2
       },
@@ -4368,12 +4195,12 @@
       "link": null,
       "locked": false,
       "startBinding": {
-        "elementId": "url-traf",
+        "elementId": "url-type",
         "focus": 0,
         "gap": 6
       },
       "endBinding": {
-        "elementId": "url-fb",
+        "elementId": "url-traf",
         "focus": 0,
         "gap": 6
       },
@@ -4409,7 +4236,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "l1",
+      "index": "k7",
       "roundness": {
         "type": 2
       },
@@ -4463,7 +4290,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "l2",
+      "index": "k8",
       "roundness": {
         "type": 2
       },
@@ -4476,7 +4303,7 @@
       "link": null,
       "locked": false,
       "startBinding": {
-        "elementId": "url-traf",
+        "elementId": "url-type",
         "focus": 0,
         "gap": 6
       },
@@ -4517,7 +4344,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "l3",
+      "index": "k9",
       "roundness": {
         "type": 2
       },
@@ -4530,7 +4357,7 @@
       "link": null,
       "locked": false,
       "startBinding": {
-        "elementId": "url-fb",
+        "elementId": "url-traf",
         "focus": 0,
         "gap": 6
       },
@@ -4573,7 +4400,7 @@
         "g-merge"
       ],
       "frameId": null,
-      "index": "l4",
+      "index": "l0",
       "roundness": {
         "type": 3
       },
@@ -4618,7 +4445,7 @@
         "g-merge"
       ],
       "frameId": null,
-      "index": "l5",
+      "index": "l1",
       "roundness": null,
       "seed": 1593451347,
       "version": 1,
@@ -4655,7 +4482,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "l6",
+      "index": "l2",
       "roundness": {
         "type": 3
       },
@@ -4685,7 +4512,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "l7",
+      "index": "l3",
       "roundness": null,
       "seed": 801922549,
       "version": 1,
@@ -4706,11 +4533,11 @@
       "lineHeight": 1.25
     },
     {
-      "id": "out-payload",
+      "id": "out-payload-a",
       "type": "rectangle",
       "x": 84,
       "y": 1554,
-      "width": 1432,
+      "width": 700,
       "height": 250,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -4721,24 +4548,20 @@
       "roughness": 1,
       "opacity": 100,
       "groupIds": [
-        "g-out-payload"
+        "g-out-payload-a"
       ],
       "frameId": null,
-      "index": "l8",
+      "index": "l4",
       "roundness": {
         "type": 3
       },
-      "seed": 443795983,
+      "seed": 1204627820,
       "version": 1,
-      "versionNonce": 229161392,
+      "versionNonce": 828332188,
       "isDeleted": false,
       "boundElements": [
         {
           "id": "a-merge-out",
-          "type": "arrow"
-        },
-        {
-          "id": "a-out-insp",
           "type": "arrow"
         },
         {
@@ -4751,11 +4574,11 @@
       "locked": false
     },
     {
-      "id": "out-payload-title",
+      "id": "out-payload-a-title",
       "type": "text",
       "x": 98,
       "y": 1564,
-      "width": 1404,
+      "width": 672,
       "height": 20.0,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -4766,21 +4589,21 @@
       "roughness": 1,
       "opacity": 100,
       "groupIds": [
-        "g-out-payload"
+        "g-out-payload-a"
       ],
       "frameId": null,
-      "index": "l9",
+      "index": "l5",
       "roundness": null,
-      "seed": 401241934,
+      "seed": 2103544908,
       "version": 1,
-      "versionNonce": 1279152434,
+      "versionNonce": 1625236623,
       "isDeleted": false,
       "boundElements": null,
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "envelope.input",
-      "originalText": "envelope.input",
+      "text": "envelope.input  \u00b7  content and identity",
+      "originalText": "envelope.input  \u00b7  content and identity",
       "fontSize": 16,
       "fontFamily": 2,
       "textAlign": "left",
@@ -4790,12 +4613,12 @@
       "lineHeight": 1.25
     },
     {
-      "id": "out-payload-body",
+      "id": "out-payload-a-body",
       "type": "text",
       "x": 98,
       "y": 1588.0,
-      "width": 1404,
-      "height": 187.5,
+      "width": 672,
+      "height": 192.5,
       "angle": 0,
       "strokeColor": "#343a40",
       "backgroundColor": "transparent",
@@ -4805,22 +4628,137 @@
       "roughness": 1,
       "opacity": 100,
       "groupIds": [
-        "g-out-payload"
+        "g-out-payload-a"
       ],
       "frameId": null,
-      "index": "m0",
+      "index": "l6",
       "roundness": null,
-      "seed": 2087556084,
+      "seed": 194577503,
       "version": 1,
-      "versionNonce": 590225185,
+      "versionNonce": 1139800647,
       "isDeleted": false,
       "boundElements": null,
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "raw_text                 body Layer 2 will classify\nurl                      journalist-supplied URL (or null)\nfetched_title            extracted headline, if any\ncanonical_url            normalized final URL after redirects\npublisher_domain         registrable domain (eTLD+1)\nfetch_timestamp          UTC ISO-8601 when the GET started\nfetch_status             ok | empty | error | skipped\nfetch_error              truncated exception / HTTP code\nextracted_char_count     fetched body length (0 if skipped)\ntext_merged              paste prepended to fetched body",
-      "originalText": "raw_text                 body Layer 2 will classify\nurl                      journalist-supplied URL (or null)\nfetched_title            extracted headline, if any\ncanonical_url            normalized final URL after redirects\npublisher_domain         registrable domain (eTLD+1)\nfetch_timestamp          UTC ISO-8601 when the GET started\nfetch_status             ok | empty | error | skipped\nfetch_error              truncated exception / HTTP code\nextracted_char_count     fetched body length (0 if skipped)\ntext_merged              paste prepended to fetched body",
-      "fontSize": 15,
+      "text": "raw_text                 concatenation Layer 2 classifies\nsegments                 ordered spans tiling raw_text exactly\nurl                      journalist-supplied URL (or null)\nfetched_title            extracted headline, if any\ncanonical_url            dedup key after unwrap + param strip\ncanonical_source         link_rel | og_url | final_url\npublisher_domain         registrable domain (eTLD+1), unchanged\npublisher_id             platform identity, e.g. medium.com/@alice\npublisher_is_platform    host listed in PLATFORM_HOSTS\nfetch_timestamp          UTC ISO-8601 when the GET started\ntext_merged              derived: both source kinds present",
+      "originalText": "raw_text                 concatenation Layer 2 classifies\nsegments                 ordered spans tiling raw_text exactly\nurl                      journalist-supplied URL (or null)\nfetched_title            extracted headline, if any\ncanonical_url            dedup key after unwrap + param strip\ncanonical_source         link_rel | og_url | final_url\npublisher_domain         registrable domain (eTLD+1), unchanged\npublisher_id             platform identity, e.g. medium.com/@alice\npublisher_is_platform    host listed in PLATFORM_HOSTS\nfetch_timestamp          UTC ISO-8601 when the GET started\ntext_merged              derived: both source kinds present",
+      "fontSize": 14,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "autoResize": false,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "out-payload-b",
+      "type": "rectangle",
+      "x": 800,
+      "y": 1554,
+      "width": 700,
+      "height": 250,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#b2f2bb",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-out-payload-b"
+      ],
+      "frameId": null,
+      "index": "l7",
+      "roundness": {
+        "type": 3
+      },
+      "seed": 371475014,
+      "version": 1,
+      "versionNonce": 2018491214,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "a-out-insp",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "out-payload-b-title",
+      "type": "text",
+      "x": 814,
+      "y": 1564,
+      "width": 672,
+      "height": 20.0,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-out-payload-b"
+      ],
+      "frameId": null,
+      "index": "l8",
+      "roundness": null,
+      "seed": 2111690399,
+      "version": 1,
+      "versionNonce": 1689310003,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "text": "envelope.input  \u00b7  fetch outcome and observables",
+      "originalText": "envelope.input  \u00b7  fetch outcome and observables",
+      "fontSize": 16,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "autoResize": false,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "out-payload-b-body",
+      "type": "text",
+      "x": 814,
+      "y": 1588.0,
+      "width": 672,
+      "height": 175.0,
+      "angle": 0,
+      "strokeColor": "#343a40",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-out-payload-b"
+      ],
+      "frameId": null,
+      "index": "l9",
+      "roundness": null,
+      "seed": 501605467,
+      "version": 1,
+      "versionNonce": 1385930458,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "text": "fetch_status             ok | empty | error | skipped (derived)\nfetch_reason             precise outcome \u2014 taxonomy below\nfetch_error              diagnostic only; never branch on it\nhttp_status              final HTTP code, if a response arrived\nfinal_url                URL after redirects\ncontent_type             response type/subtype\nredirect_chain           request \u2192 \u2026 \u2192 final_url\nresponse_bytes           encoded body size, when known\nretry_after              Retry-After header value, if sent\nextracted_char_count     fetched body length (0 if skipped)",
+      "originalText": "fetch_status             ok | empty | error | skipped (derived)\nfetch_reason             precise outcome \u2014 taxonomy below\nfetch_error              diagnostic only; never branch on it\nhttp_status              final HTTP code, if a response arrived\nfinal_url                URL after redirects\ncontent_type             response type/subtype\nredirect_chain           request \u2192 \u2026 \u2192 final_url\nresponse_bytes           encoded body size, when known\nretry_after              Retry-After header value, if sent\nextracted_char_count     fetched body length (0 if skipped)",
+      "fontSize": 14,
       "fontFamily": 2,
       "textAlign": "left",
       "verticalAlign": "top",
@@ -4845,7 +4783,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "m1",
+      "index": "m0",
       "roundness": {
         "type": 3
       },
@@ -4875,7 +4813,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "m2",
+      "index": "m1",
       "roundness": null,
       "seed": 2058160627,
       "version": 1,
@@ -4914,7 +4852,7 @@
         "g-insp"
       ],
       "frameId": null,
-      "index": "m3",
+      "index": "m2",
       "roundness": {
         "type": 3
       },
@@ -4951,7 +4889,7 @@
         "g-insp"
       ],
       "frameId": null,
-      "index": "m4",
+      "index": "m3",
       "roundness": null,
       "seed": 1279394442,
       "version": 1,
@@ -4977,7 +4915,7 @@
       "x": 1602,
       "y": 1588.0,
       "width": 540,
-      "height": 140.0,
+      "height": 157.5,
       "angle": 0,
       "strokeColor": "#343a40",
       "backgroundColor": "transparent",
@@ -4990,7 +4928,7 @@
         "g-insp"
       ],
       "frameId": null,
-      "index": "m5",
+      "index": "m4",
       "roundness": null,
       "seed": 40618572,
       "version": 1,
@@ -5000,8 +4938,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "Resolved URL\nPublisher domain\nFetch status + timestamp\nExtracted headline\nExtracted body (char count)\nPasted text merged? yes/no\nMedia-provenance hook: skipped\nFetch error, if any",
-      "originalText": "Resolved URL\nPublisher domain\nFetch status + timestamp\nExtracted headline\nExtracted body (char count)\nPasted text merged? yes/no\nMedia-provenance hook: skipped\nFetch error, if any",
+      "text": "Resolved URL + canonical source\nPublisher domain \u00b7 publisher id\nFetch status + fetch reason\nHTTP status \u00b7 content type\nFetch timestamp\nExtracted headline\nExtracted body (char count)\nPasted text merged? yes/no\nFetch error \u00b7 Retry-After, if any",
+      "originalText": "Resolved URL + canonical source\nPublisher domain \u00b7 publisher id\nFetch status + fetch reason\nHTTP status \u00b7 content type\nFetch timestamp\nExtracted headline\nExtracted body (char count)\nPasted text merged? yes/no\nFetch error \u00b7 Retry-After, if any",
       "fontSize": 14,
       "fontFamily": 2,
       "textAlign": "left",
@@ -5027,7 +4965,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "m6",
+      "index": "m5",
       "roundness": {
         "type": 3
       },
@@ -5057,7 +4995,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "m7",
+      "index": "m6",
       "roundness": null,
       "seed": 505389929,
       "version": 1,
@@ -5096,7 +5034,7 @@
         "g-gate-pause"
       ],
       "frameId": null,
-      "index": "m8",
+      "index": "m7",
       "roundness": {
         "type": 3
       },
@@ -5137,7 +5075,7 @@
         "g-gate-pause"
       ],
       "frameId": null,
-      "index": "m9",
+      "index": "m8",
       "roundness": null,
       "seed": 1156126227,
       "version": 1,
@@ -5176,7 +5114,7 @@
         "g-gate-pause"
       ],
       "frameId": null,
-      "index": "n0",
+      "index": "m9",
       "roundness": null,
       "seed": 1055383942,
       "version": 1,
@@ -5215,7 +5153,7 @@
         "g-gate-acts"
       ],
       "frameId": null,
-      "index": "n1",
+      "index": "n0",
       "roundness": {
         "type": 3
       },
@@ -5256,7 +5194,7 @@
         "g-gate-acts"
       ],
       "frameId": null,
-      "index": "n2",
+      "index": "n1",
       "roundness": null,
       "seed": 690935374,
       "version": 1,
@@ -5295,7 +5233,7 @@
         "g-gate-acts"
       ],
       "frameId": null,
-      "index": "n3",
+      "index": "n2",
       "roundness": null,
       "seed": 2084138037,
       "version": 1,
@@ -5334,7 +5272,7 @@
         "g-gate-l2"
       ],
       "frameId": null,
-      "index": "n4",
+      "index": "n3",
       "roundness": {
         "type": 3
       },
@@ -5371,7 +5309,7 @@
         "g-gate-l2"
       ],
       "frameId": null,
-      "index": "n5",
+      "index": "n4",
       "roundness": null,
       "seed": 314930720,
       "version": 1,
@@ -5410,7 +5348,7 @@
         "g-gate-l2"
       ],
       "frameId": null,
-      "index": "n6",
+      "index": "n5",
       "roundness": null,
       "seed": 1024435023,
       "version": 1,
@@ -5447,7 +5385,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "n7",
+      "index": "n6",
       "roundness": {
         "type": 3
       },
@@ -5477,7 +5415,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "n8",
+      "index": "n7",
       "roundness": null,
       "seed": 256084962,
       "version": 1,
@@ -5516,7 +5454,7 @@
         "g-not-do"
       ],
       "frameId": null,
-      "index": "n9",
+      "index": "n8",
       "roundness": {
         "type": 3
       },
@@ -5548,7 +5486,7 @@
         "g-not-do"
       ],
       "frameId": null,
-      "index": "o0",
+      "index": "n9",
       "roundness": null,
       "seed": 409040494,
       "version": 1,
@@ -5574,7 +5512,7 @@
       "x": 1602,
       "y": 1922.75,
       "width": 540,
-      "height": 48.75,
+      "height": 65.0,
       "angle": 0,
       "strokeColor": "#343a40",
       "backgroundColor": "transparent",
@@ -5587,7 +5525,7 @@
         "g-not-do"
       ],
       "frameId": null,
-      "index": "o1",
+      "index": "o0",
       "roundness": null,
       "seed": 666692008,
       "version": 1,
@@ -5597,8 +5535,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "Does not extract claims, call news APIs,\nrun NLI, or score authenticity. Failed or\nempty fetches are coverage gaps, not \u201cfake\u201d.",
-      "originalText": "Does not extract claims, call news APIs,\nrun NLI, or score authenticity. Failed or\nempty fetches are coverage gaps, not \u201cfake\u201d.",
+      "text": "Does not extract claims, call news APIs,\nrun NLI, or score authenticity. Failed,\nblocked, paywalled, or PDF fetches are\ncoverage gaps, not \u201cfake\u201d.",
+      "originalText": "Does not extract claims, call news APIs,\nrun NLI, or score authenticity. Failed,\nblocked, paywalled, or PDF fetches are\ncoverage gaps, not \u201cfake\u201d.",
       "fontSize": 13,
       "fontFamily": 2,
       "textAlign": "left",
@@ -5624,7 +5562,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "o2",
+      "index": "o1",
       "roundness": {
         "type": 2
       },
@@ -5678,7 +5616,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "o3",
+      "index": "o2",
       "roundness": {
         "type": 2
       },
@@ -5720,7 +5658,7 @@
       "type": "arrow",
       "x": 1040.0,
       "y": 1492,
-      "width": 240.0,
+      "width": 606.0,
       "height": 62,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -5732,7 +5670,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "o4",
+      "index": "o3",
       "roundness": {
         "type": 2
       },
@@ -5750,7 +5688,7 @@
         "gap": 6
       },
       "endBinding": {
-        "elementId": "out-payload",
+        "elementId": "out-payload-a",
         "focus": 0,
         "gap": 6
       },
@@ -5763,7 +5701,7 @@
           0
         ],
         [
-          -240.0,
+          -606.0,
           62
         ]
       ],
@@ -5772,9 +5710,9 @@
     {
       "id": "a-out-insp",
       "type": "arrow",
-      "x": 1516,
+      "x": 1500,
       "y": 1679.0,
-      "width": 72,
+      "width": 88,
       "height": 0,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -5786,7 +5724,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "o5",
+      "index": "o4",
       "roundness": {
         "type": 2
       },
@@ -5799,7 +5737,7 @@
       "link": null,
       "locked": false,
       "startBinding": {
-        "elementId": "out-payload",
+        "elementId": "out-payload-b",
         "focus": 0,
         "gap": 6
       },
@@ -5817,7 +5755,7 @@
           0
         ],
         [
-          72,
+          88,
           0.0
         ]
       ],
@@ -5826,9 +5764,9 @@
     {
       "id": "a-out-gate",
       "type": "arrow",
-      "x": 800.0,
+      "x": 434.0,
       "y": 1804,
-      "width": 456.0,
+      "width": 90.0,
       "height": 86,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -5840,7 +5778,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "o6",
+      "index": "o5",
       "roundness": {
         "type": 2
       },
@@ -5853,7 +5791,7 @@
       "link": null,
       "locked": false,
       "startBinding": {
-        "elementId": "out-payload",
+        "elementId": "out-payload-a",
         "focus": 0,
         "gap": 6
       },
@@ -5871,7 +5809,7 @@
           0
         ],
         [
-          -456.0,
+          -90.0,
           86
         ]
       ],
@@ -5894,7 +5832,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "o7",
+      "index": "o6",
       "roundness": {
         "type": 2
       },
@@ -5948,7 +5886,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "o8",
+      "index": "o7",
       "roundness": {
         "type": 2
       },
@@ -5990,7 +5928,7 @@
       "type": "text",
       "x": 80,
       "y": 2046,
-      "width": 434.99999999999994,
+      "width": 530.6999999999999,
       "height": 18.75,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -6002,7 +5940,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "o9",
+      "index": "o8",
       "roundness": null,
       "seed": 1184331788,
       "version": 1,
@@ -6012,8 +5950,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "fetch_status legend  \u00b7  ToolStatus in the envelope",
-      "originalText": "fetch_status legend  \u00b7  ToolStatus in the envelope",
+      "text": "fetch_status legend  \u00b7  ToolStatus in the envelope, unchanged",
+      "originalText": "fetch_status legend  \u00b7  ToolStatus in the envelope, unchanged",
       "fontSize": 15,
       "fontFamily": 2,
       "textAlign": "left",
@@ -6041,7 +5979,7 @@
         "g-leg-ok"
       ],
       "frameId": null,
-      "index": "p0",
+      "index": "o9",
       "roundness": {
         "type": 3
       },
@@ -6073,7 +6011,7 @@
         "g-leg-ok"
       ],
       "frameId": null,
-      "index": "p1",
+      "index": "p0",
       "roundness": null,
       "seed": 279723874,
       "version": 1,
@@ -6112,7 +6050,7 @@
         "g-leg-empty"
       ],
       "frameId": null,
-      "index": "p2",
+      "index": "p1",
       "roundness": {
         "type": 3
       },
@@ -6144,7 +6082,7 @@
         "g-leg-empty"
       ],
       "frameId": null,
-      "index": "p3",
+      "index": "p2",
       "roundness": null,
       "seed": 416782171,
       "version": 1,
@@ -6183,7 +6121,7 @@
         "g-leg-err"
       ],
       "frameId": null,
-      "index": "p4",
+      "index": "p3",
       "roundness": {
         "type": 3
       },
@@ -6202,7 +6140,7 @@
       "x": 654,
       "y": 2099.875,
       "width": 272,
-      "height": 32.5,
+      "height": 16.25,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -6215,7 +6153,7 @@
         "g-leg-err"
       ],
       "frameId": null,
-      "index": "p5",
+      "index": "p4",
       "roundness": null,
       "seed": 323943526,
       "version": 1,
@@ -6225,8 +6163,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "error \u2014 HTTP/network failure; paste\nkept",
-      "originalText": "error \u2014 HTTP/network failure; paste kept",
+      "text": "error \u2014 fetch did not yield a page",
+      "originalText": "error \u2014 fetch did not yield a page",
       "fontSize": 13,
       "fontFamily": 2,
       "textAlign": "center",
@@ -6254,7 +6192,7 @@
         "g-leg-skip"
       ],
       "frameId": null,
-      "index": "p6",
+      "index": "p5",
       "roundness": {
         "type": 3
       },
@@ -6286,7 +6224,7 @@
         "g-leg-skip"
       ],
       "frameId": null,
-      "index": "p7",
+      "index": "p6",
       "roundness": null,
       "seed": 2060160508,
       "version": 1,
@@ -6307,80 +6245,9 @@
       "lineHeight": 1.25
     },
     {
-      "id": "leg-media",
-      "type": "rectangle",
-      "x": 1260,
-      "y": 2080,
-      "width": 400,
-      "height": 56,
-      "angle": 0,
-      "strokeColor": "#1e1e1e",
-      "backgroundColor": "#ffffff",
-      "fillStyle": "solid",
-      "strokeWidth": 2,
-      "strokeStyle": "dashed",
-      "roughness": 1,
-      "opacity": 100,
-      "groupIds": [
-        "g-leg-media"
-      ],
-      "frameId": null,
-      "index": "p8",
-      "roundness": {
-        "type": 3
-      },
-      "seed": 1539502751,
-      "version": 1,
-      "versionNonce": 81083972,
-      "isDeleted": false,
-      "boundElements": null,
-      "updated": 1773320000000,
-      "link": null,
-      "locked": false
-    },
-    {
-      "id": "leg-media-title",
-      "type": "text",
-      "x": 1274,
-      "y": 2099.875,
-      "width": 372,
-      "height": 16.25,
-      "angle": 0,
-      "strokeColor": "#1e1e1e",
-      "backgroundColor": "transparent",
-      "fillStyle": "solid",
-      "strokeWidth": 2,
-      "strokeStyle": "solid",
-      "roughness": 1,
-      "opacity": 100,
-      "groupIds": [
-        "g-leg-media"
-      ],
-      "frameId": null,
-      "index": "p9",
-      "roundness": null,
-      "seed": 181204995,
-      "version": 1,
-      "versionNonce": 467640941,
-      "isDeleted": false,
-      "boundElements": null,
-      "updated": 1773320000000,
-      "link": null,
-      "locked": false,
-      "text": "media hook \u2014 skipped (later iteration)",
-      "originalText": "media hook \u2014 skipped (later iteration)",
-      "fontSize": 13,
-      "fontFamily": 2,
-      "textAlign": "center",
-      "verticalAlign": "top",
-      "containerId": null,
-      "autoResize": false,
-      "lineHeight": 1.25
-    },
-    {
       "id": "leg-engine",
       "type": "rectangle",
-      "x": 1680,
+      "x": 1260,
       "y": 2080,
       "width": 500,
       "height": 56,
@@ -6396,7 +6263,7 @@
         "g-leg-engine"
       ],
       "frameId": null,
-      "index": "q0",
+      "index": "p7",
       "roundness": {
         "type": 3
       },
@@ -6412,7 +6279,7 @@
     {
       "id": "leg-engine-title",
       "type": "text",
-      "x": 1694,
+      "x": 1274,
       "y": 2099.875,
       "width": 472,
       "height": 16.25,
@@ -6428,7 +6295,7 @@
         "g-leg-engine"
       ],
       "frameId": null,
-      "index": "q1",
+      "index": "p8",
       "roundness": null,
       "seed": 959044494,
       "version": 1,
@@ -6449,12 +6316,489 @@
       "lineHeight": 1.25
     },
     {
+      "id": "leg2-h",
+      "type": "text",
+      "x": 80,
+      "y": 2160,
+      "width": 852.5999999999999,
+      "height": 18.75,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "p9",
+      "roundness": null,
+      "seed": 1237840049,
+      "version": 1,
+      "versionNonce": 1456596530,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "text": "fetch_reason taxonomy  \u00b7  one mapping function derives fetch_status, so the two can never disagree",
+      "originalText": "fetch_reason taxonomy  \u00b7  one mapping function derives fetch_status, so the two can never disagree",
+      "fontSize": 15,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "r-ok",
+      "type": "rectangle",
+      "x": 80,
+      "y": 2194,
+      "width": 420,
+      "height": 96,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#b2f2bb",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-r-ok"
+      ],
+      "frameId": null,
+      "index": "q0",
+      "roundness": {
+        "type": 3
+      },
+      "seed": 651341170,
+      "version": 1,
+      "versionNonce": 861491353,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "r-ok-title",
+      "type": "text",
+      "x": 94,
+      "y": 2204,
+      "width": 392,
+      "height": 16.25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-r-ok"
+      ],
+      "frameId": null,
+      "index": "q1",
+      "roundness": null,
+      "seed": 1789822569,
+      "version": 1,
+      "versionNonce": 261976160,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "text": "ok  \u00b7  skipped_no_url",
+      "originalText": "ok  \u00b7  skipped_no_url",
+      "fontSize": 13,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "autoResize": false,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "r-ok-body",
+      "type": "text",
+      "x": 94,
+      "y": 2224.25,
+      "width": 392,
+      "height": 16.25,
+      "angle": 0,
+      "strokeColor": "#343a40",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-r-ok"
+      ],
+      "frameId": null,
+      "index": "q2",
+      "roundness": null,
+      "seed": 388605764,
+      "version": 1,
+      "versionNonce": 1257767364,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "text": "Article body extracted \u00b7 no URL was supplied",
+      "originalText": "Article body extracted \u00b7 no URL was supplied",
+      "fontSize": 13,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "autoResize": false,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "r-empty",
+      "type": "rectangle",
+      "x": 520,
+      "y": 2194,
+      "width": 520,
+      "height": 96,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#ffec99",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-r-empty"
+      ],
+      "frameId": null,
+      "index": "q3",
+      "roundness": {
+        "type": 3
+      },
+      "seed": 1186639691,
+      "version": 1,
+      "versionNonce": 1526763762,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "r-empty-title",
+      "type": "text",
+      "x": 534,
+      "y": 2204,
+      "width": 492,
+      "height": 16.25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-r-empty"
+      ],
+      "frameId": null,
+      "index": "q4",
+      "roundness": null,
+      "seed": 1642203314,
+      "version": 1,
+      "versionNonce": 1422687560,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "text": "empty_paywall \u00b7 empty_js_required \u00b7 empty_not_article",
+      "originalText": "empty_paywall \u00b7 empty_js_required \u00b7 empty_not_article",
+      "fontSize": 13,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "autoResize": false,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "r-empty-body",
+      "type": "text",
+      "x": 534,
+      "y": 2224.25,
+      "width": 492,
+      "height": 32.5,
+      "angle": 0,
+      "strokeColor": "#343a40",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-r-empty"
+      ],
+      "frameId": null,
+      "index": "q5",
+      "roundness": null,
+      "seed": 682210944,
+      "version": 1,
+      "versionNonce": 1377471852,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "text": "HTML arrived but carried no article text.\nCoverage gap, not a falsity signal.",
+      "originalText": "HTML arrived but carried no article text.\nCoverage gap, not a falsity signal.",
+      "fontSize": 13,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "autoResize": false,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "r-transport",
+      "type": "rectangle",
+      "x": 1060,
+      "y": 2194,
+      "width": 520,
+      "height": 96,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-r-transport"
+      ],
+      "frameId": null,
+      "index": "q6",
+      "roundness": {
+        "type": 3
+      },
+      "seed": 1829291395,
+      "version": 1,
+      "versionNonce": 671305231,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "r-transport-title",
+      "type": "text",
+      "x": 1074,
+      "y": 2204,
+      "width": 492,
+      "height": 16.25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-r-transport"
+      ],
+      "frameId": null,
+      "index": "q7",
+      "roundness": null,
+      "seed": 1480113336,
+      "version": 1,
+      "versionNonce": 1406824641,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "text": "error_dns \u00b7 error_timeout \u00b7 error_tls \u00b7 error_other",
+      "originalText": "error_dns \u00b7 error_timeout \u00b7 error_tls \u00b7 error_other",
+      "fontSize": 13,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "autoResize": false,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "r-transport-body",
+      "type": "text",
+      "x": 1074,
+      "y": 2224.25,
+      "width": 492,
+      "height": 32.5,
+      "angle": 0,
+      "strokeColor": "#343a40",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-r-transport"
+      ],
+      "frameId": null,
+      "index": "q8",
+      "roundness": null,
+      "seed": 332518299,
+      "version": 1,
+      "versionNonce": 443370352,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "text": "No usable response from the network.\nThe journalist\u2019s paste is kept.",
+      "originalText": "No usable response from the network.\nThe journalist\u2019s paste is kept.",
+      "fontSize": 13,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "autoResize": false,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "r-http",
+      "type": "rectangle",
+      "x": 1600,
+      "y": 2194,
+      "width": 580,
+      "height": 96,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#ffc9c9",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-r-http"
+      ],
+      "frameId": null,
+      "index": "q9",
+      "roundness": {
+        "type": 3
+      },
+      "seed": 1456832767,
+      "version": 1,
+      "versionNonce": 144902119,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "r-http-title",
+      "type": "text",
+      "x": 1614,
+      "y": 2204,
+      "width": 552,
+      "height": 16.25,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-r-http"
+      ],
+      "frameId": null,
+      "index": "r0",
+      "roundness": null,
+      "seed": 1948483137,
+      "version": 1,
+      "versionNonce": 1488540764,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "text": "error_blocked \u00b7 error_not_found \u00b7 error_server",
+      "originalText": "error_blocked \u00b7 error_not_found \u00b7 error_server",
+      "fontSize": 13,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "autoResize": false,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "r-http-body",
+      "type": "text",
+      "x": 1614,
+      "y": 2224.25,
+      "width": 552,
+      "height": 32.5,
+      "angle": 0,
+      "strokeColor": "#343a40",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-r-http"
+      ],
+      "frameId": null,
+      "index": "r1",
+      "roundness": null,
+      "seed": 653287890,
+      "version": 1,
+      "versionNonce": 755803383,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "text": "401/403/429 \u00b7 404/410 \u00b7 5xx\nerror_unsupported_type (PDF) \u00b7 error_too_large",
+      "originalText": "401/403/429 \u00b7 404/410 \u00b7 5xx\nerror_unsupported_type (PDF) \u00b7 error_too_large",
+      "fontSize": 13,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "autoResize": false,
+      "lineHeight": 1.25
+    },
+    {
       "id": "footer",
       "type": "text",
       "x": 80,
-      "y": 2156,
+      "y": 2320,
       "width": 2100,
-      "height": 15.0,
+      "height": 30.0,
       "angle": 0,
       "strokeColor": "#868e96",
       "backgroundColor": "transparent",
@@ -6465,7 +6809,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "q2",
+      "index": "r2",
       "roundness": null,
       "seed": 622663238,
       "version": 1,
@@ -6475,8 +6819,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "Source of truth: backend/app/tools/ingest.py, backend/app/pipeline/orchestrator.py (_run_input), backend/app/schemas/envelope.py (InputPayload), src/App.tsx, src/components/layerOutputs.tsx.",
-      "originalText": "Source of truth: backend/app/tools/ingest.py, backend/app/pipeline/orchestrator.py (_run_input), backend/app/schemas/envelope.py (InputPayload), src/App.tsx, src/components/layerOutputs.tsx.",
+      "text": "Source of truth: backend/app/tools/ingest.py, backend/app/scoring/urls.py, backend/app/config.py, backend/app/data/platform_hosts.json,\nbackend/app/pipeline/orchestrator.py (_run_input), backend/app/schemas/envelope.py (InputPayload), src/App.tsx, src/components/layerOutputs.tsx. Tests: backend/tests/.",
+      "originalText": "Source of truth: backend/app/tools/ingest.py, backend/app/scoring/urls.py, backend/app/config.py, backend/app/data/platform_hosts.json,\nbackend/app/pipeline/orchestrator.py (_run_input), backend/app/schemas/envelope.py (InputPayload), src/App.tsx, src/components/layerOutputs.tsx. Tests: backend/tests/.",
       "fontSize": 12,
       "fontFamily": 2,
       "textAlign": "left",
