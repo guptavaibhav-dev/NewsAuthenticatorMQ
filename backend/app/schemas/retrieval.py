@@ -25,7 +25,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 RetrievalExistenceClass = Literal[
     "exact_url",
@@ -90,6 +90,21 @@ MergeReason = Literal["same_owner", "same_wire", "reprint", "none"]
 """
 
 QueryKind = Literal["existence", "claim", "factcheck", "entity"]
+
+ExistenceSearchOutcome = Literal["not_planned", "matched", "exhausted"]
+"""What happened to the existence ladder — whether we looked at all.
+
+- not_planned: no existence query was ever built, because Layer 2 produced no
+  headline. We never looked for the article elsewhere.
+- matched: a rung of the ladder returned hits.
+- exhausted: every rung ran and all returned nothing.
+
+not_planned and exhausted both leave title_match_strength at "none" and both
+tend to leave existence_class at not_found or out_of_range, which is exactly why
+they are recorded separately. "We never looked" and "we looked everywhere and
+found nothing" are opposite statements to a journalist, and no count elsewhere
+in this payload distinguishes them.
+"""
 
 
 class PlannedQuery(BaseModel):
@@ -329,6 +344,17 @@ class AdapterReport(BaseModel):
             "the article."
         ),
     )
+    checks_skipped: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Capability checks that did not run because our own metadata was "
+            "missing, e.g. 'age' when the article has no known publication "
+            "date, or 'language' when no detector identified one. A skipped "
+            "check means this adapter was queried without that filter, so the "
+            "result is broader than the declared capabilities imply — the "
+            "opposite of a coverage gap, and worth seeing either way."
+        ),
+    )
     http_status: int | None = Field(
         default=None,
         description="Final HTTP status when a response was received, else None.",
@@ -394,6 +420,44 @@ class CoverageReport(BaseModel):
     adapters: list[AdapterReport] = Field(
         default_factory=list,
         description="One report per configured adapter, including skipped ones.",
+    )
+    capability_notes: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Every capability check that did not run, attributed to its "
+            "adapter and in plain words. These are the cases where our own "
+            "missing metadata — an unknown publication date, an undetected "
+            "language — meant a declared limit was never enforced. Surfaced "
+            "here so a reader does not have to open each AdapterReport to "
+            "learn that the search was less filtered than it appears."
+        ),
+    )
+    existence_search: ExistenceSearchOutcome = Field(
+        default="not_planned",
+        description=(
+            "Whether we looked for the article elsewhere at all, and what "
+            "came of it. See ExistenceSearchOutcome. Read this before reading "
+            "existence_class: 'not_planned' means the class below is the "
+            "absence of a search, not the result of one."
+        ),
+    )
+    existence_rungs_planned: int = Field(
+        default=0,
+        description=(
+            "How many rungs the existence ladder had: 3 normally, 2 when the "
+            "headline yielded no distinctive keywords, 0 when there was no "
+            "headline. Stated directly so a reader need not count "
+            "planned_queries to discover the search was narrower than usual."
+        ),
+    )
+    existence_keyword_rung_skipped: bool = Field(
+        default=False,
+        description=(
+            "True when a headline existed but consisted entirely of stopwords, "
+            "so the broadest rung of the ladder was never built. The search "
+            "stopped one step short of where it normally would; that is a "
+            "limit of the headline's wording, not a finding about the article."
+        ),
     )
     scoring_fields_missing: list[str] = Field(
         default_factory=list,
@@ -539,7 +603,13 @@ class RetrievalPayload(BaseModel):
             "threshold one method's scores with a number tuned on another's. "
             "The 0.22 relevance floor and 0.88 near-duplicate threshold "
             "inherited from the old Layer 3 were tuned against char-trigram "
-            "cosine, not semantic embeddings, and do not transfer."
+            "cosine, not semantic embeddings, and do not transfer. "
+            "Within a single method scores ARE now comparable across runs: the "
+            "char-ngram fallback used to bucket trigrams with Python's salted "
+            "built-in hash, so an unchanged article scored differently after "
+            "every restart. That is fixed, and comparing two runs of the same "
+            "article under the same ranking_method is now meaningful. Across "
+            "methods it is still not."
         ),
     )
     ranking_engine_name: str = Field(
@@ -561,3 +631,21 @@ class RetrievalPayload(BaseModel):
             "very different from a low count from a wide one."
         ),
     )
+
+    @model_validator(mode="after")
+    def _counts_follow_their_lists(self) -> RetrievalPayload:
+        """Derive both counts, so neither can drift from what it summarises.
+
+        A count that disagrees with its list is the one way this layer could
+        quietly misreport corroboration: `independent_source_count` is the
+        number a journalist acts on, and if it ever exceeded
+        `len(independent_sources)` it would invent newsrooms that were never
+        found. Deriving rather than checking makes the bug unrepresentable
+        instead of merely detectable, and unlike an `assert` it survives
+        `python -O`.
+        """
+        object.__setattr__(self, "document_count", len(self.documents))
+        object.__setattr__(
+            self, "independent_source_count", len(self.independent_sources)
+        )
+        return self

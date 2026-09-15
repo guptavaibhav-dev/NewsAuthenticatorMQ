@@ -12,6 +12,35 @@ from app.schemas.envelope import (
 from app.scoring.source_independence import publisher_family
 
 
+def _distinct_sources(
+    source_ids: set[str],
+    evidence_by_id: dict[str, str],
+    source_groups: dict[str, str] | None,
+) -> set[str]:
+    """Collapse evidence ids to the newsrooms genuinely behind them.
+
+    `source_groups` comes from Layer 3's independence resolution, which has
+    already merged wire syndication, shared ownership and reprints. Using it
+    here is the point of the rewrite: counting publisher families instead
+    treats one wire story republished by twenty papers as twenty outlets
+    corroborating a claim, when it is one newsroom's reporting seen twenty
+    times.
+
+    The publisher_family fallback exists only for envelopes written before
+    Layer 3 populated `retrieval` — it is the old, over-counting behaviour and
+    goes away with the compat shim in stage 6.
+    """
+    groups: set[str] = set()
+    for sid in source_ids:
+        if sid not in evidence_by_id:
+            continue
+        if source_groups and sid in source_groups:
+            groups.add(source_groups[sid])
+        else:
+            groups.add(publisher_family(evidence_by_id[sid]))
+    return groups
+
+
 def fuse_claim(
     *,
     claim_id: str,
@@ -20,6 +49,7 @@ def fuse_claim(
     evidence_by_id: dict[str, str],
     threshold: float,
     existence: ExistenceResult,
+    source_groups: dict[str, str] | None = None,
 ) -> ClaimCorroboration:
     valid_ids = set(evidence_by_id)
 
@@ -56,16 +86,14 @@ def fuse_claim(
     else:
         agreement = "none"
 
-    support_families = {
-        publisher_family(evidence_by_id[sid])
-        for sid in (nli_support_ids | llm_support_ids)
-        if sid in evidence_by_id
-    }
-    contradict_families = {
-        publisher_family(evidence_by_id[sid])
-        for sid in (nli_contradict_ids | llm_contradict_ids)
-        if sid in evidence_by_id
-    }
+    # Independent SOURCES, not pages and not mastheads. A claim backed by
+    # twenty syndicated copies of one wire report is backed by one source.
+    support_families = _distinct_sources(
+        nli_support_ids | llm_support_ids, evidence_by_id, source_groups
+    )
+    contradict_families = _distinct_sources(
+        nli_contradict_ids | llm_contradict_ids, evidence_by_id, source_groups
+    )
 
     state = _existence_overlay(
         existence=existence,
@@ -77,25 +105,13 @@ def fuse_claim(
 
     return ClaimCorroboration(
         claim_id=claim_id,
-        nli_support=len(
-            {publisher_family(evidence_by_id[s]) for s in nli_support_ids if s in evidence_by_id}
-        ),
+        nli_support=len(_distinct_sources(nli_support_ids, evidence_by_id, source_groups)),
         nli_contradict=len(
-            {
-                publisher_family(evidence_by_id[s])
-                for s in nli_contradict_ids
-                if s in evidence_by_id
-            }
+            _distinct_sources(nli_contradict_ids, evidence_by_id, source_groups)
         ),
-        llm_support=len(
-            {publisher_family(evidence_by_id[s]) for s in llm_support_ids if s in evidence_by_id}
-        ),
+        llm_support=len(_distinct_sources(llm_support_ids, evidence_by_id, source_groups)),
         llm_contradict=len(
-            {
-                publisher_family(evidence_by_id[s])
-                for s in llm_contradict_ids
-                if s in evidence_by_id
-            }
+            _distinct_sources(llm_contradict_ids, evidence_by_id, source_groups)
         ),
         independent_support_outlets=len(support_families),
         independent_contradict_outlets=len(contradict_families),

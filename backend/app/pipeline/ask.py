@@ -18,6 +18,9 @@ You may explain, quote, and reference the supplied layer output and the accumula
 This system is decision support only. Outputs are signals, not a true/false verdict. Final editorial judgement stays with the journalist.
 If the question asks you to decide authenticity, refuse and point to the signals already recorded.
 Answer in concise prose. Use the claim ids (c1, c2, …) and source ids when you refer to them.
+
+When the context contains a retrieval payload, document_count is a count of pages and independent_source_count is a count of newsrooms. Syndication inflates the first; only the second bears on corroboration. Never present the page count as the number of sources confirming something.
+An existence_class of out_of_range means no search was performed. not_found means a search ran and returned nothing. Neither is evidence the article is false, and you must not describe them as if they were.
 """
 
 
@@ -35,11 +38,19 @@ def context_for_layer(envelope: RunEnvelope, layer: int) -> dict:
     if layer >= 2:
         data["classification"] = envelope.classification.model_dump()
     if layer >= 3:
-        data["queries"] = envelope.queries.model_dump()
-        data["evidence_items"] = [e.model_dump() for e in envelope.evidence_items]
-        data["wiki_hits"] = [w.model_dump() for w in envelope.wiki_hits]
-        data["existence"] = envelope.corroboration.existence.model_dump()
-        data["fact_checks"] = [f.model_dump() for f in envelope.corroboration.fact_checks]
+        if envelope.retrieval is not None:
+            # The whole retrieval payload, so the assistant can answer "why were
+            # these two outlets counted as one?" from merge_evidence, and can
+            # tell "we did not look" from "we looked and found nothing".
+            data["retrieval"] = envelope.retrieval.model_dump()
+        else:
+            data["queries"] = envelope.queries.model_dump()
+            data["evidence_items"] = [e.model_dump() for e in envelope.evidence_items]
+            data["wiki_hits"] = [w.model_dump() for w in envelope.wiki_hits]
+            data["existence"] = envelope.corroboration.existence.model_dump()
+            data["fact_checks"] = [
+                f.model_dump() for f in envelope.corroboration.fact_checks
+            ]
     if layer >= 4:
         data["analysis"] = [a.model_dump() for a in envelope.analysis]
         data["corroboration"] = envelope.corroboration.model_dump()

@@ -101,6 +101,121 @@ export type WikiHit = {
   found: boolean
 }
 
+export type RetrievalExistenceClass =
+  | 'exact_url'
+  | 'title_match'
+  | 'near_duplicate'
+  | 'syndicated'
+  | 'not_found'
+  | 'out_of_range'
+
+export type TitleMatchStrength = 'exact' | 'loose' | 'keyword' | 'none'
+export type ExistenceSearchOutcome = 'not_planned' | 'matched' | 'exhausted'
+export type MergeReason = 'same_wire' | 'same_owner' | 'reprint' | 'none'
+export type AdapterStatus =
+  | 'ok'
+  | 'empty'
+  | 'skipped_out_of_range'
+  | 'skipped_no_key'
+  | 'error'
+
+export type PlannedQuery = {
+  query_id: string
+  kind: 'existence' | 'claim' | 'factcheck' | 'entity'
+  claim_id: string | null
+  query_text: string
+  template_id: string
+  attempt: number
+  date_from: string | null
+  date_to: string | null
+}
+
+export type SearchHit = {
+  url: string
+  canonical_url: string
+  title: string
+  snippet: string | null
+  body_hash: string | null
+  published_at: string | null
+  publisher_domain: string
+  publisher_id: string
+  byline: string | null
+  wire_credit: string | null
+  source_adapter: string
+  query_id: string
+  claim_id: string | null
+  language: string | null
+  relevance_score: number | null
+}
+
+export type IndependentSource = {
+  source_id: string
+  representative_url: string
+  member_urls: string[]
+  publisher_ids: string[]
+  merge_reason: MergeReason
+  merge_evidence: string
+}
+
+export type AdapterReport = {
+  adapter: string
+  status: AdapterStatus
+  queries_run: number
+  hits_returned: number
+  reason: string | null
+  checks_skipped: string[]
+  http_status: number | null
+}
+
+export type CoverageReport = {
+  claims_total: number
+  claims_searched: string[]
+  claims_skipped: string[]
+  article_language: string | null
+  language_checks_applied: boolean
+  languages_covered: string[]
+  earliest_reachable_date: string | null
+  adapters: AdapterReport[]
+  capability_notes: string[]
+  existence_search: ExistenceSearchOutcome
+  existence_rungs_planned: number
+  existence_keyword_rung_skipped: boolean
+  scoring_fields_missing: string[]
+}
+
+export type FactCheckRecord = {
+  claim_id: string
+  reviewer_name: string
+  rating_text: string
+  review_url: string
+  reviewed_claim_text: string
+}
+
+export type EntityGrounding = {
+  entity_text: string
+  entity_type: string
+  entity_is_well_known: boolean
+  matched_title: string | null
+  near_match_suggestion: string | null
+}
+
+export type RetrievalPayload = {
+  planned_queries: PlannedQuery[]
+  planner_model: string | null
+  planner_template_version: string
+  documents: SearchHit[]
+  document_count: number
+  independent_sources: IndependentSource[]
+  independent_source_count: number
+  existence_class: RetrievalExistenceClass
+  title_match_strength: TitleMatchStrength
+  factchecks: FactCheckRecord[]
+  entity_grounding: EntityGrounding[]
+  ranking_method: string
+  ranking_engine_name: string
+  coverage: CoverageReport
+}
+
 export type RunEnvelope = {
   run_id: string
   status: RunStatus
@@ -158,6 +273,7 @@ export type RunEnvelope = {
   evidence_items: EvidenceItem[]
   wiki_hits: WikiHit[]
   tool_results: { tool: string; status: string; detail: string; hit_count: number }[]
+  retrieval?: RetrievalPayload | null
   analysis: PairAnalysis[]
   corroboration: {
     existence: {
@@ -279,7 +395,7 @@ export type Health = {
 export const LAYERS = [
   { id: 'input', label: 'Input', n: 1 },
   { id: 'preprocess', label: 'Pre-process', n: 2 },
-  { id: 'verification', label: 'Verification', n: 3 },
+  { id: 'verification', label: 'Retrieval', n: 3 },
   { id: 'evidence', label: 'Evidence', n: 4 },
   { id: 'uncertainty', label: 'Uncertainty', n: 5 },
   { id: 'editorial', label: 'Editorial', n: 6 },
@@ -289,7 +405,7 @@ export const LAYERS = [
 export const PIPELINE_LAYERS = [
   { n: 1, id: 'input', title: 'Input' },
   { n: 2, id: 'preprocess', title: 'Pre-processing and Classification' },
-  { n: 3, id: 'verification', title: 'Verification Tool Layer' },
+  { n: 3, id: 'verification', title: 'Retrieval and Independence' },
   { n: 4, id: 'evidence', title: 'Evidence Analysis' },
   { n: 5, id: 'uncertainty', title: 'Uncertainty and Risk Assessment' },
   { n: 6, id: 'editorial', title: 'Human Editorial Decision' },

@@ -25,7 +25,7 @@ NOW = 1773320000000
 LAYERS = [
     "1 Input",
     "2 Pre-process",
-    "3 Verification",
+    "3 Retrieval",
     "4 Evidence",
     "5 Uncertainty",
     "6 Editorial",

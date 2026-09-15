@@ -523,7 +523,11 @@ function RunResults({
         {showEvidence && (
           <div>
             <dt>Existence</dt>
-            <dd>{labelize(run.corroboration.existence.existence_class)}</dd>
+            <dd>
+              {run.retrieval
+                ? existenceSummary(run.retrieval.existence_class)
+                : labelize(run.corroboration.existence.existence_class)}
+            </dd>
           </div>
         )}
         {showMatrix && (
@@ -534,8 +538,11 @@ function RunResults({
         )}
         {showMatrix && (
           <div>
-            <dt>Independent families</dt>
-            <dd>{run.corroboration.independent_source_count}</dd>
+            <dt>Independent sources</dt>
+            <dd>
+              {run.retrieval?.independent_source_count ??
+                run.corroboration.independent_source_count}
+            </dd>
           </div>
         )}
         {showUncertainty && (
@@ -660,10 +667,29 @@ function RunResults({
       {showEvidence && (
         <>
           <h3>Retrieved evidence</h3>
-          {outlets.length === 0 ? (
+          {run.retrieval != null ? (
+            run.retrieval.documents.length === 0 ? (
+              <p className="muted">{existenceSummary(run.retrieval.existence_class)}</p>
+            ) : (
+              <ul className="plain-list">
+                {run.retrieval.independent_sources.map((source) => (
+                  <li key={source.source_id}>
+                    <a href={source.representative_url} target="_blank" rel="noreferrer">
+                      {source.publisher_ids.join(', ') || source.representative_url}
+                    </a>{' '}
+                    <span className="muted">
+                      {source.merge_reason === 'none'
+                        ? 'stands alone'
+                        : source.merge_reason.replaceAll('_', ' ')}
+                    </span>
+                    <p className="claim-note">{source.merge_evidence}</p>
+                  </li>
+                ))}
+              </ul>
+            )
+          ) : outlets.length === 0 ? (
             <p className="muted">
-              No portal hits. That is recorded as missing corroboration, not as proof
-              the content is false.
+              No coverage found — this is an open question.
             </p>
           ) : (
             <ul className="plain-list">
@@ -682,38 +708,66 @@ function RunResults({
         </>
       )}
 
-      {showEvidence && run.corroboration.fact_checks.length > 0 && (
+      {showEvidence &&
+        (run.retrieval?.factchecks.length
+          ? run.retrieval.factchecks
+          : run.corroboration.fact_checks
+        ).length > 0 && (
         <>
           <h3>Prior fact-checks</h3>
           <ul className="plain-list">
-            {run.corroboration.fact_checks.map((fc, i) => (
-              <li key={fc.url || String(i)}>
-                {fc.publisher}: {fc.textual_rating} — {fc.claim_text}{' '}
-                {fc.url && (
-                  <a href={fc.url} target="_blank" rel="noreferrer">
-                    source
-                  </a>
-                )}
-              </li>
-            ))}
+            {run.retrieval?.factchecks.length
+              ? run.retrieval.factchecks.map((record) => (
+                  <li key={record.review_url}>
+                    {record.reviewer_name} rated this “{record.rating_text}” — their rating,
+                    not NewsAuth’s. {record.reviewed_claim_text}{' '}
+                    {record.review_url && (
+                      <a href={record.review_url} target="_blank" rel="noreferrer">
+                        source
+                      </a>
+                    )}
+                  </li>
+                ))
+              : run.corroboration.fact_checks.map((fc, i) => (
+                  <li key={fc.url || String(i)}>
+                    {fc.publisher}: {fc.textual_rating} — {fc.claim_text}{' '}
+                    {fc.url && (
+                      <a href={fc.url} target="_blank" rel="noreferrer">
+                        source
+                      </a>
+                    )}
+                  </li>
+                ))}
           </ul>
         </>
       )}
 
-      {showEvidence && run.wiki_hits.length > 0 && (
+      {showEvidence &&
+        (run.retrieval?.entity_grounding.length
+          ? true
+          : run.wiki_hits.length > 0) && (
         <>
           <h3>Entity grounding</h3>
           <ul className="plain-list">
-            {run.wiki_hits.map((hit) => (
-              <li key={hit.query}>
-                {hit.query}: {hit.found ? hit.title : 'no page'}{' '}
-                {hit.url && (
-                  <a href={hit.url} target="_blank" rel="noreferrer">
-                    open
-                  </a>
-                )}
-              </li>
-            ))}
+            {run.retrieval?.entity_grounding.length
+              ? run.retrieval.entity_grounding.map((row) => (
+                  <li key={row.entity_text}>
+                    {row.entity_text}:{' '}
+                    {row.entity_is_well_known
+                      ? row.matched_title || 'found'
+                      : 'no page — a gap in reference coverage, not evidence of invention'}
+                  </li>
+                ))
+              : run.wiki_hits.map((hit) => (
+                  <li key={hit.query}>
+                    {hit.query}: {hit.found ? hit.title : 'no page'}{' '}
+                    {hit.url && (
+                      <a href={hit.url} target="_blank" rel="noreferrer">
+                        open
+                      </a>
+                    )}
+                  </li>
+                ))}
           </ul>
         </>
       )}
@@ -865,4 +919,12 @@ function newId() {
 
 function labelize(value: string) {
   return value.replaceAll('_', ' ')
+}
+
+function existenceSummary(klass: string) {
+  if (klass === 'not_found') return 'No coverage found — this is an open question.'
+  if (klass === 'out_of_range') {
+    return 'Never looked — no configured adapter could search this article.'
+  }
+  return labelize(klass)
 }

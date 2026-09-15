@@ -9,8 +9,8 @@ from app.layers.documentation import run_documentation
 from app.layers.evidence import run_evidence
 from app.layers.preprocess import run_preprocess
 from app.layers.uncertainty import run_uncertainty
-from app.layers.verification import run_verification
 from app.logutil import get_logger, short_error
+from app.retrieval.run import run_retrieval
 from app.pipeline.store import RunState
 from app.schemas.envelope import RunEnvelope, TraceEvent, utc_now
 from app.tools.ingest import ingest_input
@@ -30,7 +30,9 @@ LAYER_IDS = {
 LAYER_TITLES = {
     1: "Input",
     2: "Pre-processing and Classification",
-    3: "Verification Tool Layer",
+    # Display only. The layer id stays "verification" in LAYER_IDS, in every
+    # trace event, and in the frontend's trace filter.
+    3: "Retrieval and Independence",
     4: "Evidence Analysis",
     5: "Uncertainty and Risk Assessment",
     6: "Human Editorial Decision",
@@ -248,7 +250,7 @@ async def _run_preprocess(envelope: RunEnvelope, *, settings: Settings, client, 
 async def _run_verification(envelope: RunEnvelope, *, settings: Settings, client, emit) -> None:
     llm = LLMRouter(settings, client)
     embeddings = EmbeddingEngine(settings, client)
-    await run_verification(
+    await run_retrieval(
         envelope,
         settings=settings,
         llm=llm,
@@ -256,16 +258,34 @@ async def _run_verification(envelope: RunEnvelope, *, settings: Settings, client
         client=client,
         emit=emit,
     )
-    for tool in envelope.tool_results:
-        if tool.status == "error":
-            log.error("run %s tool %s error: %s", envelope.run_id[:8], tool.tool, tool.detail)
-        elif tool.status == "skipped":
-            log.warning("run %s tool %s skipped: %s", envelope.run_id[:8], tool.tool, tool.detail)
+    retrieval = envelope.retrieval
+    for report in retrieval.coverage.adapters if retrieval else []:
+        if report.status == "error":
+            log.error(
+                "run %s adapter %s error: %s", envelope.run_id[:8], report.adapter, report.reason
+            )
+        elif report.status.startswith("skipped"):
+            log.warning(
+                "run %s adapter %s %s: %s",
+                envelope.run_id[:8],
+                report.adapter,
+                report.status,
+                report.reason,
+            )
+    if retrieval is None:
+        return
+    # documents and independent_sources are logged side by side on purpose:
+    # the first is a page count inflated by syndication, the second is the only
+    # one that speaks to corroboration.
     log.info(
-        "run %s verification done evidence=%s existence=%s",
+        "run %s retrieval done documents=%s independent_sources=%s existence=%s "
+        "ladder=%s ranking=%s",
         envelope.run_id[:8],
-        len(envelope.evidence_items),
-        envelope.corroboration.existence.existence_class,
+        retrieval.document_count,
+        retrieval.independent_source_count,
+        retrieval.existence_class,
+        retrieval.coverage.existence_search,
+        retrieval.ranking_method or "unranked",
     )
 
 

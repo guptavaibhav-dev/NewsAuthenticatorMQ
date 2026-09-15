@@ -589,6 +589,48 @@ input {
   font-size: 0.85rem;
 }
 
+.count-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 0.4rem 0 0.75rem;
+}
+
+.count-pair > div {
+  border: 1px solid var(--line);
+  padding: 0.7rem 0.85rem;
+}
+
+.count-primary {
+  background: var(--fg);
+  color: var(--bg);
+  border-color: var(--fg);
+}
+
+.count-primary .muted {
+  color: inherit;
+  opacity: 0.72;
+}
+
+.count-kicker {
+  margin: 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.count-figure {
+  margin: 0.15rem 0 0.2rem;
+  font-size: 1.8rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.source-list .claim-note {
+  margin-top: 0.2rem;
+}
+
 .matrix-wrap {
   overflow: auto;
   border: 1px solid var(--line);

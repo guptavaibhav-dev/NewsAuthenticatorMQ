@@ -11,6 +11,23 @@ _BACKEND_DIR = Path(__file__).resolve().parent.parent
 DEV_CONTACT_PLACEHOLDER = "https://localhost/newsauth-dev"
 INGEST_ACCEPT = "text/html,application/xhtml+xml,application/pdf;q=0.8,*/*;q=0.5"
 
+# Wire agencies whose credit on a page means it is a syndicated copy rather
+# than independent reporting. Matched on word boundaries against bylines and
+# snippets, longest name first so "Associated Press" wins over "AP".
+# Presence of a credit says the text came down a wire; it says nothing about
+# whether the reporting is accurate.
+WIRE_SERVICES: tuple[str, ...] = (
+    "Agence France-Presse",
+    "Associated Press",
+    "PA Media",
+    "Bloomberg",
+    "Reuters",
+    "AFP",
+    "ANI",
+    "PTI",
+    "AP",
+)
+
 
 def build_user_agent(
     contact_url: str = "",
@@ -78,6 +95,25 @@ class Settings(BaseSettings):
     # Let an LLM reword planned queries. Off by default: the deterministic
     # planner is reproducible, and a rewrite is only ever accepted whole.
     planner_use_llm: bool = False
+
+    # --- Adapter archive reach, in days. None means apply no age gate. ---
+    # An over-tight bound here is worse than a loose one: too small and we
+    # report out_of_range for articles we could actually have retrieved,
+    # turning our own bad constant into an apparent gap in the source.
+    #
+    # NewsAPI free Developer plan: "Search articles up to a month old",
+    # https://newsapi.org/pricing (checked 2026-09-15). The same page notes a
+    # 24-hour publication delay. 30 rather than 29 for the reason above.
+    newsapi_max_age_days: int = 30
+    # Not verified against either vendor's current free tier, so deliberately
+    # left ungated: we would rather attempt the call and record a real empty
+    # result than pre-emptively claim the source cannot reach the article.
+    # Operators who know their plan should set these.
+    gnews_max_age_days: int | None = None
+    newsdata_max_age_days: int | None = None
+    # GDELT DOC 2.0 needs no key. Its index starts in 2017, which is deeper
+    # than any article this tool is likely to see, so no age gate is applied.
+    gdelt_max_records: int = 25
     nli_threshold: float = 0.6
     near_duplicate_threshold: float = 0.88
     log_level: str = "INFO"

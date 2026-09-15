@@ -1,6 +1,12 @@
 import { LayerProcess } from './layerProcess'
 import type { ReactNode } from 'react'
-import type { Claim, Entity, RunEnvelope } from '../types/run'
+import type {
+  Claim,
+  CoverageReport,
+  Entity,
+  IndependentSource,
+  RunEnvelope,
+} from '../types/run'
 import { PIPELINE_LAYERS } from '../types/run'
 
 export function layerTitle(layer: number) {
@@ -19,10 +25,10 @@ export function enginesForLayer(run: RunEnvelope, layer: number): string {
     case 3:
       return [
         run.queries.planner_model || run.engines_used.verification_planner,
-        run.engines_used.embeddings,
+        run.retrieval?.ranking_engine_name || run.engines_used.embeddings,
       ]
         .filter(Boolean)
-        .join(' · ') || 'verification tools'
+        .join(' · ') || 'retrieval tools'
     case 4:
       return [run.engines_used.nli, run.engines_used.evidence_llm].filter(Boolean).join(' + ') ||
         'NLI'
@@ -288,10 +294,108 @@ function PreprocessOutput({ run }: { run: RunEnvelope }) {
 }
 
 function VerificationOutput({ run }: { run: RunEnvelope }) {
+  const retrieval = run.retrieval
+  if (!retrieval) {
+    return <LegacyVerificationOutput run={run} />
+  }
+  const coverage = retrieval.coverage
+  return (
+    <div className="chat-block">
+      <div className="count-pair">
+        <div>
+          <p className="count-kicker">Pages retrieved</p>
+          <p className="count-figure">{retrieval.document_count}</p>
+          <p className="muted">Distinct documents. Syndication inflates this.</p>
+        </div>
+        <div className="count-primary">
+          <p className="count-kicker">Independent sources</p>
+          <p className="count-figure">{retrieval.independent_source_count}</p>
+          <p className="muted">Genuinely separate newsrooms. This is the number that bears on corroboration.</p>
+        </div>
+      </div>
+      <p>
+        Page count is not corroboration. Twenty papers carrying one wire report are twenty
+        documents and one source.
+      </p>
+
+      <h4>Existence</h4>
+      <p>{existenceStatement(retrieval.existence_class)}</p>
+      <p className="muted">
+        Title match strength: {retrieval.title_match_strength}.{' '}
+        {ladderStatement(coverage)}
+      </p>
+
+      <h4>Independent sources</h4>
+      {retrieval.independent_sources.length === 0 ? (
+        <p className="muted">None grouped — there are no retrieved documents to collapse.</p>
+      ) : (
+        <ul className="plain-list source-list">
+          {retrieval.independent_sources.map((source) => (
+            <li key={source.source_id}>
+              <SourceRow source={source} />
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h4>Coverage</h4>
+      <CoverageBlock coverage={coverage} />
+
+      {retrieval.factchecks.length > 0 && (
+        <>
+          <h4>Prior fact-checks</h4>
+          <ul className="plain-list">
+            {retrieval.factchecks.map((record) => (
+              <li key={record.review_url}>
+                <strong>{record.reviewer_name || 'An unnamed reviewer'}</strong> rated this
+                claim “{record.rating_text}”. That is {record.reviewer_name || 'their'} rating,
+                not NewsAuth’s.{' '}
+                <span className="muted">“{record.reviewed_claim_text}”</span>{' '}
+                {record.review_url && (
+                  <a href={record.review_url} target="_blank" rel="noreferrer">
+                    review
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      <h4>Retrieved documents</h4>
+      {retrieval.documents.length === 0 ? (
+        <p className="muted">No documents after retrieval.</p>
+      ) : (
+        <ul className="plain-list">
+          {retrieval.documents.map((hit) => (
+            <li key={hit.canonical_url || hit.url}>
+              <a href={hit.url} target="_blank" rel="noreferrer">
+                {hit.title || hit.url}
+              </a>{' '}
+              <span className="muted">
+                {hit.publisher_domain}
+                {hit.wire_credit ? ` · wire: ${hit.wire_credit}` : ''}
+                {hit.relevance_score != null
+                  ? ` · ${hit.relevance_score.toFixed(2)} (${retrieval.ranking_method || 'unranked'})`
+                  : retrieval.ranking_method
+                    ? ` · unranked (${retrieval.ranking_method})`
+                    : ''}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <p className="muted">
+        Compat shim still fills the older queries / evidence_items / wiki_hits fields for
+        layers 4–7. Those copies are not the source of truth.
+      </p>
+    </div>
+  )
+}
+
+function LegacyVerificationOutput({ run }: { run: RunEnvelope }) {
   const q = run.queries
-  const tools = run.tool_results.filter((row) => row.tool !== 'media')
-  const before = tools.reduce((sum, row) => sum + (row.hit_count || 0), 0)
-  const after = run.evidence_items.length
   return (
     <div className="chat-block">
       <h4>Planned queries</h4>
@@ -315,7 +419,7 @@ function VerificationOutput({ run }: { run: RunEnvelope }) {
         />
       </dl>
       <p>
-        <strong>Hit counts.</strong> {before} before dedupe · {after} ranked items kept.
+        <strong>Hit counts.</strong> {run.evidence_items.length} ranked items kept.
       </p>
       <p>
         <strong>Existence class.</strong> {labelize(run.corroboration.existence.existence_class)}
@@ -323,6 +427,93 @@ function VerificationOutput({ run }: { run: RunEnvelope }) {
       </p>
     </div>
   )
+}
+
+function SourceRow({ source }: { source: IndependentSource }) {
+  const outlets = source.publisher_ids.join(', ') || source.representative_url
+  const reason =
+    source.merge_reason === 'none'
+      ? 'stands alone'
+      : source.merge_reason.replaceAll('_', ' ')
+  return (
+    <>
+      <a href={source.representative_url} target="_blank" rel="noreferrer">
+        {outlets}
+      </a>{' '}
+      <span className="muted">
+        {source.member_urls.length} page{source.member_urls.length === 1 ? '' : 's'} · {reason}
+      </span>
+      <p className="claim-note">{source.merge_evidence}</p>
+    </>
+  )
+}
+
+function CoverageBlock({ coverage }: { coverage: CoverageReport }) {
+  return (
+    <>
+      <p>{ladderStatement(coverage)}</p>
+      {coverage.existence_keyword_rung_skipped && (
+        <p>
+          The broadest (keyword) existence query was not built — the headline had no
+          distinctive non-stopword words. The search stopped one step short of usual.
+        </p>
+      )}
+      {coverage.article_language == null && (
+        <p>Language checks not applied — the article’s language is unknown.</p>
+      )}
+      {coverage.capability_notes.length > 0 ? (
+        <ul className="plain-list">
+          {coverage.capability_notes.map((note) => (
+            <li key={note}>{note}</li>
+          ))}
+        </ul>
+      ) : (
+        <p className="muted">No capability checks were skipped for missing metadata.</p>
+      )}
+      {coverage.adapters.length > 0 && (
+        <ul className="plain-list">
+          {coverage.adapters.map((report) => (
+            <li key={report.adapter}>
+              <code>{report.adapter}</code> {report.status}
+              {report.reason ? ` — ${report.reason}` : ''}
+              {report.checks_skipped.length
+                ? ` (skipped checks: ${report.checks_skipped.join(', ')})`
+                : ''}
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  )
+}
+
+function existenceStatement(klass: string) {
+  switch (klass) {
+    case 'not_found':
+      return 'No coverage found — this is an open question.'
+    case 'out_of_range':
+      return 'Never looked — no configured adapter could search this article.'
+    case 'exact_url':
+      return 'The same article was found by canonical URL.'
+    case 'title_match':
+      return 'A retrieved page carries the same title.'
+    case 'near_duplicate':
+      return 'A retrieved page is a near-duplicate of the submitted article.'
+    case 'syndicated':
+      return 'The same report was republished under other mastheads. One story, several pages.'
+    default:
+      return labelize(klass)
+  }
+}
+
+function ladderStatement(coverage: CoverageReport) {
+  if (coverage.existence_search === 'not_planned') {
+    return `Existence search was never planned (${coverage.existence_rungs_planned} rungs). We did not look.`
+  }
+  if (coverage.existence_search === 'exhausted') {
+    return `Existence search ran ${coverage.existence_rungs_planned} rung(s) and found nothing.`
+  }
+  return `Existence search matched (${coverage.existence_rungs_planned} rung(s) planned).`
 }
 
 function EvidenceOutput({ run }: { run: RunEnvelope }) {
@@ -386,7 +577,14 @@ function EvidenceOutput({ run }: { run: RunEnvelope }) {
         </ul>
       )}
       <p>
-        <strong>Independent families.</strong> {run.corroboration.independent_source_count}
+        <strong>Independent sources.</strong> {run.corroboration.independent_source_count}
+        {run.retrieval != null && (
+          <span className="muted">
+            {' '}
+            — after collapsing {run.retrieval.document_count} page
+            {run.retrieval.document_count === 1 ? '' : 's'}. Page count is not corroboration.
+          </span>
+        )}
       </p>
       <p>
         <strong>Overall corroboration.</strong> {labelize(run.corroboration.overall_state)}

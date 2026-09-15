@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 import re
+import zlib
 from collections import Counter
 
 import numpy as np
@@ -78,13 +79,26 @@ class EmbeddingEngine:
         return _vectors_from_hf(payload)
 
 
+def _bucket(gram: str, dim: int) -> int:
+    """Stable bucket for a trigram.
+
+    Deliberately not the built-in `hash`: Python salts string hashing per
+    process, so the same text produced a different vector on every restart and
+    two runs of an unchanged article returned different relevance scores. A
+    score that cannot be reproduced cannot be audited, which is the one thing
+    this layer has to be. crc32 is not a good hash function, but it is a fixed
+    one, and fixed is the property that matters here.
+    """
+    return zlib.crc32(gram.encode("utf-8")) % dim
+
+
 def ngram_vector(text: str) -> np.ndarray:
     counts = _char_ngrams(text)
     # stable hashed bag so we can still use dense cosine
     dim = 512
     vec = np.zeros(dim, dtype=np.float32)
     for gram, count in counts.items():
-        vec[hash(gram) % dim] += float(count)
+        vec[_bucket(gram, dim)] += float(count)
     norm = np.linalg.norm(vec)
     if norm > 0:
         vec /= norm

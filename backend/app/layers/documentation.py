@@ -102,34 +102,46 @@ def template_record(envelope: RunEnvelope) -> DocumentationPayload:
         if claims
         else "No atomic claims were extracted."
     )
-    sources = [
-        f"{item.outlet} ({item.source_band}, {item.url})"
-        for item in envelope.evidence_items[:8]
-    ]
-    source_assessment = (
-        "Retrieved outlets: " + "; ".join(sources)
-        if sources
-        else "No portal hits. This is recorded as missing corroboration, not as falsity."
-    )
-    evidence_summary = (
-        f"Existence class: {envelope.corroboration.existence.existence_class}. "
-        f"Overall corroboration: {envelope.corroboration.overall_state}. "
-        f"Independent publisher families: {envelope.corroboration.independent_source_count}."
-    )
+    retrieval = envelope.retrieval
+    source_assessment = _source_assessment(envelope)
+    evidence_summary = _evidence_summary(envelope)
     cross = []
+    if retrieval is not None:
+        for source in retrieval.independent_sources:
+            if source.merge_reason != "none":
+                cross.append(f"Source grouping: {source.merge_evidence}")
+        for note in retrieval.coverage.capability_notes:
+            cross.append(f"Coverage limit: {note}")
     for row in envelope.corroboration.claims:
         cross.append(
             f"{row.claim_id}: NLI support={row.nli_support} contradict={row.nli_contradict}; "
             f"Gemini support={row.llm_support} contradict={row.llm_contradict}; "
             f"agreement={row.agreement}; state={row.state}."
         )
-    for fc in envelope.corroboration.fact_checks[:5]:
-        cross.append(
-            f"Prior fact-check: {fc.publisher} rated “{fc.textual_rating}” ({fc.url})."
-        )
+    if retrieval is not None:
+        for record in retrieval.factchecks[:5]:
+            # Attributed to the reviewer by name. It is their rating of their
+            # reading of a claim, not a NewsAuth finding about this article.
+            cross.append(
+                f"Prior fact-check by {record.reviewer_name or 'an unnamed reviewer'}, "
+                f"which rated “{record.rating_text}” the claim "
+                f"“{record.reviewed_claim_text}” ({record.review_url})."
+            )
+    else:
+        for fc in envelope.corroboration.fact_checks[:5]:
+            cross.append(
+                f"Prior fact-check: {fc.publisher} rated “{fc.textual_rating}” ({fc.url})."
+            )
     rec = envelope.uncertainty.recommended_decision or "needs_investigation"
-    citations = [item.url for item in envelope.evidence_items if item.url]
-    citations += [fc.url for fc in envelope.corroboration.fact_checks if fc.url]
+    if retrieval is not None:
+        # One citation per independent source, not per page: citing twenty
+        # syndicated copies of one wire report would pad the record with
+        # twenty references to a single piece of journalism.
+        citations = [source.representative_url for source in retrieval.independent_sources]
+        citations += [record.review_url for record in retrieval.factchecks if record.review_url]
+    else:
+        citations = [item.url for item in envelope.evidence_items if item.url]
+        citations += [fc.url for fc in envelope.corroboration.fact_checks if fc.url]
     return DocumentationPayload(
         claim_summary=claim_summary,
         source_assessment=source_assessment,
@@ -149,18 +161,91 @@ def template_record(envelope: RunEnvelope) -> DocumentationPayload:
     )
 
 
+def _source_assessment(envelope: RunEnvelope) -> str:
+    """Who published on this, counted as newsrooms rather than as pages."""
+    retrieval = envelope.retrieval
+    if retrieval is None:
+        sources = [
+            f"{item.outlet} ({item.source_band}, {item.url})"
+            for item in envelope.evidence_items[:8]
+        ]
+        return (
+            "Retrieved outlets: " + "; ".join(sources)
+            if sources
+            else "No portal hits. This is recorded as missing corroboration, not as falsity."
+        )
+    if not retrieval.independent_sources:
+        if retrieval.existence_class == "out_of_range":
+            return (
+                "No source could be searched for this article, so there is "
+                "nothing to assess. This is a gap in our reach, not a finding."
+            )
+        return (
+            "No coverage was found on the sources we could search. This is "
+            "recorded as missing corroboration, not as falsity."
+        )
+    rows = []
+    for source in retrieval.independent_sources[:8]:
+        who = ", ".join(source.publisher_ids) or "unattributed"
+        detail = f"{who} — {source.representative_url}"
+        if source.merge_reason != "none":
+            detail += f" ({len(source.member_urls)} pages merged as {source.merge_reason})"
+        rows.append(detail)
+    return (
+        f"{retrieval.independent_source_count} independent source(s) behind "
+        f"{retrieval.document_count} retrieved page(s): " + "; ".join(rows)
+    )
+
+
+def _evidence_summary(envelope: RunEnvelope) -> str:
+    retrieval = envelope.retrieval
+    if retrieval is None:
+        return (
+            f"Existence class: {envelope.corroboration.existence.existence_class}. "
+            f"Overall corroboration: {envelope.corroboration.overall_state}. "
+            f"Independent publisher families: {envelope.corroboration.independent_source_count}."
+        )
+    if retrieval.existence_class == "out_of_range":
+        existence = (
+            "Existence: we were unable to search for this article elsewhere "
+            f"({retrieval.coverage.existence_search}). Never looked, so nothing "
+            "follows from it."
+        )
+    elif retrieval.existence_class == "not_found":
+        existence = (
+            "Existence: searched and not found on any reachable source. An open "
+            "question, not evidence the story is false."
+        )
+    else:
+        existence = (
+            f"Existence: {retrieval.existence_class} "
+            f"(title match strength {retrieval.title_match_strength})."
+        )
+    return (
+        f"{existence} Overall corroboration: {envelope.corroboration.overall_state}. "
+        f"{retrieval.independent_source_count} independent source(s) — the figure "
+        f"that bears on corroboration — behind {retrieval.document_count} retrieved "
+        f"page(s), which syndication inflates. Ranked by "
+        f"{retrieval.ranking_method or 'no ranking engine'}."
+    )
+
+
 def _doc_user(envelope: RunEnvelope) -> str:
     import json
 
+    retrieval = envelope.retrieval
     slim = {
         "input": envelope.input.model_dump(),
         "classification": envelope.classification.model_dump(),
-        "queries": envelope.queries.model_dump(),
-        "evidence": [e.model_dump() for e in envelope.evidence_items],
         "corroboration": envelope.corroboration.model_dump(),
         "uncertainty": envelope.uncertainty.model_dump(),
         "human_decision": envelope.human_decision.model_dump(),
-        "wiki": [w.model_dump() for w in envelope.wiki_hits],
         "engines": envelope.engines_used,
     }
+    if retrieval is not None:
+        slim["retrieval"] = retrieval.model_dump()
+    else:
+        slim["queries"] = envelope.queries.model_dump()
+        slim["evidence"] = [e.model_dump() for e in envelope.evidence_items]
+        slim["wiki"] = [w.model_dump() for w in envelope.wiki_hits]
     return json.dumps(slim, ensure_ascii=False)[:20000]

@@ -432,14 +432,14 @@ def _modules(by_id: dict[str, dict]) -> list[dict[str, Any]]:
         {
             "id": "query-planner",
             "label": "Search query planner",
-            "layer": "Verification Tool",
+            "layer": "Retrieval and Independence",
             "status": _module_status(by_id, "anthropic", fallback=True),
             "detail": "Claude, deterministic queries if key missing",
         },
         {
             "id": "existence",
             "label": "Existence / similar-article match",
-            "layer": "Verification Tool",
+            "layer": "Retrieval and Independence",
             "status": _any_news_status(by_id),
             "detail": "NewsAPI + Guardian + aggregator + embeddings",
         },
@@ -539,7 +539,7 @@ def _layers(by_id: dict[str, dict], settings: Settings) -> list[dict[str, Any]]:
         {
             "id": "verification",
             "order": 3,
-            "label": "Verification Tool",
+            "label": "Retrieval and Independence",
             "status": _verification_layer(news, anthropic, factcheck),
             "detail": (
                 f"Planner: {settings.query_planner_model}. "

@@ -165,7 +165,18 @@ function toolsForLayer(run: RunEnvelope | null, layer: number) {
     return rows
   }
   if (layer === 3) {
-    return run.tool_results.filter((row) => row.tool !== 'media')
+    if (run.retrieval?.coverage.adapters.length) {
+      return run.retrieval.coverage.adapters.map((report) => ({
+        tool: report.adapter,
+        status:
+          report.status.startsWith('skipped')
+            ? 'skipped'
+            : report.status,
+        detail: report.reason || '',
+        hit_count: report.hits_returned,
+      }))
+    }
+    return run.tool_results
   }
   return []
 }
