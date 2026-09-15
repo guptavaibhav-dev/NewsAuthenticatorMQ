@@ -10,6 +10,7 @@ import type {
   RunPhase,
   TraceEvent,
 } from './types/run'
+import { corroborationStateCopy } from './components/layerOutputs'
 import { LAST_LAYER, LAYERS } from './types/run'
 
 const SHOW_PROCESS_LOG = false
@@ -509,7 +510,7 @@ function RunResults({
   run: RunEnvelope
   completedLayer: number
 }) {
-  const outlets = [...new Map(run.evidence_items.map((item) => [item.source_id, item])).values()]
+  const outlets = evidenceColumns(run)
   const showInput = completedLayer >= 1
   const showClaims = completedLayer >= 2
   const showEvidence = completedLayer >= 3
@@ -526,14 +527,21 @@ function RunResults({
             <dd>
               {run.retrieval
                 ? existenceSummary(run.retrieval.existence_class)
-                : labelize(run.corroboration.existence.existence_class)}
+                : 'Layer 3 has not run'}
             </dd>
           </div>
         )}
         {showMatrix && (
           <div>
             <dt>Corroboration</dt>
-            <dd>{labelize(run.corroboration.overall_state)}</dd>
+            <dd>
+              {corroborationStateCopy(run.corroboration.overall_state, {
+                existenceClass:
+                  run.corroboration.existence_class ?? run.retrieval?.existence_class,
+                unscoredReason: run.corroboration.unscored_reason,
+                pairsScored: run.corroboration.pairs_scored,
+              })}
+            </dd>
           </div>
         )}
         {showMatrix && (
@@ -542,6 +550,11 @@ function RunResults({
             <dd>
               {run.retrieval?.independent_source_count ??
                 run.corroboration.independent_source_count}
+              {(run.corroboration.group_join_misses ?? 0) > 0
+                ? ` (upper bound; ${run.corroboration.group_join_misses} join miss${
+                    run.corroboration.group_join_misses === 1 ? '' : 'es'
+                  })`
+                : ''}
             </dd>
           </div>
         )}
@@ -687,87 +700,43 @@ function RunResults({
                 ))}
               </ul>
             )
-          ) : outlets.length === 0 ? (
-            <p className="muted">
-              No coverage found — this is an open question.
-            </p>
           ) : (
-            <ul className="plain-list">
-              {outlets.map((item) => (
-                <li key={item.source_id}>
-                  <a href={item.url} target="_blank" rel="noreferrer">
-                    {item.title || item.url}
-                  </a>{' '}
-                  <span className="muted">
-                    {item.outlet} · {item.tool} · {item.source_band}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <p className="muted">Layer 3 has not run.</p>
           )}
         </>
       )}
 
-      {showEvidence &&
-        (run.retrieval?.factchecks.length
-          ? run.retrieval.factchecks
-          : run.corroboration.fact_checks
-        ).length > 0 && (
+      {showEvidence && (run.retrieval?.factchecks.length ?? 0) > 0 && (
         <>
           <h3>Prior fact-checks</h3>
           <ul className="plain-list">
-            {run.retrieval?.factchecks.length
-              ? run.retrieval.factchecks.map((record) => (
-                  <li key={record.review_url}>
-                    {record.reviewer_name} rated this “{record.rating_text}” — their rating,
-                    not NewsAuth’s. {record.reviewed_claim_text}{' '}
-                    {record.review_url && (
-                      <a href={record.review_url} target="_blank" rel="noreferrer">
-                        source
-                      </a>
-                    )}
-                  </li>
-                ))
-              : run.corroboration.fact_checks.map((fc, i) => (
-                  <li key={fc.url || String(i)}>
-                    {fc.publisher}: {fc.textual_rating} — {fc.claim_text}{' '}
-                    {fc.url && (
-                      <a href={fc.url} target="_blank" rel="noreferrer">
-                        source
-                      </a>
-                    )}
-                  </li>
-                ))}
+            {run.retrieval!.factchecks.map((record) => (
+              <li key={record.review_url}>
+                {record.reviewer_name} rated this “{record.rating_text}” — their rating,
+                not NewsAuth’s. {record.reviewed_claim_text}{' '}
+                {record.review_url && (
+                  <a href={record.review_url} target="_blank" rel="noreferrer">
+                    source
+                  </a>
+                )}
+              </li>
+            ))}
           </ul>
         </>
       )}
 
-      {showEvidence &&
-        (run.retrieval?.entity_grounding.length
-          ? true
-          : run.wiki_hits.length > 0) && (
+      {showEvidence && (run.retrieval?.entity_grounding.length ?? 0) > 0 && (
         <>
           <h3>Entity grounding</h3>
           <ul className="plain-list">
-            {run.retrieval?.entity_grounding.length
-              ? run.retrieval.entity_grounding.map((row) => (
-                  <li key={row.entity_text}>
-                    {row.entity_text}:{' '}
-                    {row.entity_is_well_known
-                      ? row.matched_title || 'found'
-                      : 'no page — a gap in reference coverage, not evidence of invention'}
-                  </li>
-                ))
-              : run.wiki_hits.map((hit) => (
-                  <li key={hit.query}>
-                    {hit.query}: {hit.found ? hit.title : 'no page'}{' '}
-                    {hit.url && (
-                      <a href={hit.url} target="_blank" rel="noreferrer">
-                        open
-                      </a>
-                    )}
-                  </li>
-                ))}
+            {run.retrieval!.entity_grounding.map((row) => (
+              <li key={row.entity_text}>
+                {row.entity_text}:{' '}
+                {row.entity_is_well_known
+                  ? row.matched_title || 'found'
+                  : 'no page — a gap in reference coverage, not evidence of invention'}
+              </li>
+            ))}
           </ul>
         </>
       )}
@@ -915,6 +884,16 @@ function cloneRun(run: RunEnvelope): RunEnvelope {
 
 function newId() {
   return crypto.randomUUID()
+}
+
+function evidenceColumns(run: RunEnvelope) {
+  const documents = run.retrieval?.documents ?? []
+  return documents.map((hit, index) => ({
+    source_id: `s${index + 1}`,
+    outlet: hit.publisher_domain || hit.publisher_id,
+    title: hit.title,
+    url: hit.url,
+  }))
 }
 
 function labelize(value: string) {

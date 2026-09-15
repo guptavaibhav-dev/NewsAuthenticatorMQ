@@ -49,7 +49,7 @@ def build() -> Diagram:
         "Filled from the envelope, no model required:\n"
         "• claims listed by id\n"
         "• retrieved outlets, or “no portal hits ≠ falsity”\n"
-        "• existence class, corroboration state, family count\n"
+        "• existence class, corroboration state, independent source count\n"
         "• per-claim NLI / Gemini agreement\n"
         "• uncertainty rationale and unknowns\n"
         "• citations (article URLs + fact-check URLs)\n"

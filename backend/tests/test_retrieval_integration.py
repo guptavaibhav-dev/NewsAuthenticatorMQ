@@ -2,8 +2,8 @@
 
 These tests drive `execute_layer(state, 3, ...)` rather than calling
 `run_retrieval` directly, so they cover the orchestrator switch, the snapshot
-and re-run machinery, and the compat shim that keeps seven downstream consumers
-alive — the parts most likely to break quietly.
+and re-run machinery, and the live Layer 3 payload — the parts most likely to
+break quietly.
 """
 
 from __future__ import annotations
@@ -205,7 +205,7 @@ def test_full_layer_three_run_reaches_awaiting_decision() -> None:
     assert envelope.completed_layer == 3
 
 
-def test_retrieval_payload_and_all_six_legacy_fields_are_populated() -> None:
+def test_retrieval_payload_and_tool_results_are_populated() -> None:
     envelope = _run_layer3(_state(_envelope()), _default_handler)
 
     retrieval = envelope.retrieval
@@ -214,14 +214,18 @@ def test_retrieval_payload_and_all_six_legacy_fields_are_populated() -> None:
     assert retrieval.documents
     assert retrieval.independent_sources
     assert retrieval.coverage.adapters
+    assert retrieval.existence_class != "not_found" or retrieval.coverage.existence_search in {
+        "exhausted",
+        "not_planned",
+    }
 
-    # The shim, which stage 6 deletes.
-    assert envelope.queries.quoted_headline
-    assert envelope.evidence_items
-    assert envelope.wiki_hits
+    # Ask exposes tool_results from layer 1; Layer 3 copies adapter reports
+    # onto it without mapping existence_class.
     assert envelope.tool_results
-    assert envelope.corroboration.existence.existence_class
-    assert envelope.corroboration.fact_checks
+    assert all(t.tool for t in envelope.tool_results)
+    dumped = envelope.corroboration.model_dump()
+    assert "existence" not in dumped
+    assert "fact_checks" not in dumped
 
     assert envelope.engines_used["verification_planner"]
     assert envelope.engines_used["embeddings"]
@@ -250,10 +254,14 @@ def test_trace_events_still_use_the_verification_layer_id() -> None:
 
 
 def test_evidence_source_ids_are_unique_and_resolvable() -> None:
+    from app.retrieval.run import evidence_source_id
+
     envelope = _run_layer3(_state(_envelope()), _default_handler)
-    ids = [item.source_id for item in envelope.evidence_items]
+    retrieval = envelope.retrieval
+    assert retrieval is not None
+    ids = [evidence_source_id(index) for index in range(len(retrieval.documents))]
     assert len(ids) == len(set(ids))
-    assert all(item.url for item in envelope.evidence_items)
+    assert all(hit.url for hit in retrieval.documents)
 
 
 # --- queries are frozen before dispatch --------------------------------------
@@ -407,7 +415,7 @@ def _empty_handler(request: httpx.Request) -> httpx.Response:
     return httpx.Response(200, json={"articles": []})
 
 
-def test_out_of_range_becomes_not_found_in_the_shim_only() -> None:
+def test_out_of_range_is_never_flattened_to_not_found() -> None:
     # No headline means no existence query was ever built, so we never looked.
     envelope = _run_layer3(_state(_envelope(headline=None)), _empty_handler)
     retrieval = envelope.retrieval
@@ -415,28 +423,13 @@ def test_out_of_range_becomes_not_found_in_the_shim_only() -> None:
 
     assert retrieval.coverage.existence_search == "not_planned"
     assert retrieval.coverage.existence_rungs_planned == 0
-    # The truth survives on envelope.retrieval …
     assert retrieval.existence_class == "out_of_range"
-    # … and is flattened only for the legacy consumers, because the old enum
-    # cannot express "we could not look". This dies with the shim in stage 6.
-    assert envelope.corroboration.existence.existence_class == "not_found"
-
-
-@pytest.mark.parametrize(
-    "modern, legacy",
-    [
-        ("exact_url", "exact_url_match"),
-        ("title_match", "title_match"),
-        ("near_duplicate", "near_duplicate"),
-        ("syndicated", "syndicated_or_reprint"),
-        ("not_found", "not_found"),
-        ("out_of_range", "not_found"),
-    ],
-)
-def test_legacy_existence_mapping(modern, legacy) -> None:
-    from app.retrieval.run import legacy_existence_class
-
-    assert legacy_existence_class(modern) == legacy
+    dumped = envelope.model_dump(mode="json")
+    assert dumped["retrieval"]["existence_class"] == "out_of_range"
+    assert "existence" not in dumped["corroboration"]
+    # tool_results may say skipped for capability limits; they must not invent
+    # a not_found existence class — that field is gone from the envelope.
+    assert not hasattr(envelope.corroboration, "existence")
 
 
 def test_documentation_template_reads_independent_sources_not_pages() -> None:

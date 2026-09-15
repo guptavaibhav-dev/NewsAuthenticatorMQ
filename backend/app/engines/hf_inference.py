@@ -99,11 +99,13 @@ async def _post_json(
 ) -> object:
     response = await client.post(url, headers=headers, json=payload, timeout=timeout)
     if response.status_code == 503:
-        wait = 10.0
+        # Model loading. Cap the wait: the old 10–25s sleep ran per in-flight
+        # pair, so six concurrent 503s could stall Layer 4 for minutes.
+        wait = 2.0
         try:
             body = response.json()
             if isinstance(body, dict):
-                wait = min(float(body.get("estimated_time") or 10), 25.0)
+                wait = min(float(body.get("estimated_time") or wait), 2.0)
         except Exception:
             pass
         log.info("hf model loading; waiting %.0fs then retry", wait)

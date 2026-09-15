@@ -113,8 +113,13 @@ def template_record(envelope: RunEnvelope) -> DocumentationPayload:
         for note in retrieval.coverage.capability_notes:
             cross.append(f"Coverage limit: {note}")
     for row in envelope.corroboration.claims:
+        nli_contradict = (
+            str(row.nli_contradict)
+            if envelope.corroboration.nli_can_detect_contradiction
+            else "unavailable (lexical NLI)"
+        )
         cross.append(
-            f"{row.claim_id}: NLI support={row.nli_support} contradict={row.nli_contradict}; "
+            f"{row.claim_id}: NLI support={row.nli_support} contradict={nli_contradict}; "
             f"Gemini support={row.llm_support} contradict={row.llm_contradict}; "
             f"agreement={row.agreement}; state={row.state}."
         )
@@ -127,11 +132,6 @@ def template_record(envelope: RunEnvelope) -> DocumentationPayload:
                 f"which rated “{record.rating_text}” the claim "
                 f"“{record.reviewed_claim_text}” ({record.review_url})."
             )
-    else:
-        for fc in envelope.corroboration.fact_checks[:5]:
-            cross.append(
-                f"Prior fact-check: {fc.publisher} rated “{fc.textual_rating}” ({fc.url})."
-            )
     rec = envelope.uncertainty.recommended_decision or "needs_investigation"
     if retrieval is not None:
         # One citation per independent source, not per page: citing twenty
@@ -140,8 +140,7 @@ def template_record(envelope: RunEnvelope) -> DocumentationPayload:
         citations = [source.representative_url for source in retrieval.independent_sources]
         citations += [record.review_url for record in retrieval.factchecks if record.review_url]
     else:
-        citations = [item.url for item in envelope.evidence_items if item.url]
-        citations += [fc.url for fc in envelope.corroboration.fact_checks if fc.url]
+        citations = []
     return DocumentationPayload(
         claim_summary=claim_summary,
         source_assessment=source_assessment,
@@ -165,15 +164,7 @@ def _source_assessment(envelope: RunEnvelope) -> str:
     """Who published on this, counted as newsrooms rather than as pages."""
     retrieval = envelope.retrieval
     if retrieval is None:
-        sources = [
-            f"{item.outlet} ({item.source_band}, {item.url})"
-            for item in envelope.evidence_items[:8]
-        ]
-        return (
-            "Retrieved outlets: " + "; ".join(sources)
-            if sources
-            else "No portal hits. This is recorded as missing corroboration, not as falsity."
-        )
+        return "Layer 3 has not run, so there is no source assessment yet."
     if not retrieval.independent_sources:
         if retrieval.existence_class == "out_of_range":
             return (
@@ -200,11 +191,7 @@ def _source_assessment(envelope: RunEnvelope) -> str:
 def _evidence_summary(envelope: RunEnvelope) -> str:
     retrieval = envelope.retrieval
     if retrieval is None:
-        return (
-            f"Existence class: {envelope.corroboration.existence.existence_class}. "
-            f"Overall corroboration: {envelope.corroboration.overall_state}. "
-            f"Independent publisher families: {envelope.corroboration.independent_source_count}."
-        )
+        return "Layer 3 has not run, so there is no evidence summary yet."
     if retrieval.existence_class == "out_of_range":
         existence = (
             "Existence: we were unable to search for this article elsewhere "
@@ -221,12 +208,43 @@ def _evidence_summary(envelope: RunEnvelope) -> str:
             f"Existence: {retrieval.existence_class} "
             f"(title match strength {retrieval.title_match_strength})."
         )
+    if envelope.corroboration.overall_state == "not_assessed":
+        if envelope.corroboration.existence_class == "out_of_range":
+            overall = (
+                "Overall corroboration: not assessed — sources could not cover "
+                "this article, so no claim × evidence pair was scored. A gap "
+                "in reach, not a finding."
+            )
+        elif envelope.corroboration.existence_class == "not_found":
+            overall = (
+                "Overall corroboration: not assessed — no coverage found to "
+                "score against. An open question, not evidence the story is false."
+            )
+        else:
+            overall = (
+                "Overall corroboration: not assessed — no claim × evidence pair "
+                "was scored. That is not a finding against the article."
+            )
+    else:
+        overall = f"Overall corroboration: {envelope.corroboration.overall_state}."
     return (
-        f"{existence} Overall corroboration: {envelope.corroboration.overall_state}. "
+        f"{existence} {overall} "
         f"{retrieval.independent_source_count} independent source(s) — the figure "
         f"that bears on corroboration — behind {retrieval.document_count} retrieved "
         f"page(s), which syndication inflates. Ranked by "
         f"{retrieval.ranking_method or 'no ranking engine'}."
+        + (
+            f" IndependentSource join missed {envelope.corroboration.group_join_misses} "
+            "document(s); the independent-source count is an upper bound."
+            if envelope.corroboration.group_join_misses
+            else ""
+        )
+        + (
+            " Contradiction detection was unavailable (lexical NLI)."
+            if envelope.corroboration.pairs_scored
+            and not envelope.corroboration.nli_can_detect_contradiction
+            else ""
+        )
     )
 
 
@@ -244,8 +262,4 @@ def _doc_user(envelope: RunEnvelope) -> str:
     }
     if retrieval is not None:
         slim["retrieval"] = retrieval.model_dump()
-    else:
-        slim["queries"] = envelope.queries.model_dump()
-        slim["evidence"] = [e.model_dump() for e in envelope.evidence_items]
-        slim["wiki"] = [w.model_dump() for w in envelope.wiki_hits]
     return json.dumps(slim, ensure_ascii=False)[:20000]

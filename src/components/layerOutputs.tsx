@@ -24,7 +24,7 @@ export function enginesForLayer(run: RunEnvelope, layer: number): string {
     }
     case 3:
       return [
-        run.queries.planner_model || run.engines_used.verification_planner,
+        run.retrieval?.planner_model || run.engines_used.verification_planner,
         run.retrieval?.ranking_engine_name || run.engines_used.embeddings,
       ]
         .filter(Boolean)
@@ -296,7 +296,9 @@ function PreprocessOutput({ run }: { run: RunEnvelope }) {
 function VerificationOutput({ run }: { run: RunEnvelope }) {
   const retrieval = run.retrieval
   if (!retrieval) {
-    return <LegacyVerificationOutput run={run} />
+    return (
+      <p className="muted">Layer 3 has not produced a retrieval payload yet.</p>
+    )
   }
   const coverage = retrieval.coverage
   return (
@@ -385,46 +387,6 @@ function VerificationOutput({ run }: { run: RunEnvelope }) {
           ))}
         </ul>
       )}
-
-      <p className="muted">
-        Compat shim still fills the older queries / evidence_items / wiki_hits fields for
-        layers 4–7. Those copies are not the source of truth.
-      </p>
-    </div>
-  )
-}
-
-function LegacyVerificationOutput({ run }: { run: RunEnvelope }) {
-  const q = run.queries
-  return (
-    <div className="chat-block">
-      <h4>Planned queries</h4>
-      <dl className="chat-dl">
-        <Row label="Quoted headline" value={q.quoted_headline || 'n/a'} />
-        <Row label="Event boolean" value={q.event_boolean || 'n/a'} />
-        <Row label="Fact-check query" value={q.factcheck_query || 'n/a'} />
-        <Row
-          label="Entity queries"
-          value={(q.entity_queries || []).join(', ') || 'n/a'}
-        />
-        <Row
-          label="Date range"
-          value={
-            q.date_from || q.date_to ? `${q.date_from || '?'} → ${q.date_to || '?'}` : 'n/a'
-          }
-        />
-        <Row
-          label="Planner"
-          value={`${q.planner_mode}${q.planner_model ? ` · ${q.planner_model}` : ''}`}
-        />
-      </dl>
-      <p>
-        <strong>Hit counts.</strong> {run.evidence_items.length} ranked items kept.
-      </p>
-      <p>
-        <strong>Existence class.</strong> {labelize(run.corroboration.existence.existence_class)}
-        {run.corroboration.existence.notes ? ` — ${run.corroboration.existence.notes}` : ''}
-      </p>
     </div>
   )
 }
@@ -517,7 +479,9 @@ function ladderStatement(coverage: CoverageReport) {
 }
 
 function EvidenceOutput({ run }: { run: RunEnvelope }) {
-  const outlets = uniqueOutlets(run)
+  const outlets = evidenceColumns(run)
+  const canDetectContradiction = run.corroboration.nli_can_detect_contradiction !== false
+  const joinMisses = run.corroboration.group_join_misses ?? 0
   return (
     <div className="chat-block">
       <Fold title="Claim–evidence matrix">
@@ -561,23 +525,68 @@ function EvidenceOutput({ run }: { run: RunEnvelope }) {
           </div>
         )}
       </Fold>
-      <h4>Support vs contradict (publisher families)</h4>
+      {run.corroboration.pairs_scored && !canDetectContradiction && (
+        <p className="muted">
+          Contradiction detection was unavailable (lexical NLI fallback). Counts
+          below do not mean no contradiction was found.
+        </p>
+      )}
+      {joinMisses > 0 && (
+        <p className="muted">
+          {joinMisses} document{joinMisses === 1 ? '' : 's'} did not join an
+          IndependentSource group. Independent-source counts are an upper bound.
+        </p>
+      )}
+      {(run.corroboration.llm_dropped_id_count ?? 0) > 0 && (
+        <p className="muted">
+          Engine B cited {run.corroboration.llm_dropped_id_count} source id
+          {(run.corroboration.llm_dropped_id_count ?? 0) === 1 ? '' : 's'} that
+          were not in the evidence list. Those were dropped and did not count as
+          stance.
+        </p>
+      )}
+      {run.corroboration.evidence_llm_temperature_pinned === false && (
+        <p className="muted">
+          Engine B sampling was not pinned
+          {run.corroboration.evidence_llm_model
+            ? ` (${run.corroboration.evidence_llm_model})`
+            : ''}
+          . Fusion input may differ across runs.
+        </p>
+      )}
+      <h4>Support vs contradict (independent sources)</h4>
       {run.corroboration.claims.length === 0 ? (
         <p className="muted">No fused claim scores yet.</p>
       ) : (
         <ul className="plain-list">
           {run.corroboration.claims.map((row) => (
             <li key={row.claim_id}>
-              <code>{row.claim_id}</code> families support {row.independent_support_outlets ?? 0} /
-              contradict {row.independent_contradict_outlets ?? 0}; NLI support {row.nli_support} /
-              contradict {row.nli_contradict}; LLM support {row.llm_support} / contradict{' '}
-              {row.llm_contradict}; agreement {row.agreement}; state {labelize(row.state)}
+              <code>{row.claim_id}</code>{' '}
+              {row.state === 'not_assessed' ? (
+                corroborationStateCopy(row.state, {
+                  existenceClass: row.existence_class ?? run.corroboration.existence_class,
+                  unscoredReason: run.corroboration.unscored_reason,
+                  pairsScored: run.corroboration.pairs_scored,
+                })
+              ) : (
+                <>
+                  sources support {row.independent_support_outlets ?? 0} / contradict{' '}
+                  {contradictCount(row.independent_contradict_outlets, canDetectContradiction)}
+                  ; NLI support {row.nli_support} / contradict{' '}
+                  {contradictCount(row.nli_contradict, canDetectContradiction)}; LLM support{' '}
+                  {row.llm_support} / contradict {row.llm_contradict}; agreement{' '}
+                  {row.agreement}; state {labelize(row.state)}
+                </>
+              )}
             </li>
           ))}
         </ul>
       )}
       <p>
         <strong>Independent sources.</strong> {run.corroboration.independent_source_count}
+        {joinMisses > 0 && (
+          <span className="muted"> (upper bound; {joinMisses} join miss{joinMisses === 1 ? '' : 'es'})</span>
+        )}
         {run.retrieval != null && (
           <span className="muted">
             {' '}
@@ -587,7 +596,12 @@ function EvidenceOutput({ run }: { run: RunEnvelope }) {
         )}
       </p>
       <p>
-        <strong>Overall corroboration.</strong> {labelize(run.corroboration.overall_state)}
+        <strong>Overall corroboration.</strong>{' '}
+        {corroborationStateCopy(run.corroboration.overall_state, {
+          existenceClass: run.corroboration.existence_class ?? run.retrieval?.existence_class,
+          unscoredReason: run.corroboration.unscored_reason,
+          pairsScored: run.corroboration.pairs_scored,
+        })}
       </p>
     </div>
   )
@@ -714,10 +728,48 @@ function groupEntities(entities: Entity[]): Record<string, string[]> {
   return grouped
 }
 
-function uniqueOutlets(run: RunEnvelope) {
-  return [...new Map(run.evidence_items.map((item) => [item.source_id, item])).values()]
+function evidenceColumns(run: RunEnvelope) {
+  const documents = run.retrieval?.documents ?? []
+  return documents.map((hit, index) => ({
+    source_id: `s${index + 1}`,
+    outlet: hit.publisher_domain || hit.publisher_id,
+    title: hit.title,
+    url: hit.url,
+  }))
 }
 
 function labelize(value: string) {
   return value.replaceAll('_', ' ')
+}
+
+function contradictCount(value: number | undefined, canDetect: boolean): string {
+  if (!canDetect) return 'unavailable'
+  return String(value ?? 0)
+}
+
+export function corroborationStateCopy(
+  state: string,
+  opts?: {
+    existenceClass?: string | null
+    unscoredReason?: string | null
+    pairsScored?: boolean
+  },
+) {
+  const existence = opts?.existenceClass
+  const reason = opts?.unscoredReason
+  const treatedAsNotAssessed =
+    state === 'not_assessed' || (state === 'no_corroboration_found' && opts?.pairsScored === false)
+  if (treatedAsNotAssessed) {
+    let why = 'no evidence was available to score'
+    if (existence === 'out_of_range') why = 'sources could not cover this article'
+    else if (existence === 'not_found') why = 'no coverage found'
+    else if (reason === 'no_claims') why = 'there were no claims to score'
+    else if (reason === 'documents_filtered') why = 'documents were retrieved but none could be scored'
+    else if (reason === 'no_documents') why = 'no coverage found'
+    return `Not assessed — no evidence was scored for this claim (${why})`
+  }
+  if (state === 'no_corroboration_found') {
+    return 'No corroboration found — pairs were scored and none supported the claim'
+  }
+  return labelize(state)
 }

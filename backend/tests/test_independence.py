@@ -63,11 +63,12 @@ def _hit(
     claim_id: str | None = None,
     url: str | None = None,
     adapter: str = "newsapi",
+    canonical: str | None = None,
 ) -> SearchHit:
     resolved = url or f"https://{domain}{path}"
     return SearchHit(
         url=resolved,
-        canonical_url=resolved,
+        canonical_url=resolved if canonical is None else canonical,
         title=title,
         snippet=snippet,
         body_hash=body_hash_value,
@@ -809,3 +810,44 @@ def test_payload_carries_ranking_provenance() -> None:
     )
     assert payload.ranking_method == "char-ngram"
     assert payload.ranking_engine_name == "char-ngram-cosine"
+
+
+def test_empty_canonical_url_still_groups_and_joins_layer4() -> None:
+    """Layer 3 and Layer 4 must share grouping_url or the join silently page-counts."""
+    from app.layers.evidence import join_independent_sources
+    from app.schemas.envelope import RunEnvelope
+    from app.schemas.retrieval import RetrievalPayload
+    from app.scoring.urls import grouping_url
+
+    hits = [
+        _hit(
+            "smh.com.au",
+            path="/a?utm_source=share",
+            canonical="",
+            snippet=WIRE_BODY,
+        ),
+        _hit(
+            "theage.com.au",
+            path="/b?utm_source=share",
+            canonical="",
+            snippet=WIRE_BODY,
+            wire="Reuters",
+        ),
+    ]
+    documents = dedupe(hits)
+    sources = resolve_independence(documents)
+    assert sources
+    grouped = {url for source in sources for url in source.member_urls}
+    for hit in documents:
+        assert grouping_url(hit) in grouped
+
+    envelope = RunEnvelope(run_id="join-empty-canonical")
+    envelope.retrieval = RetrievalPayload(
+        documents=documents,
+        independent_sources=sources,
+        independent_source_count=len(sources),
+        document_count=len(documents),
+    )
+    groups, misses = join_independent_sources(envelope)
+    assert misses == 0
+    assert len(groups) == len(documents)

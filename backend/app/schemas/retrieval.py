@@ -15,10 +15,8 @@ Two rules run through every model here:
    `independent_source_count` speaks to corroboration.
 
 This module intentionally imports nothing from `envelope.py` so the two can be
-evolved separately. `RetrievalExistenceClass` is deliberately named apart from
-the older, coarser `ExistenceClass` in `envelope.py`, which stays until stage 6
-deletes it — two same-named types resolved only by import path is a bug waiting
-to typecheck.
+evolved separately. `ExistenceClass` lives here: the coarser five-member type
+that used to sit on `envelope.py` was deleted in stage 6.
 """
 
 from __future__ import annotations
@@ -27,7 +25,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
-RetrievalExistenceClass = Literal[
+ExistenceClass = Literal[
     "exact_url",
     "title_match",
     "near_duplicate",
@@ -90,6 +88,13 @@ MergeReason = Literal["same_owner", "same_wire", "reprint", "none"]
 """
 
 QueryKind = Literal["existence", "claim", "factcheck", "entity"]
+"""What a planned query is for.
+
+- existence: locate the submitted article itself (the three-rung ladder).
+- claim: search for coverage of one selected Layer 2 claim.
+- factcheck: search prior reviews that appear to concern that claim.
+- entity: look up a Layer 2 PERSON/ORG/GPE in a knowledge base.
+"""
 
 ExistenceSearchOutcome = Literal["not_planned", "matched", "exhausted"]
 """What happened to the existence ladder — whether we looked at all.
@@ -570,11 +575,11 @@ class RetrievalPayload(BaseModel):
             "corroboration."
         ),
     )
-    existence_class: RetrievalExistenceClass = Field(
+    existence_class: ExistenceClass = Field(
         default="not_found",
         description=(
             "Whether the article itself was found elsewhere. See "
-            "RetrievalExistenceClass: 'not_found' and 'out_of_range' are both "
+            "ExistenceClass: 'not_found' and 'out_of_range' are both "
             "coverage outcomes, never findings against the article."
         ),
     )

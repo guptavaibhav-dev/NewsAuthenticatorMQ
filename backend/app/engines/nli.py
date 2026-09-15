@@ -24,6 +24,10 @@ class NliEngine:
         self._payload_index: int | None = None
         self._hf_disabled = False
 
+    def can_detect_contradiction(self) -> bool:
+        """False on the lexical path, which has no real polarity model."""
+        return not self.engine_name.startswith("lexical")
+
     async def score_pair(self, premise: str, hypothesis: str) -> NliResult:
         results = await self.score_pairs([(premise, hypothesis)])
         return results[0]
@@ -86,18 +90,18 @@ class NliEngine:
                     "hypothesis_template": hypothesis[:400] + " is {}.",
                     "multi_label": False,
                 },
-                "options": {"wait_for_model": True},
+                "options": {"wait_for_model": False},
             },
             {
                 "inputs": {"text": premise[:2000], "text_pair": hypothesis[:500]},
-                "options": {"wait_for_model": True},
+                "options": {"wait_for_model": False},
             },
             {
                 "inputs": [premise[:2000], hypothesis[:500]],
-                "options": {"wait_for_model": True},
+                "options": {"wait_for_model": False},
             },
         ]
-        order = list(range(len(payloads)))
+        order = _payload_order(model)
         if self._payload_index is not None:
             order = [self._payload_index] + [i for i in order if i != self._payload_index]
         last_error: Exception | None = None
@@ -120,6 +124,20 @@ class NliEngine:
         if last_error:
             raise last_error
         raise RuntimeError(f"HF NLI returned no parseable scores for {model}")
+
+
+def _payload_order(model: str) -> list[int]:
+    """Which HF JSON shape to try first.
+
+    DeBERTa MNLI is a text-pair classifier. Trying the zero-shot shape first
+    cold-starts the wrong pipeline and can sit on 503 for tens of seconds
+    *per pair*. BART-MNLI is commonly served as zero-shot, so it keeps
+    candidate_labels first.
+    """
+    name = (model or "").lower()
+    if "deberta" in name or "fever" in name:
+        return [1, 2, 0]
+    return [0, 1, 2]
 
 
 def _parse_hf_nli(payload: object) -> NliResult:
@@ -154,29 +172,66 @@ def _parse_hf_nli(payload: object) -> NliResult:
     return label, labels[label], labels
 
 
+# Heuristic and unvalidated. These numbers are not MNLI probabilities; they
+# were chosen by hand so the fallback returns the same three labels as the
+# hosted engines. A zero-contradiction result from this path does not mean
+# contradiction was absent — the engine cannot detect it in general.
+LEXICAL_EMPTY_SCORE = 0.5
+LEXICAL_EMPTY_PROBS = {"entailment": 0.1, "contradiction": 0.1, "neutral": 0.8}
+LEXICAL_NEGATION_CUES = frozenset(
+    {"not", "never", "false", "denied", "hoax", "untrue", "no"}
+)
+LEXICAL_CONTRADICTION_OVERLAP = 0.3
+LEXICAL_CONTRADICTION_SCORE = 0.6
+LEXICAL_CONTRADICTION_PROBS = {
+    "entailment": 0.15,
+    "contradiction": 0.6,
+    "neutral": 0.25,
+}
+LEXICAL_ENTAILMENT_OVERLAP = 0.45
+LEXICAL_ENTAILMENT_BASE = 0.58
+LEXICAL_ENTAILMENT_SLOPE = 0.3
+LEXICAL_ENTAILMENT_CAP = 0.85
+LEXICAL_BACKGROUND_CONTRADICTION = 0.1
+LEXICAL_NEUTRAL_SCORE_FLOOR = 0.4
+LEXICAL_REMAINDER_FLOOR = 0.05
+
+
 def lexical_nli(premise: str, hypothesis: str) -> NliResult:
-    """Conservative fallback: overlap → entailment-leaning, antonym cues → contradiction."""
+    """Conservative fallback: overlap → entailment-leaning, antonym cues → contradiction.
+
+    Heuristic and unvalidated. This is not MNLI: it cannot represent polarity
+    in general, and a zero-contradiction result from this path is not a finding
+    that no contradiction exists.
+    """
     p = set(_words(premise))
     h = set(_words(hypothesis))
     if not p or not h:
-        return "neutral", 0.5, {"entailment": 0.1, "contradiction": 0.1, "neutral": 0.8}
+        return "neutral", LEXICAL_EMPTY_SCORE, dict(LEXICAL_EMPTY_PROBS)
     overlap = len(p & h) / max(len(h), 1)
-    neg_cues = {"not", "never", "false", "denied", "hoax", "untrue", "no"}
-    contradiction_hit = bool(neg_cues & p) != bool(neg_cues & h) and overlap > 0.3
+    contradiction_hit = (
+        bool(LEXICAL_NEGATION_CUES & p) != bool(LEXICAL_NEGATION_CUES & h)
+        and overlap > LEXICAL_CONTRADICTION_OVERLAP
+    )
     if contradiction_hit:
-        probs = {"entailment": 0.15, "contradiction": 0.6, "neutral": 0.25}
-        return "contradiction", 0.6, probs
-    if overlap >= 0.45:
-        conf = min(0.58 + overlap * 0.3, 0.85)
+        return "contradiction", LEXICAL_CONTRADICTION_SCORE, dict(LEXICAL_CONTRADICTION_PROBS)
+    if overlap >= LEXICAL_ENTAILMENT_OVERLAP:
+        conf = min(
+            LEXICAL_ENTAILMENT_BASE + overlap * LEXICAL_ENTAILMENT_SLOPE,
+            LEXICAL_ENTAILMENT_CAP,
+        )
         return "entailment", conf, {
             "entailment": conf,
-            "contradiction": 0.1,
-            "neutral": max(0.05, 1 - conf - 0.1),
+            "contradiction": LEXICAL_BACKGROUND_CONTRADICTION,
+            "neutral": max(LEXICAL_REMAINDER_FLOOR, 1 - conf - LEXICAL_BACKGROUND_CONTRADICTION),
         }
-    return "neutral", max(0.4, 1 - overlap), {
+    return "neutral", max(LEXICAL_NEUTRAL_SCORE_FLOOR, 1 - overlap), {
         "entailment": overlap,
-        "contradiction": 0.1,
-        "neutral": max(0.4, 1 - overlap - 0.1),
+        "contradiction": LEXICAL_BACKGROUND_CONTRADICTION,
+        "neutral": max(
+            LEXICAL_NEUTRAL_SCORE_FLOOR,
+            1 - overlap - LEXICAL_BACKGROUND_CONTRADICTION,
+        ),
     }
 
 

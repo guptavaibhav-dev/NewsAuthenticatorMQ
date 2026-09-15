@@ -43,14 +43,6 @@ def context_for_layer(envelope: RunEnvelope, layer: int) -> dict:
             # these two outlets counted as one?" from merge_evidence, and can
             # tell "we did not look" from "we looked and found nothing".
             data["retrieval"] = envelope.retrieval.model_dump()
-        else:
-            data["queries"] = envelope.queries.model_dump()
-            data["evidence_items"] = [e.model_dump() for e in envelope.evidence_items]
-            data["wiki_hits"] = [w.model_dump() for w in envelope.wiki_hits]
-            data["existence"] = envelope.corroboration.existence.model_dump()
-            data["fact_checks"] = [
-                f.model_dump() for f in envelope.corroboration.fact_checks
-            ]
     if layer >= 4:
         data["analysis"] = [a.model_dump() for a in envelope.analysis]
         data["corroboration"] = envelope.corroboration.model_dump()

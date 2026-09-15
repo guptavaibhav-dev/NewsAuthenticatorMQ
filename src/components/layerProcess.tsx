@@ -8,7 +8,7 @@ import {
   SystemMessage,
   Tool,
 } from './processKit'
-import type { EvidenceItem, RunEnvelope, TraceEvent, WikiHit } from '../types/run'
+import type { RunEnvelope, TraceEvent } from '../types/run'
 import { PIPELINE_LAYERS } from '../types/run'
 
 export function LayerProcess({
@@ -184,45 +184,27 @@ function toolsForLayer(run: RunEnvelope | null, layer: number) {
 function sourcesForLayer(run: RunEnvelope | null, layer: number) {
   if (!run) return []
   const rows: { href: string; label: string; title: string; description: string }[] = []
-  if (layer >= 3) {
-    for (const item of uniqueEvidence(run.evidence_items)) {
-      if (!item.url) continue
+  if (layer >= 3 && run.retrieval) {
+    for (const source of run.retrieval.independent_sources) {
+      if (!source.representative_url) continue
       rows.push({
-        href: item.url,
-        label: item.outlet || hostOf(item.url),
-        title: item.title || item.url,
-        description: [item.tool, item.source_band, item.publisher_family]
-          .filter(Boolean)
-          .join(' · '),
+        href: source.representative_url,
+        label: source.publisher_ids.join(', ') || hostOf(source.representative_url),
+        title: source.representative_url,
+        description: source.merge_reason === 'none' ? 'stands alone' : source.merge_reason,
       })
     }
-    for (const hit of run.wiki_hits) {
-      if (hit.url) rows.push(wikiSource(hit))
-    }
-    for (const fc of run.corroboration.fact_checks) {
-      if (!fc.url) continue
+    for (const record of run.retrieval.factchecks) {
+      if (!record.review_url) continue
       rows.push({
-        href: fc.url,
-        label: fc.publisher || 'Fact-check',
-        title: fc.claim_text,
-        description: fc.textual_rating || 'prior ClaimReview',
+        href: record.review_url,
+        label: record.reviewer_name || 'Fact-check',
+        title: record.reviewed_claim_text,
+        description: record.rating_text || 'prior review',
       })
     }
   }
   return rows
-}
-
-function wikiSource(hit: WikiHit) {
-  return {
-    href: hit.url || '#',
-    label: hit.title || hit.query,
-    title: hit.title || hit.query,
-    description: hit.found ? hit.description || 'Wikipedia' : 'no page',
-  }
-}
-
-function uniqueEvidence(items: EvidenceItem[]) {
-  return [...new Map(items.map((item) => [item.source_id, item])).values()]
 }
 
 function hostOf(url: string) {

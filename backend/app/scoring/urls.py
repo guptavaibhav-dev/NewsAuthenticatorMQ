@@ -217,6 +217,20 @@ def canonical_url(url: str) -> str:
     return _strip_tracking_and_normalize(_strip_amp_wrappers(unwrapped))
 
 
+def grouping_url(hit: object) -> str:
+    """Join key for IndependentSource.member_urls and Layer 4's group lookup.
+
+    Layer 3 used to store `canonical_url or url` while Layer 4 looked up
+    `canonical_url or canonical_url(url)`. When `canonical_url` was empty those
+    disagreed, the join missed, and fusion counted the page as its own
+    newsroom — the volume-as-corroboration defect the rewrite removed.
+    Both sides must call this.
+    """
+    stored = str(getattr(hit, "canonical_url", None) or "").strip()
+    raw = str(getattr(hit, "url", None) or "").strip()
+    return stored or canonical_url(raw) or raw
+
+
 def _first_attr(html: str, patterns: tuple[str, ...]) -> str | None:
     for pattern in patterns:
         match = re.search(pattern, html or "", re.I)

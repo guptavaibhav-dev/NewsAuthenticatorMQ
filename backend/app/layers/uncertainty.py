@@ -116,18 +116,17 @@ def rule_based_uncertainty(envelope: RunEnvelope) -> UncertaintyPayload:
             if not row.entity_is_well_known
         ]
     else:
-        skipped = [t.tool for t in envelope.tool_results if t.status in {"skipped", "error"}]
-        if skipped:
-            unknowns.append(
-                "Some verification tools did not return results: " + ", ".join(skipped)
-            )
-        if envelope.corroboration.existence.existence_class == "not_found":
-            unknowns.append("Same-article existence was not confirmed on queried portals.")
-        missing_entities = [h.query for h in envelope.wiki_hits if not h.found]
+        unknowns.append("Layer 3 has not run, so coverage is unknown.")
+        missing_entities = []
 
     # Independent SOURCES, after wire and ownership collapsing — not outlets
     # and not pages. Twenty papers running one agency report is one source.
-    if envelope.corroboration.independent_source_count < 2:
+    # Skip when Layer 4 did not assess: zero sources then is a gap, not thin
+    # corroboration.
+    if (
+        envelope.corroboration.overall_state != "not_assessed"
+        and envelope.corroboration.independent_source_count < 2
+    ):
         weak.append("Fewer than two independent sources corroborate the event.")
     if missing_entities:
         unknowns.append(
@@ -142,10 +141,52 @@ def rule_based_uncertainty(envelope: RunEnvelope) -> UncertaintyPayload:
     if envelope.input.fetch_status == "error":
         unknowns.append("URL fetch failed; analysis used provided text only.")
 
+    corr = envelope.corroboration
+    if corr.pairs_scored and not corr.nli_can_detect_contradiction:
+        unknowns.append(
+            "Contradiction detection was unavailable (lexical NLI fallback). "
+            "A zero contradiction count is not a finding that none exists."
+        )
+    if corr.group_join_misses:
+        unknowns.append(
+            f"{corr.group_join_misses} document(s) did not join an IndependentSource "
+            "group. Independent-source counts are an upper bound."
+        )
+    if corr.llm_dropped_id_count:
+        unknowns.append(
+            f"Engine B cited {corr.llm_dropped_id_count} source id(s) that were not "
+            "in the evidence list; those were dropped and did not count as stance."
+        )
+    if corr.evidence_llm_temperature_pinned is False:
+        unknowns.append(
+            "Engine B sampling was not pinned (gemini-3* omits temperature). "
+            "Fusion input may differ across runs."
+        )
+
     state = envelope.corroboration.overall_state
     rec: EditorialDecision
     risk: PublicationRisk
-    if state in {"corroborated_coverage", "event_corroborated"}:
+    if state == "not_assessed":
+        rec, risk = "needs_investigation", "unknown"
+        reason = envelope.corroboration.unscored_reason
+        existence = envelope.corroboration.existence_class
+        if existence == "out_of_range":
+            unknowns.append(
+                "Layer 4 did not assess claims: sources could not cover this "
+                "article. That is a gap in reach, not a finding."
+            )
+        elif existence == "not_found" and reason == "no_documents":
+            unknowns.append(
+                "Layer 4 did not assess claims: no coverage was found to score "
+                "against. An open question, not evidence against the article."
+            )
+        else:
+            unknowns.append(
+                "Layer 4 did not assess claims against evidence "
+                f"({reason or 'no pairs scored'}). That is not a finding "
+                "against the article."
+            )
+    elif state in {"corroborated_coverage", "event_corroborated"}:
         rec, risk = "verified", "low"
     elif state == "contested_reporting" or state == "contested":
         rec, risk = "needs_investigation", "high"
@@ -155,28 +196,31 @@ def rule_based_uncertainty(envelope: RunEnvelope) -> UncertaintyPayload:
         rec, risk = "unverifiable", "high"
 
     independence = _independence_note(envelope)
+    if state == "not_assessed":
+        rationale = (
+            "Corroboration was not assessed: no claim × evidence pair was scored. "
+            "That is an absence of assessment, not an absence of support."
+        )
+    else:
+        rationale = (
+            f"Corroboration state is {state}. Absence of hits is treated as uncertainty, "
+            "not as proof the content is false."
+        )
     return UncertaintyPayload(
         unknowns=unknowns,
         weak_evidence=weak,
         source_independence_note=independence,
         publication_risk=risk,
         recommended_decision=rec,
-        rationale=(
-            f"Corroboration state is {state}. Absence of hits is treated as uncertainty, "
-            "not as proof the content is false."
-        ),
+        rationale=rationale,
     )
 
 
 def _independence_note(envelope: RunEnvelope) -> str:
     """State pages and sources together, so neither can be read as the other."""
     retrieval = envelope.retrieval
-    count = envelope.corroboration.independent_source_count
     if retrieval is None:
-        return (
-            f"{count} independent publisher families among retrieved items. "
-            "Unknown band is unrated, not unreliable."
-        )
+        return "Layer 3 has not run, so independence is unknown."
     collapsed = [
         source
         for source in retrieval.independent_sources
@@ -220,15 +264,28 @@ def _from_llm(data: dict, fallback: UncertaintyPayload) -> UncertaintyPayload:
 def _structured_view(envelope: RunEnvelope) -> dict:
     retrieval = envelope.retrieval
     view = {
-        "existence_class": envelope.corroboration.existence.existence_class,
         "overall_state": envelope.corroboration.overall_state,
+        "pairs_scored": envelope.corroboration.pairs_scored,
+        "unscored_reason": envelope.corroboration.unscored_reason,
+        "existence_class": envelope.corroboration.existence_class
+        or (retrieval.existence_class if retrieval else None),
         "independent_source_count": envelope.corroboration.independent_source_count,
         "claims": [c.model_dump() for c in envelope.corroboration.claims],
         "tool_results": [t.model_dump() for t in envelope.tool_results],
-        "fact_check_count": len(envelope.corroboration.fact_checks),
-        "wiki_missing": [h.query for h in envelope.wiki_hits if not h.found],
-        "nli_engine": envelope.engines_used.get("nli"),
+        "fact_check_count": len(retrieval.factchecks) if retrieval else 0,
+        "wiki_missing": [
+            row.entity_text
+            for row in (retrieval.entity_grounding if retrieval else [])
+            if not row.entity_is_well_known
+        ],
+        "nli_engine": envelope.corroboration.nli_engine or envelope.engines_used.get("nli"),
+        "nli_can_detect_contradiction": envelope.corroboration.nli_can_detect_contradiction,
+        "group_join_misses": envelope.corroboration.group_join_misses,
+        "llm_dropped_id_count": envelope.corroboration.llm_dropped_id_count,
         "evidence_llm": envelope.engines_used.get("evidence_llm"),
+        "evidence_llm_model": envelope.corroboration.evidence_llm_model,
+        "evidence_llm_temperature": envelope.corroboration.evidence_llm_temperature,
+        "evidence_llm_temperature_pinned": envelope.corroboration.evidence_llm_temperature_pinned,
         "disagreements": envelope.classification.disagreements,
     }
     if retrieval is None:

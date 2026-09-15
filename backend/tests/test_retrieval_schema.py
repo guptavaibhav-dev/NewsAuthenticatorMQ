@@ -319,19 +319,20 @@ def test_capability_requires_every_reach_limit_to_be_stated() -> None:
     assert Capability.model_validate(cap.model_dump(mode="json")) == cap
 
 
-def test_envelope_carries_retrieval_without_disturbing_legacy_fields() -> None:
+def test_envelope_carries_retrieval_and_keeps_tool_results() -> None:
     envelope = RunEnvelope(run_id="test-run")
     assert envelope.retrieval is None
     envelope.retrieval = _payload()
     restored = RunEnvelope.model_validate(envelope.model_dump(mode="json"))
     assert restored.retrieval is not None
     assert restored.retrieval.independent_source_count == 2
-    # Stage 5 migrates these; until then they must still exist and default.
-    assert restored.queries.planner_mode == "deterministic"
-    assert restored.evidence_items == []
-    assert restored.wiki_hits == []
     assert restored.tool_results == []
-    assert restored.corroboration.existence.existence_class == "not_found"
+    dumped = restored.model_dump()
+    assert "queries" not in dumped
+    assert "evidence_items" not in dumped
+    assert "wiki_hits" not in dumped
+    assert "existence" not in dumped["corroboration"]
+    assert "fact_checks" not in dumped["corroboration"]
 
 
 def test_legacy_envelopes_without_retrieval_still_validate() -> None:

@@ -172,26 +172,13 @@ def build() -> Diagram:
         "payload",
         60,
         1208,
-        1240,
+        1880,
         140,
         "RetrievalPayload",
-        "document_count = pages. independent_source_count = newsrooms. existence_class keeps out_of_range distinct from not_found. Counts are derived from their lists, so they cannot drift.",
+        "document_count = pages. independent_source_count = newsrooms. existence_class keeps out_of_range distinct from not_found. Counts are derived from their lists, so they cannot drift. Adapter reports are copied onto envelope.tool_results for Ask; existence_class is never written there.",
         fill=PALE_BLUE,
         title_size=18,
         body_size=15,
-    )
-    d.box(
-        "shim",
-        1320,
-        1208,
-        620,
-        140,
-        "Compat shim — transitional",
-        "Also fills the old queries / evidence_items / wiki_hits / tool_results / corroboration.existence fields so Layers 4–7 keep running. out_of_range is mapped to not_found here only. Stage 6 deletes the shim.",
-        fill=ORANGE,
-        title_size=17,
-        body_size=14,
-        dashed=True,
     )
 
     d.box(
@@ -257,7 +244,6 @@ def build() -> Diagram:
     d.arrow("a-indep-rank", "indep", "rank", src_side="right", dst_side="left")
     d.arrow("a-rank-cov", "rank", "coverage")
     d.arrow("a-cov-pay", "coverage", "payload")
-    d.arrow("a-pay-shim", "payload", "shim", src_side="right", dst_side="left")
     d.arrow("a-pay-review", "payload", "review")
     d.arrow("a-review-next", "review", "next", src_side="right", dst_side="left")
 

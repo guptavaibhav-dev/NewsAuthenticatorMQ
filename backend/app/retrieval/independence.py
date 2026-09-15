@@ -40,11 +40,11 @@ from app.schemas.retrieval import (
     CoverageReport,
     IndependentSource,
     MergeReason,
-    RetrievalExistenceClass,
+    ExistenceClass,
     RetrievalPayload,
     SearchHit,
 )
-from app.scoring.urls import registrable_domain
+from app.scoring.urls import grouping_url, registrable_domain
 
 _OWNERSHIP_PATH = Path(__file__).resolve().parent.parent / "data" / "publisher_ownership.json"
 
@@ -206,7 +206,7 @@ def dedupe(hits: Iterable[SearchHit]) -> list[SearchHit]:
 
     by_url: dict[str, list[SearchHit]] = {}
     for hit in rows:
-        by_url.setdefault(hit.canonical_url or hit.url, []).append(hit)
+        by_url.setdefault(grouping_url(hit), []).append(hit)
     unique = [_best(group) for group in by_url.values()]
 
     kept: list[SearchHit] = []
@@ -371,7 +371,7 @@ def resolve_independence(documents: Iterable[SearchHit]) -> list[IndependentSour
             IndependentSource(
                 source_id=f"src_{order}",
                 representative_url=representative.url,
-                member_urls=[hit.canonical_url or hit.url for hit in members],
+                member_urls=[grouping_url(hit) for hit in members],
                 publisher_ids=sorted({hit.publisher_id for hit in members}),
                 merge_reason=reason,
                 merge_evidence=_evidence(reason, members),
@@ -489,7 +489,7 @@ def classify_existence(
     ladder: LadderResult,
     context: ArticleContext,
     adapter_reports: Iterable[AdapterReport] = (),
-) -> RetrievalExistenceClass:
+) -> ExistenceClass:
     """Did we find the article itself somewhere else, and how sure are we?
 
     Ordered most to least specific. `not_found` and `out_of_range` are both
@@ -517,7 +517,7 @@ def classify_existence(
         or (context.body_hash and hit.body_hash == context.body_hash)
     ]
     for hit in matches:
-        if (hit.canonical_url or hit.url) in wire_members:
+        if grouping_url(hit) in wire_members:
             return "syndicated"
     for hit in matches:
         if context.body_hash and hit.body_hash == context.body_hash:

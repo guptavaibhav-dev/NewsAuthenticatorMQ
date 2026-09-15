@@ -22,7 +22,7 @@ def build() -> Diagram:
         1100,
         96,
         "From Layer 4 — structured scores, not prose",
-        "Existence class, per-claim corroboration states and engine agreement, independent publisher families, tool statuses, missing Wikipedia hits, entity disagreements, fetch status.",
+        "Existence class, per-claim corroboration states and engine agreement, independent sources, adapter coverage, entity-grounding gaps, entity disagreements, fetch status.",
         fill=PALE_BLUE,
         title_size=18,
         body_size=15,
@@ -46,9 +46,9 @@ def build() -> Diagram:
         900,
         340,
         "Baseline — deterministic rules, always run first",
-        "Every gap in the run becomes a sentence. Skipped or failed tools, an existence class of not found, a Wikipedia miss, or a failed URL fetch are collected as unknowns.\n"
+        "Every gap in the run becomes a sentence. Skipped or failed adapters, an existence class of not_found or out_of_range (kept distinct), an entity with no knowledge-base page, or a failed URL fetch are collected as unknowns.\n"
         "\n"
-        "Fewer than two independent publisher families, a claim where NLI and Gemini disagree, or clashing entity sets are collected as weak-evidence flags.\n"
+        "Fewer than two independent sources, a claim where NLI and Gemini disagree, or clashing entity sets are collected as weak-evidence flags.\n"
         "\n"
         "The corroboration state then picks a conservative risk band and recommended label. This payload exists before any model is contacted.",
         fill=BLUE,
@@ -129,7 +129,7 @@ def build() -> Diagram:
     cards = [
         ("out-unknowns", "Unknowns", "Every gap the run hit,\nwritten as plain sentences"),
         ("out-weak", "Weak-evidence flags", "Where corroboration is\nthin or contested"),
-        ("out-indep", "Independence note", "How many publisher families,\nplus the unknown-band caveat"),
+        ("out-indep", "Independence note", "How many independent\nsources, vs page count"),
         ("out-risk", "Publication risk", "low · moderate · high\n· unknown"),
         ("out-rec", "Recommended label", "One of the six labels —\na suggestion, not a verdict"),
         ("out-engine", "Engine recorded", "openai, anthropic, gemini,\nor rule-based"),

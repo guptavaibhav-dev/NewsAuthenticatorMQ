@@ -51,20 +51,6 @@ export type Entity = {
   source: string
 }
 
-export type EvidenceItem = {
-  source_id: string
-  outlet: string
-  domain: string
-  url: string
-  title: string
-  published_at: string | null
-  snippet: string
-  tool: string
-  source_band: string
-  publisher_family: string | null
-  similarity: number | null
-}
-
 export type PairAnalysis = {
   claim_id: string
   source_id: string
@@ -83,25 +69,10 @@ export type ClaimCorroboration = {
   independent_contradict_outlets?: number
   agreement: string
   state: string
+  existence_class?: ExistenceClass | null
 }
 
-export type FactCheckItem = {
-  claim_text: string
-  textual_rating: string | null
-  publisher: string | null
-  url: string | null
-  review_date: string | null
-}
-
-export type WikiHit = {
-  query: string
-  title: string | null
-  url: string | null
-  description: string | null
-  found: boolean
-}
-
-export type RetrievalExistenceClass =
+export type ExistenceClass =
   | 'exact_url'
   | 'title_match'
   | 'near_duplicate'
@@ -207,7 +178,7 @@ export type RetrievalPayload = {
   document_count: number
   independent_sources: IndependentSource[]
   independent_source_count: number
-  existence_class: RetrievalExistenceClass
+  existence_class: ExistenceClass
   title_match_strength: TitleMatchStrength
   factchecks: FactCheckRecord[]
   entity_grounding: EntityGrounding[]
@@ -260,33 +231,23 @@ export type RunEnvelope = {
     preprocess_model: string | null
     ner_engine: string | null
   }
-  queries: {
-    quoted_headline: string | null
-    event_boolean: string | null
-    factcheck_query: string | null
-    planner_model: string | null
-    planner_mode: string
-    entity_queries?: string[]
-    date_from?: string | null
-    date_to?: string | null
-  }
-  evidence_items: EvidenceItem[]
-  wiki_hits: WikiHit[]
   tool_results: { tool: string; status: string; detail: string; hit_count: number }[]
   retrieval?: RetrievalPayload | null
   analysis: PairAnalysis[]
   corroboration: {
-    existence: {
-      existence_class: string
-      matched_url: string | null
-      matched_title: string | null
-      similarity: number | null
-      notes: string
-    }
     overall_state: string
     independent_source_count: number
     claims: ClaimCorroboration[]
-    fact_checks: FactCheckItem[]
+    pairs_scored?: boolean
+    unscored_reason?: 'no_documents' | 'no_claims' | 'documents_filtered' | null
+    existence_class?: ExistenceClass | null
+    nli_engine?: string
+    nli_can_detect_contradiction?: boolean
+    group_join_misses?: number
+    llm_dropped_id_count?: number
+    evidence_llm_model?: string | null
+    evidence_llm_temperature?: number | null
+    evidence_llm_temperature_pinned?: boolean | null
   }
   uncertainty: {
     unknowns: string[]

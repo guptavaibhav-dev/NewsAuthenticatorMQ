@@ -5,7 +5,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
 
-from app.schemas.retrieval import RetrievalPayload
+from app.schemas.retrieval import ExistenceClass, RetrievalPayload
 
 
 def utc_now() -> str:
@@ -54,13 +54,6 @@ def fetch_status_for_reason(reason: FetchReason) -> ToolStatus:
     return "error"
 NliLabel = Literal["entailment", "contradiction", "neutral"]
 Stance = Literal["supports", "refutes", "unrelated", "mixed"]
-ExistenceClass = Literal[
-    "exact_url_match",
-    "title_match",
-    "near_duplicate",
-    "syndicated_or_reprint",
-    "not_found",
-]
 CorroborationState = Literal[
     "corroborated_coverage",
     "event_corroborated",
@@ -68,7 +61,30 @@ CorroborationState = Literal[
     "contested_reporting",
     "no_corroboration_found",
     "contested",
+    "not_assessed",
 ]
+"""How Layer 4 fused stance, not a true/false verdict.
+
+- corroborated_coverage: same-article match and both engines agree there is support.
+- event_corroborated: two or more independent sources support the claim.
+- single_source: exactly one independent source supports the claim.
+- contested_reporting: independent sources both support and contradict, or
+  two or more contradict.
+- no_corroboration_found: pairs WERE scored and none supported the claim.
+  Unavailable when nothing was scored.
+- contested: the two engines disagree on direction.
+- not_assessed: no claim × evidence pair was scored. An absence of
+  assessment, not an absence of support. Must never be rendered in language
+  implying the claim is doubtful.
+"""
+
+UnscoredReason = Literal["no_documents", "no_claims", "documents_filtered"]
+"""Why Layer 4 produced no claim × evidence pairs.
+
+- no_documents: Layer 3 returned no pages to score against.
+- no_claims: there were no claims to score.
+- documents_filtered: pages were retrieved but none had scorable text.
+"""
 EngineAgreement = Literal["convergent", "contested", "nli_only", "llm_only", "none"]
 SourceBand = Literal["known_legacy", "aggregator", "unknown"]
 EditorialDecision = Literal[
@@ -429,62 +445,11 @@ class ClassificationPayload(BaseModel):
     ner_engine: str | None = None
 
 
-class SearchQueries(BaseModel):
-    quoted_headline: str | None = None
-    event_boolean: str | None = None
-    date_from: str | None = None
-    date_to: str | None = None
-    entity_queries: list[str] = Field(default_factory=list)
-    factcheck_query: str | None = None
-    planner_model: str | None = None
-    planner_mode: Literal["llm", "deterministic"] = "deterministic"
-
-
-class EvidenceItem(BaseModel):
-    source_id: str
-    outlet: str
-    domain: str
-    url: str
-    title: str
-    published_at: str | None = None
-    snippet: str
-    tool: str
-    matched_claim_id: str | None = None
-    publisher_family: str | None = None
-    source_band: SourceBand = "unknown"
-    similarity: float | None = None
-
-
-class FactCheckItem(BaseModel):
-    claim_text: str
-    textual_rating: str | None = None
-    publisher: str | None = None
-    url: str | None = None
-    review_date: str | None = None
-    similarity: float | None = None
-
-
-class WikiHit(BaseModel):
-    query: str
-    title: str | None = None
-    url: str | None = None
-    description: str | None = None
-    found: bool = False
-
-
 class ToolResult(BaseModel):
     tool: str
     status: ToolStatus
     detail: str = ""
     hit_count: int = 0
-
-
-class ExistenceResult(BaseModel):
-    existence_class: ExistenceClass = "not_found"
-    matched_url: str | None = None
-    matched_title: str | None = None
-    similarity: float | None = None
-    notes: str = ""
 
 
 class PairAnalysis(BaseModel):
@@ -511,6 +476,13 @@ class GeminiClaimAnalysis(BaseModel):
     unrelated: list[str] = Field(default_factory=list)
     inconsistencies: list[Inconsistency] = Field(default_factory=list)
     missing_slots: list[str] = Field(default_factory=list)
+    dropped_source_ids: list[str] = Field(
+        default_factory=list,
+        description=(
+            "source_ids the model cited that were not in the evidence list. "
+            "Invented ids are dropped, not treated as stance."
+        ),
+    )
 
 
 class ClaimCorroboration(BaseModel):
@@ -522,15 +494,87 @@ class ClaimCorroboration(BaseModel):
     independent_support_outlets: int = 0
     independent_contradict_outlets: int = 0
     agreement: EngineAgreement = "none"
-    state: CorroborationState = "no_corroboration_found"
+    state: CorroborationState = "not_assessed"
+    existence_class: ExistenceClass | None = Field(
+        default=None,
+        description=(
+            "Layer 3 existence class this claim was fused under. Kept here so "
+            "not_found and out_of_range stay distinguishable after overlay, "
+            "instead of collapsing into a single state string."
+        ),
+    )
 
 
 class CorroborationPayload(BaseModel):
-    existence: ExistenceResult = Field(default_factory=ExistenceResult)
-    overall_state: CorroborationState = "no_corroboration_found"
+    overall_state: CorroborationState = "not_assessed"
     independent_source_count: int = 0
     claims: list[ClaimCorroboration] = Field(default_factory=list)
-    fact_checks: list[FactCheckItem] = Field(default_factory=list)
+    pairs_scored: bool = Field(
+        default=False,
+        description=(
+            "True only when at least one claim × evidence pair was sent to NLI. "
+            "no_corroboration_found is only meaningful when this is True."
+        ),
+    )
+    unscored_reason: UnscoredReason | None = Field(
+        default=None,
+        description=(
+            "Why no pairs were scored: no_documents, no_claims, or "
+            "documents_filtered. None when pairs_scored is True."
+        ),
+    )
+    existence_class: ExistenceClass | None = Field(
+        default=None,
+        description=(
+            "Layer 3 existence class at fusion time. Survives into Layers 5 "
+            "and 7 so never-looked (out_of_range) is not flattened into "
+            "looked-and-found-nothing (not_found)."
+        ),
+    )
+    nli_engine: str = Field(
+        default="",
+        description=(
+            "Engine A id that actually scored pairs (hf:… or lexical-nli-fallback). "
+            "Empty when no pairs were scored."
+        ),
+    )
+    nli_can_detect_contradiction: bool = Field(
+        default=False,
+        description=(
+            "False on the lexical fallback, which cannot represent polarity in "
+            "general. When False, a zero contradiction count is not a finding."
+        ),
+    )
+    group_join_misses: int = Field(
+        default=0,
+        description=(
+            "How many document ids failed to resolve to a Layer 3 IndependentSource "
+            "group. Non-zero means independent-source counts are an upper bound."
+        ),
+    )
+    llm_dropped_id_count: int = Field(
+        default=0,
+        description=(
+            "How many invented source_id mentions Engine B produced and we dropped. "
+            "A high count is a signal the model was guessing."
+        ),
+    )
+    evidence_llm_model: str | None = Field(
+        default=None,
+        description="Engine B model that returned a response, or None when it did not run.",
+    )
+    evidence_llm_temperature: float | None = Field(
+        default=None,
+        description="Temperature requested for Engine B. None when Engine B did not run.",
+    )
+    evidence_llm_temperature_pinned: bool | None = Field(
+        default=None,
+        description=(
+            "Whether the requested temperature was actually sent. False for "
+            "gemini-3*, which omits temperature from generation config. None "
+            "when Engine B did not run."
+        ),
+    )
 
 
 class UncertaintyPayload(BaseModel):
@@ -575,18 +619,14 @@ class RunEnvelope(BaseModel):
     completed_at: str | None = None
     input: InputPayload = Field(default_factory=InputPayload)
     classification: ClassificationPayload = Field(default_factory=ClassificationPayload)
-    queries: SearchQueries = Field(default_factory=SearchQueries)
     retrieval: RetrievalPayload | None = Field(
         default=None,
         description=(
             "Layer 3 retrieval and independence output. None until Layer 3 has "
-            "run. The legacy queries / evidence_items / wiki_hits / "
-            "tool_results / corroboration fields are still authoritative for "
-            "downstream layers until the stage 5 migration."
+            "run. Authoritative for documents, independent sources, existence, "
+            "fact-checks, and entity grounding."
         ),
     )
-    evidence_items: list[EvidenceItem] = Field(default_factory=list)
-    wiki_hits: list[WikiHit] = Field(default_factory=list)
     tool_results: list[ToolResult] = Field(default_factory=list)
     analysis: list[PairAnalysis] = Field(default_factory=list)
     gemini_analysis: list[GeminiClaimAnalysis] = Field(default_factory=list)

@@ -2048,7 +2048,7 @@
       "type": "rectangle",
       "x": 60,
       "y": 1208,
-      "width": 1240,
+      "width": 1880,
       "height": 140,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -2076,10 +2076,6 @@
           "type": "arrow"
         },
         {
-          "id": "a-pay-shim",
-          "type": "arrow"
-        },
-        {
           "id": "a-pay-review",
           "type": "arrow"
         }
@@ -2093,7 +2089,7 @@
       "type": "text",
       "x": 76,
       "y": 1220,
-      "width": 1208,
+      "width": 1848,
       "height": 22.5,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -2132,7 +2128,7 @@
       "type": "text",
       "x": 76,
       "y": 1248.5,
-      "width": 1208,
+      "width": 1848,
       "height": 37.5,
       "angle": 0,
       "strokeColor": "#343a40",
@@ -2156,124 +2152,9 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "document_count = pages. independent_source_count = newsrooms. existence_class keeps out_of_range distinct from not_found. Counts are\nderived from their lists, so they cannot drift.",
-      "originalText": "document_count = pages. independent_source_count = newsrooms. existence_class keeps out_of_range distinct from not_found. Counts are derived from their lists, so they cannot drift.",
+      "text": "document_count = pages. independent_source_count = newsrooms. existence_class keeps out_of_range distinct from not_found. Counts are derived from their lists, so they cannot drift. Adapter reports are copied onto\nenvelope.tool_results for Ask; existence_class is never written there.",
+      "originalText": "document_count = pages. independent_source_count = newsrooms. existence_class keeps out_of_range distinct from not_found. Counts are derived from their lists, so they cannot drift. Adapter reports are copied onto envelope.tool_results for Ask; existence_class is never written there.",
       "fontSize": 15,
-      "fontFamily": 2,
-      "textAlign": "left",
-      "verticalAlign": "top",
-      "containerId": null,
-      "autoResize": false,
-      "lineHeight": 1.25
-    },
-    {
-      "id": "shim",
-      "type": "rectangle",
-      "x": 1320,
-      "y": 1208,
-      "width": 620,
-      "height": 140,
-      "angle": 0,
-      "strokeColor": "#1e1e1e",
-      "backgroundColor": "#ffd8a8",
-      "fillStyle": "solid",
-      "strokeWidth": 2,
-      "strokeStyle": "dashed",
-      "roughness": 1,
-      "opacity": 100,
-      "groupIds": [
-        "g-shim"
-      ],
-      "frameId": null,
-      "index": "f6",
-      "roundness": {
-        "type": 3
-      },
-      "seed": 1860593958,
-      "version": 1,
-      "versionNonce": 1208396958,
-      "isDeleted": false,
-      "boundElements": [
-        {
-          "id": "a-pay-shim",
-          "type": "arrow"
-        }
-      ],
-      "updated": 1773320000000,
-      "link": null,
-      "locked": false
-    },
-    {
-      "id": "shim-title",
-      "type": "text",
-      "x": 1336,
-      "y": 1220,
-      "width": 588,
-      "height": 21.25,
-      "angle": 0,
-      "strokeColor": "#1e1e1e",
-      "backgroundColor": "transparent",
-      "fillStyle": "solid",
-      "strokeWidth": 2,
-      "strokeStyle": "solid",
-      "roughness": 1,
-      "opacity": 100,
-      "groupIds": [
-        "g-shim"
-      ],
-      "frameId": null,
-      "index": "f7",
-      "roundness": null,
-      "seed": 1590178481,
-      "version": 1,
-      "versionNonce": 1182234656,
-      "isDeleted": false,
-      "boundElements": null,
-      "updated": 1773320000000,
-      "link": null,
-      "locked": false,
-      "text": "Compat shim \u2014 transitional",
-      "originalText": "Compat shim \u2014 transitional",
-      "fontSize": 17,
-      "fontFamily": 2,
-      "textAlign": "left",
-      "verticalAlign": "top",
-      "containerId": null,
-      "autoResize": false,
-      "lineHeight": 1.25
-    },
-    {
-      "id": "shim-body",
-      "type": "text",
-      "x": 1336,
-      "y": 1247.25,
-      "width": 588,
-      "height": 52.5,
-      "angle": 0,
-      "strokeColor": "#343a40",
-      "backgroundColor": "transparent",
-      "fillStyle": "solid",
-      "strokeWidth": 2,
-      "strokeStyle": "solid",
-      "roughness": 1,
-      "opacity": 100,
-      "groupIds": [
-        "g-shim"
-      ],
-      "frameId": null,
-      "index": "f8",
-      "roundness": null,
-      "seed": 2030995699,
-      "version": 1,
-      "versionNonce": 1350966378,
-      "isDeleted": false,
-      "boundElements": null,
-      "updated": 1773320000000,
-      "link": null,
-      "locked": false,
-      "text": "Also fills the old queries / evidence_items / wiki_hits / tool_results /\ncorroboration.existence fields so Layers 4\u20137 keep running. out_of_range\nis mapped to not_found here only. Stage 6 deletes the shim.",
-      "originalText": "Also fills the old queries / evidence_items / wiki_hits / tool_results / corroboration.existence fields so Layers 4\u20137 keep running. out_of_range is mapped to not_found here only. Stage 6 deletes the shim.",
-      "fontSize": 14,
       "fontFamily": 2,
       "textAlign": "left",
       "verticalAlign": "top",
@@ -2300,7 +2181,7 @@
         "g-review"
       ],
       "frameId": null,
-      "index": "f9",
+      "index": "f6",
       "roundness": {
         "type": 3
       },
@@ -2341,7 +2222,7 @@
         "g-review"
       ],
       "frameId": null,
-      "index": "g0",
+      "index": "f7",
       "roundness": null,
       "seed": 953189351,
       "version": 1,
@@ -2380,7 +2261,7 @@
         "g-review"
       ],
       "frameId": null,
-      "index": "g1",
+      "index": "f8",
       "roundness": null,
       "seed": 159262850,
       "version": 1,
@@ -2419,7 +2300,7 @@
         "g-next"
       ],
       "frameId": null,
-      "index": "g2",
+      "index": "f9",
       "roundness": {
         "type": 3
       },
@@ -2456,7 +2337,7 @@
         "g-next"
       ],
       "frameId": null,
-      "index": "g3",
+      "index": "g0",
       "roundness": null,
       "seed": 294929947,
       "version": 1,
@@ -2495,7 +2376,7 @@
         "g-next"
       ],
       "frameId": null,
-      "index": "g4",
+      "index": "g1",
       "roundness": null,
       "seed": 302395930,
       "version": 1,
@@ -2534,7 +2415,7 @@
         "g-not"
       ],
       "frameId": null,
-      "index": "g5",
+      "index": "g2",
       "roundness": {
         "type": 3
       },
@@ -2566,7 +2447,7 @@
         "g-not"
       ],
       "frameId": null,
-      "index": "g6",
+      "index": "g3",
       "roundness": null,
       "seed": 2079826415,
       "version": 1,
@@ -2605,7 +2486,7 @@
         "g-not"
       ],
       "frameId": null,
-      "index": "g7",
+      "index": "g4",
       "roundness": null,
       "seed": 1502769635,
       "version": 1,
@@ -2642,7 +2523,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g8",
+      "index": "g5",
       "roundness": null,
       "seed": 622663238,
       "version": 1,
@@ -2679,7 +2560,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g9",
+      "index": "g6",
       "roundness": {
         "type": 2
       },
@@ -2733,7 +2614,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "h0",
+      "index": "g7",
       "roundness": {
         "type": 2
       },
@@ -2787,7 +2668,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "h1",
+      "index": "g8",
       "roundness": {
         "type": 2
       },
@@ -2841,7 +2722,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "h2",
+      "index": "g9",
       "roundness": {
         "type": 2
       },
@@ -2895,7 +2776,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "h3",
+      "index": "h0",
       "roundness": {
         "type": 2
       },
@@ -2949,7 +2830,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "h4",
+      "index": "h1",
       "roundness": {
         "type": 2
       },
@@ -3003,7 +2884,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "h5",
+      "index": "h2",
       "roundness": {
         "type": 2
       },
@@ -3057,7 +2938,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "h6",
+      "index": "h3",
       "roundness": {
         "type": 2
       },
@@ -3111,7 +2992,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "h7",
+      "index": "h4",
       "roundness": {
         "type": 2
       },
@@ -3165,7 +3046,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "h8",
+      "index": "h5",
       "roundness": {
         "type": 2
       },
@@ -3219,7 +3100,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "h9",
+      "index": "h6",
       "roundness": {
         "type": 2
       },
@@ -3273,7 +3154,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "i0",
+      "index": "h7",
       "roundness": {
         "type": 2
       },
@@ -3315,7 +3196,7 @@
       "type": "arrow",
       "x": 1000.0,
       "y": 1176,
-      "width": 320.0,
+      "width": 0,
       "height": 32,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -3327,7 +3208,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "i1",
+      "index": "h8",
       "roundness": {
         "type": 2
       },
@@ -3358,62 +3239,8 @@
           0
         ],
         [
-          -320.0,
+          0.0,
           32
-        ]
-      ],
-      "lastCommittedPoint": null
-    },
-    {
-      "id": "a-pay-shim",
-      "type": "arrow",
-      "x": 1300,
-      "y": 1278.0,
-      "width": 20,
-      "height": 0,
-      "angle": 0,
-      "strokeColor": "#1e1e1e",
-      "backgroundColor": "transparent",
-      "fillStyle": "solid",
-      "strokeWidth": 2,
-      "strokeStyle": "solid",
-      "roughness": 1,
-      "opacity": 100,
-      "groupIds": [],
-      "frameId": null,
-      "index": "i2",
-      "roundness": {
-        "type": 2
-      },
-      "seed": 647960247,
-      "version": 1,
-      "versionNonce": 468524342,
-      "isDeleted": false,
-      "boundElements": null,
-      "updated": 1773320000000,
-      "link": null,
-      "locked": false,
-      "startBinding": {
-        "elementId": "payload",
-        "focus": 0,
-        "gap": 8
-      },
-      "endBinding": {
-        "elementId": "shim",
-        "focus": 0,
-        "gap": 8
-      },
-      "startArrowhead": null,
-      "endArrowhead": "arrow",
-      "elbowed": false,
-      "points": [
-        [
-          0,
-          0
-        ],
-        [
-          20,
-          0.0
         ]
       ],
       "lastCommittedPoint": null
@@ -3421,9 +3248,9 @@
     {
       "id": "a-pay-review",
       "type": "arrow",
-      "x": 680.0,
+      "x": 1000.0,
       "y": 1348,
-      "width": 170.0,
+      "width": 490.0,
       "height": 32,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -3435,7 +3262,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "i3",
+      "index": "h9",
       "roundness": {
         "type": 2
       },
@@ -3466,7 +3293,7 @@
           0
         ],
         [
-          -170.0,
+          -490.0,
           32
         ]
       ],
@@ -3489,7 +3316,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "i4",
+      "index": "i0",
       "roundness": {
         "type": 2
       },

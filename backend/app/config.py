@@ -87,6 +87,8 @@ class Settings(BaseSettings):
     ingest_read_timeout_s: float = 20.0
     llm_timeout_s: float = 90.0
     hf_timeout_s: float = 60.0
+    # Ranked snippets both Layer 4 engines score. Layer 3 still keeps every
+    # page for independence counting; this cap is only the MNLI/LLM window.
     max_evidence_items: int = 12
     # 2 = extract claims twice and cross-check by span; 1 = single pass.
     claim_passes: int = 2
@@ -114,6 +116,8 @@ class Settings(BaseSettings):
     # GDELT DOC 2.0 needs no key. Its index starts in 2017, which is deeper
     # than any article this tool is likely to see, so no age gate is applied.
     gdelt_max_records: int = 25
+    # Unvalidated default inherited from pre-rewrite scoring. No cited
+    # justification in this repo; candidate for experimental determination.
     nli_threshold: float = 0.6
     near_duplicate_threshold: float = 0.88
     log_level: str = "INFO"

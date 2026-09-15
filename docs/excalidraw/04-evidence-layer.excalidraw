@@ -67,8 +67,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "NewsAuth \u00b7 Thesis B \u00b7 COMP4092     Compare each claim against the retrieved articles. Two independent engines, then a deterministic fuse. No authenticity score.",
-      "originalText": "NewsAuth \u00b7 Thesis B \u00b7 COMP4092     Compare each claim against the retrieved articles. Two independent engines, then a deterministic fuse. No authenticity score.",
+      "text": "NewsAuth \u00b7 Thesis B \u00b7 COMP4093     Compare each claim against retrieved snippets. Two engines, then a deterministic fuse. No authenticity score.",
+      "originalText": "NewsAuth \u00b7 Thesis B \u00b7 COMP4093     Compare each claim against retrieved snippets. Two engines, then a deterministic fuse. No authenticity score.",
       "fontSize": 15,
       "fontFamily": 2,
       "textAlign": "left",
@@ -317,8 +317,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "3 Verification",
-      "originalText": "3 Verification",
+      "text": "3 Retrieval",
+      "originalText": "3 Retrieval",
       "fontSize": 14,
       "fontFamily": 2,
       "textAlign": "center",
@@ -614,10 +614,10 @@
     {
       "id": "from-l3",
       "type": "rectangle",
-      "x": 420,
+      "x": 60,
       "y": 200,
-      "width": 1100,
-      "height": 96,
+      "width": 1880,
+      "height": 88,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "#d0ebff",
@@ -640,7 +640,11 @@
       "isDeleted": false,
       "boundElements": [
         {
-          "id": "a-in-split",
+          "id": "a-in-nli-sel",
+          "type": "arrow"
+        },
+        {
+          "id": "a-in-llm-sel",
           "type": "arrow"
         }
       ],
@@ -651,9 +655,9 @@
     {
       "id": "from-l3-title",
       "type": "text",
-      "x": 436,
+      "x": 76,
       "y": 212,
-      "width": 1068,
+      "width": 1848,
       "height": 22.5,
       "angle": 0,
       "strokeColor": "#1e1e1e",
@@ -677,8 +681,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "From Layer 3 \u2014 claims \u00d7 retrieved articles",
-      "originalText": "From Layer 3 \u2014 claims \u00d7 retrieved articles",
+      "text": "From Layer 3 \u2014 claims \u00d7 retrieved snippets",
+      "originalText": "From Layer 3 \u2014 claims \u00d7 retrieved snippets",
       "fontSize": 18,
       "fontFamily": 2,
       "textAlign": "left",
@@ -690,9 +694,9 @@
     {
       "id": "from-l3-body",
       "type": "text",
-      "x": 436,
+      "x": 76,
       "y": 240.5,
-      "width": 1068,
+      "width": 1848,
       "height": 18.75,
       "angle": 0,
       "strokeColor": "#343a40",
@@ -716,8 +720,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "Atomic claims from Layer 2, plus the ranked snippets, existence class, and publisher families from Layer 3.",
-      "originalText": "Atomic claims from Layer 2, plus the ranked snippets, existence class, and publisher families from Layer 3.",
+      "text": "Atomic claims from Layer 2, plus ranked snippets, existence class, and independent sources from Layer 3. The premise Engine A will see is a snippet, not the article.",
+      "originalText": "Atomic claims from Layer 2, plus ranked snippets, existence class, and independent sources from Layer 3. The premise Engine A will see is a snippet, not the article.",
       "fontSize": 15,
       "fontFamily": 2,
       "textAlign": "left",
@@ -727,12 +731,12 @@
       "lineHeight": 1.25
     },
     {
-      "id": "split",
+      "id": "nli-sel",
       "type": "rectangle",
-      "x": 520,
-      "y": 324,
+      "x": 60,
+      "y": 316,
       "width": 900,
-      "height": 56,
+      "height": 88,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "#ffec99",
@@ -742,28 +746,24 @@
       "roughness": 1,
       "opacity": 100,
       "groupIds": [
-        "g-split"
+        "g-nli-sel"
       ],
       "frameId": null,
       "index": "c0",
       "roundness": {
         "type": 3
       },
-      "seed": 1862189828,
+      "seed": 1288216963,
       "version": 1,
-      "versionNonce": 1386400364,
+      "versionNonce": 1019733984,
       "isDeleted": false,
       "boundElements": [
         {
-          "id": "a-in-split",
+          "id": "a-in-nli-sel",
           "type": "arrow"
         },
         {
-          "id": "a-split-nli",
-          "type": "arrow"
-        },
-        {
-          "id": "a-split-llm",
+          "id": "a-sel-nli",
           "type": "arrow"
         }
       ],
@@ -772,10 +772,10 @@
       "locked": false
     },
     {
-      "id": "split-title",
+      "id": "nli-sel-title",
       "type": "text",
-      "x": 536,
-      "y": 342.0,
+      "x": 76,
+      "y": 328,
       "width": 868,
       "height": 20.0,
       "angle": 0,
@@ -787,24 +787,182 @@
       "roughness": 1,
       "opacity": 100,
       "groupIds": [
-        "g-split"
+        "g-nli-sel"
       ],
       "frameId": null,
       "index": "c1",
       "roundness": null,
-      "seed": 1934881122,
+      "seed": 1880784346,
       "version": 1,
-      "versionNonce": 277635018,
+      "versionNonce": 478961151,
       "isDeleted": false,
       "boundElements": null,
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "Every claim is scored against every snippet \u2014 twice, on purpose",
-      "originalText": "Every claim is scored against every snippet \u2014 twice, on purpose",
+      "text": "Engine A \u2014 per pair",
+      "originalText": "Engine A \u2014 per pair",
       "fontSize": 16,
       "fontFamily": 2,
-      "textAlign": "center",
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "autoResize": false,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "nli-sel-body",
+      "type": "text",
+      "x": 76,
+      "y": 354.0,
+      "width": 868,
+      "height": 37.5,
+      "angle": 0,
+      "strokeColor": "#343a40",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-nli-sel"
+      ],
+      "frameId": null,
+      "index": "c2",
+      "roundness": null,
+      "seed": 1570164473,
+      "version": 1,
+      "versionNonce": 1470947129,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "text": "Each checkworthy claim \u00d7 the top ranked snippets (max_evidence_items, default 12), not every\nretrieved page. One NLI call per pair, run concurrently with Engine B.",
+      "originalText": "Each checkworthy claim \u00d7 the top ranked snippets (max_evidence_items, default 12), not every retrieved page. One NLI call per pair, run concurrently with Engine B.",
+      "fontSize": 15,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "autoResize": false,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "llm-sel",
+      "type": "rectangle",
+      "x": 1020,
+      "y": 316,
+      "width": 860,
+      "height": 88,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#ffec99",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-llm-sel"
+      ],
+      "frameId": null,
+      "index": "c3",
+      "roundness": {
+        "type": 3
+      },
+      "seed": 1507493123,
+      "version": 1,
+      "versionNonce": 1829913539,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "a-in-llm-sel",
+          "type": "arrow"
+        },
+        {
+          "id": "a-sel-llm",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "llm-sel-title",
+      "type": "text",
+      "x": 1036,
+      "y": 328,
+      "width": 828,
+      "height": 20.0,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-llm-sel"
+      ],
+      "frameId": null,
+      "index": "c4",
+      "roundness": null,
+      "seed": 514301024,
+      "version": 1,
+      "versionNonce": 1052636278,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "text": "Engine B \u2014 one batched call",
+      "originalText": "Engine B \u2014 one batched call",
+      "fontSize": 16,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "autoResize": false,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "llm-sel-body",
+      "type": "text",
+      "x": 1036,
+      "y": 354.0,
+      "width": 828,
+      "height": 37.5,
+      "angle": 0,
+      "strokeColor": "#343a40",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-llm-sel"
+      ],
+      "frameId": null,
+      "index": "c5",
+      "roundness": null,
+      "seed": 1568388104,
+      "version": 1,
+      "versionNonce": 138696540,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "text": "Same snippet window as Engine A, every claim (checkworthy or not), one request. Runs at the\nsame time as Engine A. Not per pair.",
+      "originalText": "Same snippet window as Engine A, every claim (checkworthy or not), one request. Runs at the same time as Engine A. Not per pair.",
+      "fontSize": 15,
+      "fontFamily": 2,
+      "textAlign": "left",
       "verticalAlign": "top",
       "containerId": null,
       "autoResize": false,
@@ -814,9 +972,9 @@
       "id": "nli",
       "type": "rectangle",
       "x": 60,
-      "y": 416,
+      "y": 432,
       "width": 900,
-      "height": 340,
+      "height": 400,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "#a5d8ff",
@@ -829,7 +987,7 @@
         "g-nli"
       ],
       "frameId": null,
-      "index": "c2",
+      "index": "c6",
       "roundness": {
         "type": 3
       },
@@ -839,7 +997,7 @@
       "isDeleted": false,
       "boundElements": [
         {
-          "id": "a-split-nli",
+          "id": "a-sel-nli",
           "type": "arrow"
         },
         {
@@ -855,7 +1013,7 @@
       "id": "nli-title",
       "type": "text",
       "x": 76,
-      "y": 428,
+      "y": 444,
       "width": 868,
       "height": 22.5,
       "angle": 0,
@@ -870,7 +1028,7 @@
         "g-nli"
       ],
       "frameId": null,
-      "index": "c3",
+      "index": "c7",
       "roundness": null,
       "seed": 2054947747,
       "version": 1,
@@ -894,9 +1052,9 @@
       "id": "nli-body",
       "type": "text",
       "x": 76,
-      "y": 456.5,
+      "y": 472.5,
       "width": 868,
-      "height": 93.75,
+      "height": 131.25,
       "angle": 0,
       "strokeColor": "#343a40",
       "backgroundColor": "transparent",
@@ -909,7 +1067,7 @@
         "g-nli"
       ],
       "frameId": null,
-      "index": "c4",
+      "index": "c8",
       "roundness": null,
       "seed": 1517638801,
       "version": 1,
@@ -919,8 +1077,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "Preferred: DeBERTa. If that is down: BART MNLI, then lexical overlap.\nFor each claim \u00d7 article snippet it returns:\nentailment \u00b7 contradiction \u00b7 neutral, with a confidence.\nIt does not write prose and cannot invent a verdict.\nIf there are no pairs, that is recorded as empty \u2014 not as false.",
-      "originalText": "Preferred: DeBERTa. If that is down: BART MNLI, then lexical overlap.\n\nFor each claim \u00d7 article snippet it returns:\nentailment \u00b7 contradiction \u00b7 neutral, with a confidence.\n\nIt does not write prose and cannot invent a verdict.\nIf there are no pairs, that is recorded as empty \u2014 not as false.",
+      "text": "Preferred: DeBERTa. If that is down: BART MNLI, then lexical overlap.\nThe premise is a search snippet (usually 500\u2013800 characters). For GDELT it is often the title\nalone. Not the article \u2014 that is why false-neutrals happen.\nEach pair returns entailment \u00b7 contradiction \u00b7 neutral, with a confidence.\nThe lexical fallback cannot detect contradiction in general. When it runs, the payload records that\nso a zero is not read as none found.\nIf there are no pairs, that is recorded as empty \u2014 not as false.",
+      "originalText": "Preferred: DeBERTa. If that is down: BART MNLI, then lexical overlap.\n\nThe premise is a search snippet (usually 500\u2013800 characters). For GDELT it is often the title alone. Not the article \u2014 that is why false-neutrals happen.\n\nEach pair returns entailment \u00b7 contradiction \u00b7 neutral, with a confidence.\n\nThe lexical fallback cannot detect contradiction in general. When it runs, the payload records that so a zero is not read as none found.\nIf there are no pairs, that is recorded as empty \u2014 not as false.",
       "fontSize": 15,
       "fontFamily": 2,
       "textAlign": "left",
@@ -933,9 +1091,9 @@
       "id": "llm",
       "type": "rectangle",
       "x": 1020,
-      "y": 416,
+      "y": 432,
       "width": 860,
-      "height": 340,
+      "height": 400,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "#d0bfff",
@@ -948,7 +1106,7 @@
         "g-llm"
       ],
       "frameId": null,
-      "index": "c5",
+      "index": "c9",
       "roundness": {
         "type": 3
       },
@@ -958,7 +1116,7 @@
       "isDeleted": false,
       "boundElements": [
         {
-          "id": "a-split-llm",
+          "id": "a-sel-llm",
           "type": "arrow"
         },
         {
@@ -974,7 +1132,7 @@
       "id": "llm-title",
       "type": "text",
       "x": 1036,
-      "y": 428,
+      "y": 444,
       "width": 828,
       "height": 22.5,
       "angle": 0,
@@ -989,7 +1147,7 @@
         "g-llm"
       ],
       "frameId": null,
-      "index": "c6",
+      "index": "d0",
       "roundness": null,
       "seed": 1061252117,
       "version": 1,
@@ -1013,9 +1171,9 @@
       "id": "llm-body",
       "type": "text",
       "x": 1036,
-      "y": 456.5,
+      "y": 472.5,
       "width": 828,
-      "height": 93.75,
+      "height": 112.5,
       "angle": 0,
       "strokeColor": "#343a40",
       "backgroundColor": "transparent",
@@ -1028,7 +1186,7 @@
         "g-llm"
       ],
       "frameId": null,
-      "index": "c7",
+      "index": "d1",
       "roundness": null,
       "seed": 496635096,
       "version": 1,
@@ -1038,8 +1196,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "Sees only the claims and the evidence list. It is not given DeBERTa labels, the existence\nclass, or a requested verdict.\nFor each claim it lists which source_ids support, refute, or are unrelated, plus slot clashes\n(date, place, number, actor).\nInvented source IDs are dropped. If Gemini is down, fusion continues on NLI alone.",
-      "originalText": "Sees only the claims and the evidence list. It is not given DeBERTa labels, the existence class, or a requested verdict.\n\nFor each claim it lists which source_ids support, refute, or are unrelated, plus slot clashes (date, place, number, actor).\n\nInvented source IDs are dropped. If Gemini is down, fusion continues on NLI alone.",
+      "text": "Blinded from NLI labels, existence class, title-match strength, relevance, merge reason, and\nwire credit. Sees outlet, date, URL, title, snippet.\nFor each claim it lists which source_ids support, refute, or are unrelated, plus slot clashes\n(date, place, number, actor).\nInvented source IDs are dropped. A response that cited only invented IDs is a non-response, not\n\u201cno stance\u201d. Temperature is 0.0; gemini-3* cannot pin sampling, and that is recorded.",
+      "originalText": "Blinded from NLI labels, existence class, title-match strength, relevance, merge reason, and wire credit. Sees outlet, date, URL, title, snippet.\n\nFor each claim it lists which source_ids support, refute, or are unrelated, plus slot clashes (date, place, number, actor).\n\nInvented source IDs are dropped. A response that cited only invented IDs is a non-response, not \u201cno stance\u201d. Temperature is 0.0; gemini-3* cannot pin sampling, and that is recorded.",
       "fontSize": 15,
       "fontFamily": 2,
       "textAlign": "left",
@@ -1052,9 +1210,9 @@
       "id": "fuse",
       "type": "rectangle",
       "x": 60,
-      "y": 792,
+      "y": 860,
       "width": 1880,
-      "height": 200,
+      "height": 248,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "#b2f2bb",
@@ -1067,7 +1225,7 @@
         "g-fuse"
       ],
       "frameId": null,
-      "index": "c8",
+      "index": "d2",
       "roundness": {
         "type": 3
       },
@@ -1097,7 +1255,7 @@
       "id": "fuse-title",
       "type": "text",
       "x": 76,
-      "y": 804,
+      "y": 872,
       "width": 1848,
       "height": 22.5,
       "angle": 0,
@@ -1112,7 +1270,7 @@
         "g-fuse"
       ],
       "frameId": null,
-      "index": "c9",
+      "index": "d3",
       "roundness": null,
       "seed": 2120507462,
       "version": 1,
@@ -1136,9 +1294,9 @@
       "id": "fuse-body",
       "type": "text",
       "x": 76,
-      "y": 832.5,
+      "y": 900.5,
       "width": 1848,
-      "height": 75.0,
+      "height": 93.75,
       "angle": 0,
       "strokeColor": "#343a40",
       "backgroundColor": "transparent",
@@ -1151,7 +1309,7 @@
         "g-fuse"
       ],
       "frameId": null,
-      "index": "d0",
+      "index": "d4",
       "roundness": null,
       "seed": 98198801,
       "version": 1,
@@ -1161,8 +1319,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "Count support and contradiction by publisher family, not by URL (bbc.com and bbc.co.uk are one family).\nAgreement: convergent \u00b7 contested \u00b7 NLI-only \u00b7 LLM-only \u00b7 none.\nThen overlay Layer 3 existence to pick a corroboration state: corroborated coverage \u00b7 event corroborated \u00b7 single source \u00b7 contested reporting \u00b7 no corroboration found.\nNo true/false probability is produced.",
-      "originalText": "Count support and contradiction by publisher family, not by URL (bbc.com and bbc.co.uk are one family).\nAgreement: convergent \u00b7 contested \u00b7 NLI-only \u00b7 LLM-only \u00b7 none.\nThen overlay Layer 3 existence to pick a corroboration state: corroborated coverage \u00b7 event corroborated \u00b7 single source \u00b7 contested reporting \u00b7 no corroboration found.\nNo true/false probability is produced.",
+      "text": "Count support and contradiction by independent source, not by URL or masthead (twenty syndicated copies are one newsroom).\nJoin misses against Layer 3 groups are counted: a miss inflates the independent-source count, which is then an upper bound.\nAgreement: convergent \u00b7 contested \u00b7 NLI-only \u00b7 LLM-only \u00b7 none. Contradiction counts are withheld when Engine A could not detect polarity.\nEmpty paths are not_assessed, never no_corroboration_found. not_found (looked, nothing) and out_of_range (never looked) stay distinct.\nFusion is a pure function of its input. Engine B sampling may be unpinned, so the layer is not reproducible even though fusion is.",
+      "originalText": "Count support and contradiction by independent source, not by URL or masthead (twenty syndicated copies are one newsroom).\nJoin misses against Layer 3 groups are counted: a miss inflates the independent-source count, which is then an upper bound.\nAgreement: convergent \u00b7 contested \u00b7 NLI-only \u00b7 LLM-only \u00b7 none. Contradiction counts are withheld when Engine A could not detect polarity.\nEmpty paths are not_assessed, never no_corroboration_found. not_found (looked, nothing) and out_of_range (never looked) stay distinct.\nFusion is a pure function of its input. Engine B sampling may be unpinned, so the layer is not reproducible even though fusion is.",
       "fontSize": 15,
       "fontFamily": 2,
       "textAlign": "left",
@@ -1175,7 +1333,7 @@
       "id": "out-label",
       "type": "text",
       "x": 60,
-      "y": 1024,
+      "y": 1140,
       "width": 222.71999999999997,
       "height": 20.0,
       "angle": 0,
@@ -1188,7 +1346,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "d1",
+      "index": "d5",
       "roundness": null,
       "seed": 1952892984,
       "version": 1,
@@ -1212,7 +1370,7 @@
       "id": "out-matrix",
       "type": "rectangle",
       "x": 60,
-      "y": 1052,
+      "y": 1168,
       "width": 292,
       "height": 120,
       "angle": 0,
@@ -1227,7 +1385,7 @@
         "g-out-matrix"
       ],
       "frameId": null,
-      "index": "d2",
+      "index": "d6",
       "roundness": {
         "type": 3
       },
@@ -1253,7 +1411,7 @@
       "id": "out-matrix-title",
       "type": "text",
       "x": 76,
-      "y": 1064,
+      "y": 1180,
       "width": 260,
       "height": 18.75,
       "angle": 0,
@@ -1268,7 +1426,7 @@
         "g-out-matrix"
       ],
       "frameId": null,
-      "index": "d3",
+      "index": "d7",
       "roundness": null,
       "seed": 1002247032,
       "version": 1,
@@ -1292,7 +1450,7 @@
       "id": "out-matrix-body",
       "type": "text",
       "x": 76,
-      "y": 1088.75,
+      "y": 1204.75,
       "width": 260,
       "height": 32.5,
       "angle": 0,
@@ -1307,7 +1465,7 @@
         "g-out-matrix"
       ],
       "frameId": null,
-      "index": "d4",
+      "index": "d8",
       "roundness": null,
       "seed": 459267825,
       "version": 1,
@@ -1331,7 +1489,7 @@
       "id": "out-agree",
       "type": "rectangle",
       "x": 368,
-      "y": 1052,
+      "y": 1168,
       "width": 292,
       "height": 120,
       "angle": 0,
@@ -1346,7 +1504,7 @@
         "g-out-agree"
       ],
       "frameId": null,
-      "index": "d5",
+      "index": "d9",
       "roundness": {
         "type": 3
       },
@@ -1363,7 +1521,7 @@
       "id": "out-agree-title",
       "type": "text",
       "x": 384,
-      "y": 1064,
+      "y": 1180,
       "width": 260,
       "height": 18.75,
       "angle": 0,
@@ -1378,7 +1536,7 @@
         "g-out-agree"
       ],
       "frameId": null,
-      "index": "d6",
+      "index": "e0",
       "roundness": null,
       "seed": 925850914,
       "version": 1,
@@ -1402,7 +1560,7 @@
       "id": "out-agree-body",
       "type": "text",
       "x": 384,
-      "y": 1088.75,
+      "y": 1204.75,
       "width": 260,
       "height": 32.5,
       "angle": 0,
@@ -1417,7 +1575,7 @@
         "g-out-agree"
       ],
       "frameId": null,
-      "index": "d7",
+      "index": "e1",
       "roundness": null,
       "seed": 25025894,
       "version": 1,
@@ -1441,7 +1599,7 @@
       "id": "out-fam",
       "type": "rectangle",
       "x": 676,
-      "y": 1052,
+      "y": 1168,
       "width": 292,
       "height": 120,
       "angle": 0,
@@ -1456,7 +1614,7 @@
         "g-out-fam"
       ],
       "frameId": null,
-      "index": "d8",
+      "index": "e2",
       "roundness": {
         "type": 3
       },
@@ -1473,7 +1631,7 @@
       "id": "out-fam-title",
       "type": "text",
       "x": 692,
-      "y": 1064,
+      "y": 1180,
       "width": 260,
       "height": 18.75,
       "angle": 0,
@@ -1488,7 +1646,7 @@
         "g-out-fam"
       ],
       "frameId": null,
-      "index": "d9",
+      "index": "e3",
       "roundness": null,
       "seed": 919914474,
       "version": 1,
@@ -1498,8 +1656,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "Independent families",
-      "originalText": "Independent families",
+      "text": "Independent sources",
+      "originalText": "Independent sources",
       "fontSize": 15,
       "fontFamily": 2,
       "textAlign": "left",
@@ -1512,7 +1670,7 @@
       "id": "out-fam-body",
       "type": "text",
       "x": 692,
-      "y": 1088.75,
+      "y": 1204.75,
       "width": 260,
       "height": 32.5,
       "angle": 0,
@@ -1527,7 +1685,7 @@
         "g-out-fam"
       ],
       "frameId": null,
-      "index": "e0",
+      "index": "e4",
       "roundness": null,
       "seed": 2095544145,
       "version": 1,
@@ -1537,8 +1695,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "How many publisher\nfamilies support / contradict",
-      "originalText": "How many publisher\nfamilies support / contradict",
+      "text": "Newsroom counts; upper\nbound if join misses",
+      "originalText": "Newsroom counts; upper\nbound if join misses",
       "fontSize": 13,
       "fontFamily": 2,
       "textAlign": "left",
@@ -1551,7 +1709,7 @@
       "id": "out-slots",
       "type": "rectangle",
       "x": 984,
-      "y": 1052,
+      "y": 1168,
       "width": 292,
       "height": 120,
       "angle": 0,
@@ -1566,7 +1724,7 @@
         "g-out-slots"
       ],
       "frameId": null,
-      "index": "e1",
+      "index": "e5",
       "roundness": {
         "type": 3
       },
@@ -1583,7 +1741,7 @@
       "id": "out-slots-title",
       "type": "text",
       "x": 1000,
-      "y": 1064,
+      "y": 1180,
       "width": 260,
       "height": 18.75,
       "angle": 0,
@@ -1598,7 +1756,7 @@
         "g-out-slots"
       ],
       "frameId": null,
-      "index": "e2",
+      "index": "e6",
       "roundness": null,
       "seed": 871800943,
       "version": 1,
@@ -1622,7 +1780,7 @@
       "id": "out-slots-body",
       "type": "text",
       "x": 1000,
-      "y": 1088.75,
+      "y": 1204.75,
       "width": 260,
       "height": 32.5,
       "angle": 0,
@@ -1637,7 +1795,7 @@
         "g-out-slots"
       ],
       "frameId": null,
-      "index": "e3",
+      "index": "e7",
       "roundness": null,
       "seed": 1425511931,
       "version": 1,
@@ -1647,8 +1805,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "Date, place, number, actor\nclashes Gemini noticed",
-      "originalText": "Date, place, number, actor\nclashes Gemini noticed",
+      "text": "Collected, not fused,\nnot shown in the UI",
+      "originalText": "Collected, not fused,\nnot shown in the UI",
       "fontSize": 13,
       "fontFamily": 2,
       "textAlign": "left",
@@ -1661,7 +1819,7 @@
       "id": "out-state",
       "type": "rectangle",
       "x": 1292,
-      "y": 1052,
+      "y": 1168,
       "width": 292,
       "height": 120,
       "angle": 0,
@@ -1676,7 +1834,7 @@
         "g-out-state"
       ],
       "frameId": null,
-      "index": "e4",
+      "index": "e8",
       "roundness": {
         "type": 3
       },
@@ -1693,7 +1851,7 @@
       "id": "out-state-title",
       "type": "text",
       "x": 1308,
-      "y": 1064,
+      "y": 1180,
       "width": 260,
       "height": 18.75,
       "angle": 0,
@@ -1708,7 +1866,7 @@
         "g-out-state"
       ],
       "frameId": null,
-      "index": "e5",
+      "index": "e9",
       "roundness": null,
       "seed": 531464265,
       "version": 1,
@@ -1732,7 +1890,7 @@
       "id": "out-state-body",
       "type": "text",
       "x": 1308,
-      "y": 1088.75,
+      "y": 1204.75,
       "width": 260,
       "height": 32.5,
       "angle": 0,
@@ -1747,7 +1905,7 @@
         "g-out-state"
       ],
       "frameId": null,
-      "index": "e6",
+      "index": "f0",
       "roundness": null,
       "seed": 1282833360,
       "version": 1,
@@ -1757,8 +1915,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "corroborated, single-source,\ncontested, or none found",
-      "originalText": "corroborated, single-source,\ncontested, or none found",
+      "text": "not_assessed, corroborated,\nsingle-source, contested",
+      "originalText": "not_assessed, corroborated,\nsingle-source, contested",
       "fontSize": 13,
       "fontFamily": 2,
       "textAlign": "left",
@@ -1771,7 +1929,7 @@
       "id": "out-overall",
       "type": "rectangle",
       "x": 1600,
-      "y": 1052,
+      "y": 1168,
       "width": 292,
       "height": 120,
       "angle": 0,
@@ -1786,7 +1944,7 @@
         "g-out-overall"
       ],
       "frameId": null,
-      "index": "e7",
+      "index": "f1",
       "roundness": {
         "type": 3
       },
@@ -1803,7 +1961,7 @@
       "id": "out-overall-title",
       "type": "text",
       "x": 1616,
-      "y": 1064,
+      "y": 1180,
       "width": 260,
       "height": 18.75,
       "angle": 0,
@@ -1818,7 +1976,7 @@
         "g-out-overall"
       ],
       "frameId": null,
-      "index": "e8",
+      "index": "f2",
       "roundness": null,
       "seed": 233546961,
       "version": 1,
@@ -1842,7 +2000,7 @@
       "id": "out-overall-body",
       "type": "text",
       "x": 1616,
-      "y": 1088.75,
+      "y": 1204.75,
       "width": 260,
       "height": 32.5,
       "angle": 0,
@@ -1857,7 +2015,7 @@
         "g-out-overall"
       ],
       "frameId": null,
-      "index": "e9",
+      "index": "f3",
       "roundness": null,
       "seed": 1081869061,
       "version": 1,
@@ -1867,8 +2025,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "One state for the run \u2014\nstill not a verdict",
-      "originalText": "One state for the run \u2014\nstill not a verdict",
+      "text": "not_found \u2260 out_of_range;\nstill not a verdict",
+      "originalText": "not_found \u2260 out_of_range;\nstill not a verdict",
       "fontSize": 13,
       "fontFamily": 2,
       "textAlign": "left",
@@ -1881,7 +2039,7 @@
       "id": "gate",
       "type": "rectangle",
       "x": 60,
-      "y": 1212,
+      "y": 1320,
       "width": 900,
       "height": 120,
       "angle": 0,
@@ -1896,7 +2054,7 @@
         "g-gate"
       ],
       "frameId": null,
-      "index": "f0",
+      "index": "f4",
       "roundness": {
         "type": 3
       },
@@ -1922,7 +2080,7 @@
       "id": "gate-title",
       "type": "text",
       "x": 76,
-      "y": 1224,
+      "y": 1332,
       "width": 868,
       "height": 21.25,
       "angle": 0,
@@ -1937,7 +2095,7 @@
         "g-gate"
       ],
       "frameId": null,
-      "index": "f1",
+      "index": "f5",
       "roundness": null,
       "seed": 1248334814,
       "version": 1,
@@ -1961,7 +2119,7 @@
       "id": "gate-body",
       "type": "text",
       "x": 76,
-      "y": 1251.25,
+      "y": 1359.25,
       "width": 868,
       "height": 37.5,
       "angle": 0,
@@ -1976,7 +2134,7 @@
         "g-gate"
       ],
       "frameId": null,
-      "index": "f2",
+      "index": "f6",
       "roundness": null,
       "seed": 1655686545,
       "version": 1,
@@ -2000,7 +2158,7 @@
       "id": "next",
       "type": "rectangle",
       "x": 996,
-      "y": 1212,
+      "y": 1320,
       "width": 360,
       "height": 120,
       "angle": 0,
@@ -2015,7 +2173,7 @@
         "g-next"
       ],
       "frameId": null,
-      "index": "f3",
+      "index": "f7",
       "roundness": {
         "type": 3
       },
@@ -2037,7 +2195,7 @@
       "id": "next-title",
       "type": "text",
       "x": 1012,
-      "y": 1224,
+      "y": 1332,
       "width": 328,
       "height": 21.25,
       "angle": 0,
@@ -2052,7 +2210,7 @@
         "g-next"
       ],
       "frameId": null,
-      "index": "f4",
+      "index": "f8",
       "roundness": null,
       "seed": 294929947,
       "version": 1,
@@ -2076,7 +2234,7 @@
       "id": "next-body",
       "type": "text",
       "x": 1012,
-      "y": 1251.25,
+      "y": 1359.25,
       "width": 328,
       "height": 37.5,
       "angle": 0,
@@ -2091,7 +2249,7 @@
         "g-next"
       ],
       "frameId": null,
-      "index": "f5",
+      "index": "f9",
       "roundness": null,
       "seed": 302395930,
       "version": 1,
@@ -2115,7 +2273,7 @@
       "id": "not",
       "type": "rectangle",
       "x": 1388,
-      "y": 1212,
+      "y": 1320,
       "width": 492,
       "height": 120,
       "angle": 0,
@@ -2130,7 +2288,7 @@
         "g-not"
       ],
       "frameId": null,
-      "index": "f6",
+      "index": "g0",
       "roundness": {
         "type": 3
       },
@@ -2147,7 +2305,7 @@
       "id": "not-title",
       "type": "text",
       "x": 1404,
-      "y": 1224,
+      "y": 1332,
       "width": 460,
       "height": 21.25,
       "angle": 0,
@@ -2162,7 +2320,7 @@
         "g-not"
       ],
       "frameId": null,
-      "index": "f7",
+      "index": "g1",
       "roundness": null,
       "seed": 2079826415,
       "version": 1,
@@ -2186,7 +2344,7 @@
       "id": "not-body",
       "type": "text",
       "x": 1404,
-      "y": 1251.25,
+      "y": 1359.25,
       "width": 460,
       "height": 37.5,
       "angle": 0,
@@ -2201,7 +2359,7 @@
         "g-not"
       ],
       "frameId": null,
-      "index": "f8",
+      "index": "g2",
       "roundness": null,
       "seed": 1502769635,
       "version": 1,
@@ -2222,10 +2380,155 @@
       "lineHeight": 1.25
     },
     {
-      "id": "a-in-split",
+      "id": "footer",
+      "type": "text",
+      "x": 60,
+      "y": 1472,
+      "width": 1880,
+      "height": 45.0,
+      "angle": 0,
+      "strokeColor": "#868e96",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "g3",
+      "roundness": null,
+      "seed": 622663238,
+      "version": 1,
+      "versionNonce": 741608418,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "text": "Source of truth: backend/app/layers/evidence.py, backend/app/scoring/corroboration.py, backend/app/engines/nli.py,\nbackend/app/engines/llm_router.py, backend/app/scoring/urls.py (grouping_url), backend/app/retrieval/independence.py,\nbackend/app/schemas/envelope.py (CorroborationPayload, GeminiClaimAnalysis), src/components/layerOutputs.tsx. Tests: backend/tests/test_evidence_blinding.py, test_evidence_fusion.py, test_nli_engine.py, test_evidence_visibility.py.",
+      "originalText": "Source of truth: backend/app/layers/evidence.py, backend/app/scoring/corroboration.py, backend/app/engines/nli.py,\nbackend/app/engines/llm_router.py, backend/app/scoring/urls.py (grouping_url), backend/app/retrieval/independence.py,\nbackend/app/schemas/envelope.py (CorroborationPayload, GeminiClaimAnalysis), src/components/layerOutputs.tsx. Tests: backend/tests/test_evidence_blinding.py, test_evidence_fusion.py, test_nli_engine.py, test_evidence_visibility.py.",
+      "fontSize": 12,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "autoResize": false,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "a-in-nli-sel",
       "type": "arrow",
-      "x": 970.0,
-      "y": 296,
+      "x": 1000.0,
+      "y": 288,
+      "width": 490.0,
+      "height": 28,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "g4",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 322245993,
+      "version": 1,
+      "versionNonce": 1941855882,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "startBinding": {
+        "elementId": "from-l3",
+        "focus": 0,
+        "gap": 8
+      },
+      "endBinding": {
+        "elementId": "nli-sel",
+        "focus": 0,
+        "gap": 8
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "elbowed": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -490.0,
+          28
+        ]
+      ],
+      "lastCommittedPoint": null
+    },
+    {
+      "id": "a-in-llm-sel",
+      "type": "arrow",
+      "x": 1000.0,
+      "y": 288,
+      "width": 450.0,
+      "height": 28,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "g5",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1492195821,
+      "version": 1,
+      "versionNonce": 1355010129,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "startBinding": {
+        "elementId": "from-l3",
+        "focus": 0,
+        "gap": 8
+      },
+      "endBinding": {
+        "elementId": "llm-sel",
+        "focus": 0,
+        "gap": 8
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "elbowed": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          450.0,
+          28
+        ]
+      ],
+      "lastCommittedPoint": null
+    },
+    {
+      "id": "a-sel-nli",
+      "type": "arrow",
+      "x": 510.0,
+      "y": 404,
       "width": 0,
       "height": 28,
       "angle": 0,
@@ -2238,25 +2541,25 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "f9",
+      "index": "g6",
       "roundness": {
         "type": 2
       },
-      "seed": 916954917,
+      "seed": 891719564,
       "version": 1,
-      "versionNonce": 453254500,
+      "versionNonce": 1617386450,
       "isDeleted": false,
       "boundElements": null,
       "updated": 1773320000000,
       "link": null,
       "locked": false,
       "startBinding": {
-        "elementId": "from-l3",
+        "elementId": "nli-sel",
         "focus": 0,
         "gap": 8
       },
       "endBinding": {
-        "elementId": "split",
+        "elementId": "nli",
         "focus": 0,
         "gap": 8
       },
@@ -2276,12 +2579,12 @@
       "lastCommittedPoint": null
     },
     {
-      "id": "a-split-nli",
+      "id": "a-sel-llm",
       "type": "arrow",
-      "x": 970.0,
-      "y": 380,
-      "width": 460.0,
-      "height": 36,
+      "x": 1450.0,
+      "y": 404,
+      "width": 0,
+      "height": 28,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -2292,74 +2595,20 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g0",
+      "index": "g7",
       "roundness": {
         "type": 2
       },
-      "seed": 399381098,
+      "seed": 1498801816,
       "version": 1,
-      "versionNonce": 920777666,
+      "versionNonce": 94296105,
       "isDeleted": false,
       "boundElements": null,
       "updated": 1773320000000,
       "link": null,
       "locked": false,
       "startBinding": {
-        "elementId": "split",
-        "focus": 0,
-        "gap": 8
-      },
-      "endBinding": {
-        "elementId": "nli",
-        "focus": 0,
-        "gap": 8
-      },
-      "startArrowhead": null,
-      "endArrowhead": "arrow",
-      "elbowed": false,
-      "points": [
-        [
-          0,
-          0
-        ],
-        [
-          -460.0,
-          36
-        ]
-      ],
-      "lastCommittedPoint": null
-    },
-    {
-      "id": "a-split-llm",
-      "type": "arrow",
-      "x": 970.0,
-      "y": 380,
-      "width": 480.0,
-      "height": 36,
-      "angle": 0,
-      "strokeColor": "#1e1e1e",
-      "backgroundColor": "transparent",
-      "fillStyle": "solid",
-      "strokeWidth": 2,
-      "strokeStyle": "solid",
-      "roughness": 1,
-      "opacity": 100,
-      "groupIds": [],
-      "frameId": null,
-      "index": "g1",
-      "roundness": {
-        "type": 2
-      },
-      "seed": 1951876968,
-      "version": 1,
-      "versionNonce": 1315478588,
-      "isDeleted": false,
-      "boundElements": null,
-      "updated": 1773320000000,
-      "link": null,
-      "locked": false,
-      "startBinding": {
-        "elementId": "split",
+        "elementId": "llm-sel",
         "focus": 0,
         "gap": 8
       },
@@ -2377,8 +2626,8 @@
           0
         ],
         [
-          480.0,
-          36
+          0.0,
+          28
         ]
       ],
       "lastCommittedPoint": null
@@ -2387,9 +2636,9 @@
       "id": "a-nli-fuse",
       "type": "arrow",
       "x": 510.0,
-      "y": 756,
+      "y": 832,
       "width": 0,
-      "height": 36,
+      "height": 28,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -2400,7 +2649,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g2",
+      "index": "g8",
       "roundness": {
         "type": 2
       },
@@ -2432,7 +2681,7 @@
         ],
         [
           0.0,
-          36
+          28
         ]
       ],
       "lastCommittedPoint": null
@@ -2441,9 +2690,9 @@
       "id": "a-llm-fuse",
       "type": "arrow",
       "x": 1450.0,
-      "y": 756,
+      "y": 832,
       "width": 0,
-      "height": 36,
+      "height": 28,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -2454,7 +2703,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g3",
+      "index": "g9",
       "roundness": {
         "type": 2
       },
@@ -2486,7 +2735,7 @@
         ],
         [
           0.0,
-          36
+          28
         ]
       ],
       "lastCommittedPoint": null
@@ -2495,7 +2744,7 @@
       "id": "a-fuse-matrix",
       "type": "arrow",
       "x": 206.0,
-      "y": 992,
+      "y": 1108,
       "width": 0,
       "height": 60,
       "angle": 0,
@@ -2508,7 +2757,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g4",
+      "index": "h0",
       "roundness": {
         "type": 2
       },
@@ -2549,9 +2798,9 @@
       "id": "a-matrix-gate",
       "type": "arrow",
       "x": 206.0,
-      "y": 1172,
+      "y": 1288,
       "width": 0,
-      "height": 40,
+      "height": 32,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -2562,7 +2811,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g5",
+      "index": "h1",
       "roundness": {
         "type": 2
       },
@@ -2594,7 +2843,7 @@
         ],
         [
           0.0,
-          40
+          32
         ]
       ],
       "lastCommittedPoint": null
@@ -2603,7 +2852,7 @@
       "id": "a-gate-next",
       "type": "arrow",
       "x": 960,
-      "y": 1272.0,
+      "y": 1380.0,
       "width": 36,
       "height": 0,
       "angle": 0,
@@ -2616,7 +2865,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g6",
+      "index": "h2",
       "roundness": {
         "type": 2
       },

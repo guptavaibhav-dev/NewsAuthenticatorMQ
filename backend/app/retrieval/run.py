@@ -295,6 +295,7 @@ async def run_retrieval(
         entity_grounding=grounding,
     )
     envelope.retrieval = payload
+    record_tool_results(envelope, payload)
 
     await emit(
         layer=TRACE_LAYER,
@@ -309,8 +310,6 @@ async def run_retrieval(
             "speaks to corroboration."
         ),
     )
-
-    apply_compat_shim(envelope, payload)
 
     await emit(
         layer=TRACE_LAYER,
@@ -500,139 +499,36 @@ def _entity_grounding(
     return rows
 
 
-# =============================================================================
-# COMPAT
-#
-# Layer 3 now writes `envelope.retrieval`, but seven consumers still read the
-# older top-level fields. Everything below projects the new payload back onto
-# them so nothing breaks while the migration lands.
-#
-# TODO(stage 6): delete this whole block, along with envelope.queries,
-# evidence_items, wiki_hits, tool_results, corroboration.existence and
-# ExistenceClass. Nothing here is a source of truth — `envelope.retrieval` is.
-# =============================================================================
-
-#: RetrievalExistenceClass -> the older, coarser ExistenceClass.
-_LEGACY_EXISTENCE: dict[str, str] = {
-    "exact_url": "exact_url_match",
-    "title_match": "title_match",
-    "near_duplicate": "near_duplicate",
-    "syndicated": "syndicated_or_reprint",
-    "not_found": "not_found",
-    # LOSSY, AND KNOWINGLY SO. The old enum has no way to say "we could not
-    # look", so "we never searched" arrives downstream indistinguishable from
-    # "we searched and found nothing" — which is precisely the conflation this
-    # rewrite exists to remove. It is confined to the shim: envelope.retrieval
-    # keeps out_of_range intact, and this mapping dies with the shim in stage 6.
-    "out_of_range": "not_found",
-}
-
-_LEGACY_TOOL_STATUS: dict[str, str] = {
-    "ok": "ok",
-    "empty": "empty",
-    "error": "error",
-    "skipped_no_key": "skipped",
-    "skipped_out_of_range": "skipped",
-}
-
-
-def legacy_existence_class(existence_class: str) -> str:
-    """Project the six-member class onto the old five. Shim only."""
-    return _LEGACY_EXISTENCE.get(existence_class, "not_found")
-
-
 def evidence_source_id(index: int) -> str:
     return f"s{index + 1}"
 
 
-def apply_compat_shim(envelope: RunEnvelope, payload: RetrievalPayload) -> None:
-    """Project envelope.retrieval onto the legacy fields. Read-only source."""
-    from app.schemas.envelope import (
-        EvidenceItem,
-        ExistenceResult,
-        FactCheckItem,
-        SearchQueries,
-        ToolResult,
-        WikiHit,
-    )
-    from app.scoring.source_independence import publisher_family, source_band
+def record_tool_results(envelope: RunEnvelope, payload: RetrievalPayload) -> None:
+    """Copy adapter reports onto envelope.tool_results.
 
-    queries = payload.planned_queries
-    existence = existence_queries(queries)
-    claim_queries = [q for q in queries if q.kind == "claim"]
-    entity_queries = [q for q in queries if q.kind == "entity"]
-    fc_queries = [q for q in queries if q.kind == "factcheck"]
-    dated = next((q for q in queries if q.date_from or q.date_to), None)
+    tool_results is a pipeline-wide field that Ask exposes from layer 1
+    onward, so Layer 3 writes it but does not own it. Statuses are projected
+    onto the coarser ToolStatus enum (ok/empty/error/skipped). That is a
+    granularity loss on *tool* status, not the existence-class conflation:
+    skipped_out_of_range and skipped_no_key both become skipped here, while
+    envelope.retrieval.coverage.adapters keeps them distinct, and
+    existence_class is never written to this list.
+    """
+    from app.schemas.envelope import ToolResult
 
-    envelope.queries = SearchQueries(
-        quoted_headline=(existence[0].query_text.strip('"') if existence else None),
-        event_boolean=(claim_queries[0].query_text if claim_queries else None),
-        date_from=dated.date_from if dated else None,
-        date_to=dated.date_to if dated else None,
-        entity_queries=[q.query_text for q in entity_queries],
-        factcheck_query=(fc_queries[0].query_text if fc_queries else None),
-        planner_model=payload.planner_model or "deterministic",
-        planner_mode="llm" if payload.planner_model else "deterministic",
-    )
-
-    envelope.evidence_items = [
-        EvidenceItem(
-            source_id=evidence_source_id(index),
-            outlet=hit.publisher_domain or hit.publisher_id,
-            domain=hit.publisher_domain,
-            url=hit.url,
-            title=hit.title,
-            published_at=hit.published_at,
-            snippet=hit.snippet or "",
-            tool=hit.source_adapter,
-            matched_claim_id=hit.claim_id,
-            publisher_family=publisher_family(hit.url),
-            source_band=source_band(hit.url),
-            similarity=hit.relevance_score,
-        )
-        for index, hit in enumerate(payload.documents)
-    ]
-
-    envelope.wiki_hits = [
-        WikiHit(
-            query=row.entity_text,
-            title=row.matched_title,
-            url=None,
-            description=None,
-            found=row.entity_is_well_known,
-        )
-        for row in payload.entity_grounding
-    ]
-
+    status_map = {
+        "ok": "ok",
+        "empty": "empty",
+        "error": "error",
+        "skipped_no_key": "skipped",
+        "skipped_out_of_range": "skipped",
+    }
     envelope.tool_results = [
         ToolResult(
             tool=report.adapter,
-            status=_LEGACY_TOOL_STATUS.get(report.status, "skipped"),
+            status=status_map.get(report.status, "skipped"),
             detail=report.reason or "",
             hit_count=report.hits_returned,
         )
         for report in payload.coverage.adapters
-    ]
-
-    envelope.corroboration.existence = ExistenceResult(
-        existence_class=legacy_existence_class(payload.existence_class),
-        matched_url=(payload.documents[0].url if payload.documents else None),
-        matched_title=(payload.documents[0].title if payload.documents else None),
-        similarity=(payload.documents[0].relevance_score if payload.documents else None),
-        notes=(
-            f"title match strength: {payload.title_match_strength}. "
-            f"{payload.independent_source_count} independent source(s) behind "
-            f"{payload.document_count} page(s)."
-        ),
-    )
-
-    envelope.corroboration.fact_checks = [
-        FactCheckItem(
-            claim_text=record.reviewed_claim_text,
-            textual_rating=record.rating_text or None,
-            publisher=record.reviewer_name or None,
-            url=record.review_url,
-            review_date=None,
-        )
-        for record in payload.factchecks
     ]

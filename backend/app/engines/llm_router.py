@@ -51,6 +51,16 @@ def _is_quota_error(detail: str) -> bool:
     return any(marker in lower for marker in _QUOTA_MARKERS)
 
 
+def pins_temperature(provider: str, model: str) -> bool:
+    """Whether this provider/model actually honours the requested temperature.
+
+    gemini-3* generation config omits temperature (thinkingConfig only), so
+    sampling is whatever Google defaults to. Callers that pass 0.0 still have
+    to record that the pin did not take.
+    """
+    return not (provider == "gemini" and model.startswith("gemini-3"))
+
+
 _JSON_BLOCK = re.compile(r"\{.*\}", re.DOTALL)
 
 
@@ -412,7 +422,7 @@ def _gemini_generation(model: str, temperature: float, json_mode: bool) -> dict[
     generation: dict[str, Any] = {}
     if json_mode:
         generation["responseMimeType"] = "application/json"
-    if model.startswith("gemini-3"):
+    if not pins_temperature("gemini", model):
         generation["thinkingConfig"] = {"thinkingLevel": "MINIMAL"}
     else:
         generation["temperature"] = temperature
