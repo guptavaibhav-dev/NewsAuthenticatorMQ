@@ -475,7 +475,7 @@ def build() -> dict:
         500,
         108,
         "RunState",
-        "Persists original paste + URL separately\nfrom extracted body, so re-run can restore.",
+        "SQLite .newsauth.db: envelope, original paste/URL,\nlayer snapshots, and inspector Q&A messages.",
         fill=PALE_BLUE,
     )
     box(
@@ -839,7 +839,7 @@ def build() -> dict:
         80,
         2320,
         "Source of truth: backend/app/tools/ingest.py, backend/app/scoring/urls.py, backend/app/config.py, backend/app/data/platform_hosts.json,\n"
-        "backend/app/pipeline/orchestrator.py (_run_input), backend/app/schemas/envelope.py (InputPayload), src/App.tsx, src/components/layerOutputs.tsx. Tests: backend/tests/.",
+        "backend/app/pipeline/orchestrator.py (_run_input), backend/app/pipeline/store.py (SQLite), backend/app/schemas/envelope.py (InputPayload), src/App.tsx, src/components/layerOutputs.tsx. Tests: backend/tests/.",
         size=12,
         color="#868e96",
         width=2100,

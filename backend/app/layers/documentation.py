@@ -245,6 +245,44 @@ def _evidence_summary(envelope: RunEnvelope) -> str:
             and not envelope.corroboration.nli_can_detect_contradiction
             else ""
         )
+        + " "
+        + _support_rate_sentence(envelope)
+    )
+
+
+def _support_rate_sentence(envelope: RunEnvelope) -> str:
+    """Read-only: Layer 7 quotes SupportRate; it does not recompute it."""
+    rate = envelope.corroboration.support_rate
+    if rate.omitted_because == "out_of_range":
+        return (
+            "Independent-reporting support: couldn't check. "
+            "This is not an authenticity score."
+        )
+    if rate.omitted_because == "no_claims":
+        return (
+            "Independent-reporting support: no claims to score. "
+            "This is not an authenticity score."
+        )
+    if rate.support_pct_of_scored is None:
+        return (
+            "Independent-reporting support: not assessed. "
+            "This is not an authenticity score."
+        )
+    unassessed = (
+        f" {rate.unassessed_claim_count} claim(s) were not scored."
+        if rate.unassessed_claim_count
+        else ""
+    )
+    join = (
+        " The independent-source count may be too high."
+        if envelope.corroboration.group_join_misses
+        else ""
+    )
+    return (
+        f"Independent-reporting support: {rate.backed_claim_count} of "
+        f"{rate.scored_claim_count} scored claims are backed by independent "
+        f"reporting ({rate.support_pct_of_scored}%).{unassessed} "
+        f"This is not an authenticity score.{join}"
     )
 
 

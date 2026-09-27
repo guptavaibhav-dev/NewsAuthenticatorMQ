@@ -1212,7 +1212,7 @@
       "x": 60,
       "y": 860,
       "width": 1880,
-      "height": 248,
+      "height": 380,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "#b2f2bb",
@@ -1244,6 +1244,10 @@
         },
         {
           "id": "a-fuse-matrix",
+          "type": "arrow"
+        },
+        {
+          "id": "a-fuse-rate",
           "type": "arrow"
         }
       ],
@@ -1296,7 +1300,7 @@
       "x": 76,
       "y": 900.5,
       "width": 1848,
-      "height": 93.75,
+      "height": 131.25,
       "angle": 0,
       "strokeColor": "#343a40",
       "backgroundColor": "transparent",
@@ -1319,8 +1323,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "Count support and contradiction by independent source, not by URL or masthead (twenty syndicated copies are one newsroom).\nJoin misses against Layer 3 groups are counted: a miss inflates the independent-source count, which is then an upper bound.\nAgreement: convergent \u00b7 contested \u00b7 NLI-only \u00b7 LLM-only \u00b7 none. Contradiction counts are withheld when Engine A could not detect polarity.\nEmpty paths are not_assessed, never no_corroboration_found. not_found (looked, nothing) and out_of_range (never looked) stay distinct.\nFusion is a pure function of its input. Engine B sampling may be unpinned, so the layer is not reproducible even though fusion is.",
-      "originalText": "Count support and contradiction by independent source, not by URL or masthead (twenty syndicated copies are one newsroom).\nJoin misses against Layer 3 groups are counted: a miss inflates the independent-source count, which is then an upper bound.\nAgreement: convergent \u00b7 contested \u00b7 NLI-only \u00b7 LLM-only \u00b7 none. Contradiction counts are withheld when Engine A could not detect polarity.\nEmpty paths are not_assessed, never no_corroboration_found. not_found (looked, nothing) and out_of_range (never looked) stay distinct.\nFusion is a pure function of its input. Engine B sampling may be unpinned, so the layer is not reproducible even though fusion is.",
+      "text": "Count support and contradiction by independent source, not by URL or masthead (twenty syndicated copies are one newsroom).\nJoin misses against Layer 3 groups are counted: a miss inflates the independent-source count, which is then an upper bound.\nAgreement: convergent \u00b7 contested \u00b7 NLI-only \u00b7 LLM-only \u00b7 none. Contradiction counts are withheld when Engine A could not detect polarity.\nEmpty paths are not_assessed, never no_corroboration_found. not_found (looked, nothing) and out_of_range (never looked) stay distinct.\nderive_support_rate writes SupportRate: backed / scored claims (event_corroborated or corroborated_coverage). single_source is not backed. Percentage omitted when pairs were not scored, existence is out_of_range,\nor there are no claims. Not authenticity. document_count is not an input.\nFusion is a pure function of its input. Engine B sampling may be unpinned, so the layer is not reproducible even though fusion is.",
+      "originalText": "Count support and contradiction by independent source, not by URL or masthead (twenty syndicated copies are one newsroom).\nJoin misses against Layer 3 groups are counted: a miss inflates the independent-source count, which is then an upper bound.\nAgreement: convergent \u00b7 contested \u00b7 NLI-only \u00b7 LLM-only \u00b7 none. Contradiction counts are withheld when Engine A could not detect polarity.\nEmpty paths are not_assessed, never no_corroboration_found. not_found (looked, nothing) and out_of_range (never looked) stay distinct.\nderive_support_rate writes SupportRate: backed / scored claims (event_corroborated or corroborated_coverage). single_source is not backed. Percentage omitted when pairs were not scored, existence is out_of_range, or there are no claims. Not authenticity. document_count is not an input.\nFusion is a pure function of its input. Engine B sampling may be unpinned, so the layer is not reproducible even though fusion is.",
       "fontSize": 15,
       "fontFamily": 2,
       "textAlign": "left",
@@ -1333,7 +1337,7 @@
       "id": "out-label",
       "type": "text",
       "x": 60,
-      "y": 1140,
+      "y": 1272,
       "width": 222.71999999999997,
       "height": 20.0,
       "angle": 0,
@@ -1370,7 +1374,7 @@
       "id": "out-matrix",
       "type": "rectangle",
       "x": 60,
-      "y": 1168,
+      "y": 1300,
       "width": 292,
       "height": 120,
       "angle": 0,
@@ -1397,10 +1401,6 @@
         {
           "id": "a-fuse-matrix",
           "type": "arrow"
-        },
-        {
-          "id": "a-matrix-gate",
-          "type": "arrow"
         }
       ],
       "updated": 1773320000000,
@@ -1411,7 +1411,7 @@
       "id": "out-matrix-title",
       "type": "text",
       "x": 76,
-      "y": 1180,
+      "y": 1312,
       "width": 260,
       "height": 18.75,
       "angle": 0,
@@ -1450,7 +1450,7 @@
       "id": "out-matrix-body",
       "type": "text",
       "x": 76,
-      "y": 1204.75,
+      "y": 1336.75,
       "width": 260,
       "height": 32.5,
       "angle": 0,
@@ -1489,7 +1489,7 @@
       "id": "out-agree",
       "type": "rectangle",
       "x": 368,
-      "y": 1168,
+      "y": 1300,
       "width": 292,
       "height": 120,
       "angle": 0,
@@ -1521,7 +1521,7 @@
       "id": "out-agree-title",
       "type": "text",
       "x": 384,
-      "y": 1180,
+      "y": 1312,
       "width": 260,
       "height": 18.75,
       "angle": 0,
@@ -1560,7 +1560,7 @@
       "id": "out-agree-body",
       "type": "text",
       "x": 384,
-      "y": 1204.75,
+      "y": 1336.75,
       "width": 260,
       "height": 32.5,
       "angle": 0,
@@ -1599,7 +1599,7 @@
       "id": "out-fam",
       "type": "rectangle",
       "x": 676,
-      "y": 1168,
+      "y": 1300,
       "width": 292,
       "height": 120,
       "angle": 0,
@@ -1631,7 +1631,7 @@
       "id": "out-fam-title",
       "type": "text",
       "x": 692,
-      "y": 1180,
+      "y": 1312,
       "width": 260,
       "height": 18.75,
       "angle": 0,
@@ -1670,7 +1670,7 @@
       "id": "out-fam-body",
       "type": "text",
       "x": 692,
-      "y": 1204.75,
+      "y": 1336.75,
       "width": 260,
       "height": 32.5,
       "angle": 0,
@@ -1709,7 +1709,7 @@
       "id": "out-slots",
       "type": "rectangle",
       "x": 984,
-      "y": 1168,
+      "y": 1300,
       "width": 292,
       "height": 120,
       "angle": 0,
@@ -1741,7 +1741,7 @@
       "id": "out-slots-title",
       "type": "text",
       "x": 1000,
-      "y": 1180,
+      "y": 1312,
       "width": 260,
       "height": 18.75,
       "angle": 0,
@@ -1780,7 +1780,7 @@
       "id": "out-slots-body",
       "type": "text",
       "x": 1000,
-      "y": 1204.75,
+      "y": 1336.75,
       "width": 260,
       "height": 32.5,
       "angle": 0,
@@ -1819,7 +1819,7 @@
       "id": "out-state",
       "type": "rectangle",
       "x": 1292,
-      "y": 1168,
+      "y": 1300,
       "width": 292,
       "height": 120,
       "angle": 0,
@@ -1851,7 +1851,7 @@
       "id": "out-state-title",
       "type": "text",
       "x": 1308,
-      "y": 1180,
+      "y": 1312,
       "width": 260,
       "height": 18.75,
       "angle": 0,
@@ -1890,7 +1890,7 @@
       "id": "out-state-body",
       "type": "text",
       "x": 1308,
-      "y": 1204.75,
+      "y": 1336.75,
       "width": 260,
       "height": 32.5,
       "angle": 0,
@@ -1929,7 +1929,7 @@
       "id": "out-overall",
       "type": "rectangle",
       "x": 1600,
-      "y": 1168,
+      "y": 1300,
       "width": 292,
       "height": 120,
       "angle": 0,
@@ -1961,7 +1961,7 @@
       "id": "out-overall-title",
       "type": "text",
       "x": 1616,
-      "y": 1180,
+      "y": 1312,
       "width": 260,
       "height": 18.75,
       "angle": 0,
@@ -2000,7 +2000,7 @@
       "id": "out-overall-body",
       "type": "text",
       "x": 1616,
-      "y": 1204.75,
+      "y": 1336.75,
       "width": 260,
       "height": 32.5,
       "angle": 0,
@@ -2036,10 +2036,129 @@
       "lineHeight": 1.25
     },
     {
+      "id": "out-rate",
+      "type": "rectangle",
+      "x": 60,
+      "y": 1448,
+      "width": 1880,
+      "height": 88,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#d0ebff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-out-rate"
+      ],
+      "frameId": null,
+      "index": "f4",
+      "roundness": {
+        "type": 3
+      },
+      "seed": 505412454,
+      "version": 1,
+      "versionNonce": 301352970,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "a-fuse-rate",
+          "type": "arrow"
+        },
+        {
+          "id": "a-rate-gate",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "out-rate-title",
+      "type": "text",
+      "x": 76,
+      "y": 1460,
+      "width": 1848,
+      "height": 20.0,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-out-rate"
+      ],
+      "frameId": null,
+      "index": "f5",
+      "roundness": null,
+      "seed": 1425107494,
+      "version": 1,
+      "versionNonce": 624153262,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "text": "Independent-reporting support rate",
+      "originalText": "Independent-reporting support rate",
+      "fontSize": 16,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "autoResize": false,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "out-rate-body",
+      "type": "text",
+      "x": 76,
+      "y": 1486.0,
+      "width": 1848,
+      "height": 37.5,
+      "angle": 0,
+      "strokeColor": "#343a40",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "g-out-rate"
+      ],
+      "frameId": null,
+      "index": "f6",
+      "roundness": null,
+      "seed": 1157519547,
+      "version": 1,
+      "versionNonce": 1859744836,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "text": "SupportRate on the payload: backed / scored after wire and owner collapse. single_source is not backed. Percentage omitted when pairs were not scored, existence is out_of_range, or there are no claims. Not an\nauthenticity score. document_count is not an input.",
+      "originalText": "SupportRate on the payload: backed / scored after wire and owner collapse. single_source is not backed. Percentage omitted when pairs were not scored, existence is out_of_range, or there are no claims. Not an authenticity score. document_count is not an input.",
+      "fontSize": 15,
+      "fontFamily": 2,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "autoResize": false,
+      "lineHeight": 1.25
+    },
+    {
       "id": "gate",
       "type": "rectangle",
       "x": 60,
-      "y": 1320,
+      "y": 1564,
       "width": 900,
       "height": 120,
       "angle": 0,
@@ -2054,7 +2173,7 @@
         "g-gate"
       ],
       "frameId": null,
-      "index": "f4",
+      "index": "f7",
       "roundness": {
         "type": 3
       },
@@ -2064,7 +2183,7 @@
       "isDeleted": false,
       "boundElements": [
         {
-          "id": "a-matrix-gate",
+          "id": "a-rate-gate",
           "type": "arrow"
         },
         {
@@ -2080,7 +2199,7 @@
       "id": "gate-title",
       "type": "text",
       "x": 76,
-      "y": 1332,
+      "y": 1576,
       "width": 868,
       "height": 21.25,
       "angle": 0,
@@ -2095,7 +2214,7 @@
         "g-gate"
       ],
       "frameId": null,
-      "index": "f5",
+      "index": "f8",
       "roundness": null,
       "seed": 1248334814,
       "version": 1,
@@ -2119,7 +2238,7 @@
       "id": "gate-body",
       "type": "text",
       "x": 76,
-      "y": 1359.25,
+      "y": 1603.25,
       "width": 868,
       "height": 37.5,
       "angle": 0,
@@ -2134,7 +2253,7 @@
         "g-gate"
       ],
       "frameId": null,
-      "index": "f6",
+      "index": "f9",
       "roundness": null,
       "seed": 1655686545,
       "version": 1,
@@ -2158,7 +2277,7 @@
       "id": "next",
       "type": "rectangle",
       "x": 996,
-      "y": 1320,
+      "y": 1564,
       "width": 360,
       "height": 120,
       "angle": 0,
@@ -2173,7 +2292,7 @@
         "g-next"
       ],
       "frameId": null,
-      "index": "f7",
+      "index": "g0",
       "roundness": {
         "type": 3
       },
@@ -2195,7 +2314,7 @@
       "id": "next-title",
       "type": "text",
       "x": 1012,
-      "y": 1332,
+      "y": 1576,
       "width": 328,
       "height": 21.25,
       "angle": 0,
@@ -2210,7 +2329,7 @@
         "g-next"
       ],
       "frameId": null,
-      "index": "f8",
+      "index": "g1",
       "roundness": null,
       "seed": 294929947,
       "version": 1,
@@ -2234,7 +2353,7 @@
       "id": "next-body",
       "type": "text",
       "x": 1012,
-      "y": 1359.25,
+      "y": 1603.25,
       "width": 328,
       "height": 37.5,
       "angle": 0,
@@ -2249,7 +2368,7 @@
         "g-next"
       ],
       "frameId": null,
-      "index": "f9",
+      "index": "g2",
       "roundness": null,
       "seed": 302395930,
       "version": 1,
@@ -2273,7 +2392,7 @@
       "id": "not",
       "type": "rectangle",
       "x": 1388,
-      "y": 1320,
+      "y": 1564,
       "width": 492,
       "height": 120,
       "angle": 0,
@@ -2288,7 +2407,7 @@
         "g-not"
       ],
       "frameId": null,
-      "index": "g0",
+      "index": "g3",
       "roundness": {
         "type": 3
       },
@@ -2305,7 +2424,7 @@
       "id": "not-title",
       "type": "text",
       "x": 1404,
-      "y": 1332,
+      "y": 1576,
       "width": 460,
       "height": 21.25,
       "angle": 0,
@@ -2320,7 +2439,7 @@
         "g-not"
       ],
       "frameId": null,
-      "index": "g1",
+      "index": "g4",
       "roundness": null,
       "seed": 2079826415,
       "version": 1,
@@ -2344,9 +2463,9 @@
       "id": "not-body",
       "type": "text",
       "x": 1404,
-      "y": 1359.25,
+      "y": 1603.25,
       "width": 460,
-      "height": 37.5,
+      "height": 56.25,
       "angle": 0,
       "strokeColor": "#343a40",
       "backgroundColor": "transparent",
@@ -2359,7 +2478,7 @@
         "g-not"
       ],
       "frameId": null,
-      "index": "g2",
+      "index": "g5",
       "roundness": null,
       "seed": 1502769635,
       "version": 1,
@@ -2369,8 +2488,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "Emit a true/false score or an editorial decision.\nDisagreement is shown, not hidden.",
-      "originalText": "Emit a true/false score or an editorial decision. Disagreement is shown, not hidden.",
+      "text": "Emit an authenticity percentage, a true/false score,\nor an editorial decision. Disagreement is shown, not\nhidden.",
+      "originalText": "Emit an authenticity percentage, a true/false score, or an editorial decision. Disagreement is shown, not hidden.",
       "fontSize": 15,
       "fontFamily": 2,
       "textAlign": "left",
@@ -2383,7 +2502,7 @@
       "id": "footer",
       "type": "text",
       "x": 60,
-      "y": 1472,
+      "y": 1716,
       "width": 1880,
       "height": 45.0,
       "angle": 0,
@@ -2396,7 +2515,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g3",
+      "index": "g6",
       "roundness": null,
       "seed": 622663238,
       "version": 1,
@@ -2406,8 +2525,8 @@
       "updated": 1773320000000,
       "link": null,
       "locked": false,
-      "text": "Source of truth: backend/app/layers/evidence.py, backend/app/scoring/corroboration.py, backend/app/engines/nli.py,\nbackend/app/engines/llm_router.py, backend/app/scoring/urls.py (grouping_url), backend/app/retrieval/independence.py,\nbackend/app/schemas/envelope.py (CorroborationPayload, GeminiClaimAnalysis), src/components/layerOutputs.tsx. Tests: backend/tests/test_evidence_blinding.py, test_evidence_fusion.py, test_nli_engine.py, test_evidence_visibility.py.",
-      "originalText": "Source of truth: backend/app/layers/evidence.py, backend/app/scoring/corroboration.py, backend/app/engines/nli.py,\nbackend/app/engines/llm_router.py, backend/app/scoring/urls.py (grouping_url), backend/app/retrieval/independence.py,\nbackend/app/schemas/envelope.py (CorroborationPayload, GeminiClaimAnalysis), src/components/layerOutputs.tsx. Tests: backend/tests/test_evidence_blinding.py, test_evidence_fusion.py, test_nli_engine.py, test_evidence_visibility.py.",
+      "text": "Source of truth: backend/app/layers/evidence.py, backend/app/scoring/corroboration.py, backend/app/engines/nli.py,\nbackend/app/engines/llm_router.py, backend/app/scoring/urls.py (grouping_url), backend/app/retrieval/independence.py,\nbackend/app/schemas/envelope.py (CorroborationPayload, SupportRate, GeminiClaimAnalysis), src/components/layerOutputs.tsx. Tests: backend/tests/test_evidence_blinding.py, test_evidence_fusion.py, test_nli_engine.py, test_evidence_visibility.py.",
+      "originalText": "Source of truth: backend/app/layers/evidence.py, backend/app/scoring/corroboration.py, backend/app/engines/nli.py,\nbackend/app/engines/llm_router.py, backend/app/scoring/urls.py (grouping_url), backend/app/retrieval/independence.py,\nbackend/app/schemas/envelope.py (CorroborationPayload, SupportRate, GeminiClaimAnalysis), src/components/layerOutputs.tsx. Tests: backend/tests/test_evidence_blinding.py, test_evidence_fusion.py, test_nli_engine.py, test_evidence_visibility.py.",
       "fontSize": 12,
       "fontFamily": 2,
       "textAlign": "left",
@@ -2433,7 +2552,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g4",
+      "index": "g7",
       "roundness": {
         "type": 2
       },
@@ -2487,7 +2606,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g5",
+      "index": "g8",
       "roundness": {
         "type": 2
       },
@@ -2541,7 +2660,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g6",
+      "index": "g9",
       "roundness": {
         "type": 2
       },
@@ -2595,7 +2714,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g7",
+      "index": "h0",
       "roundness": {
         "type": 2
       },
@@ -2649,7 +2768,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g8",
+      "index": "h1",
       "roundness": {
         "type": 2
       },
@@ -2703,7 +2822,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "g9",
+      "index": "h2",
       "roundness": {
         "type": 2
       },
@@ -2744,7 +2863,7 @@
       "id": "a-fuse-matrix",
       "type": "arrow",
       "x": 206.0,
-      "y": 1108,
+      "y": 1240,
       "width": 0,
       "height": 60,
       "angle": 0,
@@ -2757,7 +2876,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "h0",
+      "index": "h3",
       "roundness": {
         "type": 2
       },
@@ -2795,12 +2914,12 @@
       "lastCommittedPoint": null
     },
     {
-      "id": "a-matrix-gate",
+      "id": "a-fuse-rate",
       "type": "arrow",
-      "x": 206.0,
-      "y": 1288,
+      "x": 1000.0,
+      "y": 1240,
       "width": 0,
-      "height": 32,
+      "height": 208,
       "angle": 0,
       "strokeColor": "#1e1e1e",
       "backgroundColor": "transparent",
@@ -2811,20 +2930,74 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "h1",
+      "index": "h4",
       "roundness": {
         "type": 2
       },
-      "seed": 300032824,
+      "seed": 1619337737,
       "version": 1,
-      "versionNonce": 789781162,
+      "versionNonce": 1176693424,
       "isDeleted": false,
       "boundElements": null,
       "updated": 1773320000000,
       "link": null,
       "locked": false,
       "startBinding": {
-        "elementId": "out-matrix",
+        "elementId": "fuse",
+        "focus": 0,
+        "gap": 8
+      },
+      "endBinding": {
+        "elementId": "out-rate",
+        "focus": 0,
+        "gap": 8
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "elbowed": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0.0,
+          208
+        ]
+      ],
+      "lastCommittedPoint": null
+    },
+    {
+      "id": "a-rate-gate",
+      "type": "arrow",
+      "x": 1000.0,
+      "y": 1536,
+      "width": 0,
+      "height": 28,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "h5",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 2011278590,
+      "version": 1,
+      "versionNonce": 370160502,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1773320000000,
+      "link": null,
+      "locked": false,
+      "startBinding": {
+        "elementId": "out-rate",
         "focus": 0,
         "gap": 8
       },
@@ -2843,7 +3016,7 @@
         ],
         [
           0.0,
-          32
+          28
         ]
       ],
       "lastCommittedPoint": null
@@ -2852,7 +3025,7 @@
       "id": "a-gate-next",
       "type": "arrow",
       "x": 960,
-      "y": 1380.0,
+      "y": 1624.0,
       "width": 36,
       "height": 0,
       "angle": 0,
@@ -2865,7 +3038,7 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "index": "h2",
+      "index": "h6",
       "roundness": {
         "type": 2
       },

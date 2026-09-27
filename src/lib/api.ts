@@ -1,4 +1,11 @@
-import type { EditorialDecision, Health, RunEnvelope, TraceEvent } from '../types/run'
+import type {
+  EditorialDecision,
+  Health,
+  RunEnvelope,
+  RunSession,
+  RunSummary,
+  TraceEvent,
+} from '../types/run'
 
 export class ApiError extends Error {
   status: number
@@ -39,6 +46,25 @@ export async function startRun(text: string, url: string): Promise<StepResult> {
     throw new Error(body || `Run failed (${res.status})`)
   }
   return (await res.json()) as StepResult
+}
+
+export async function listRuns(): Promise<RunSummary[]> {
+  const res = await fetch('/api/runs')
+  if (!res.ok) {
+    throw new Error('Could not load session history')
+  }
+  return (await res.json()) as RunSummary[]
+}
+
+export async function fetchSession(runId: string): Promise<RunSession> {
+  const res = await fetch(`/api/runs/${runId}/session`)
+  if (!res.ok) {
+    throw new ApiError(
+      res.status,
+      res.status === 404 ? 'That session is no longer available.' : 'Could not load session',
+    )
+  }
+  return (await res.json()) as RunSession
 }
 
 export async function fetchRun(runId: string): Promise<RunEnvelope> {

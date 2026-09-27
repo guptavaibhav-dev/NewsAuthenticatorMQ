@@ -19,6 +19,7 @@ Return JSON:
   "rationale": "short"
 }
 Be conservative: missing corroboration => unverifiable or needs_investigation, never fake.
+support_rate is labelled counts of scored claims with independent backing. It is not an authenticity target. Do not invent a second percentage. Do not round it into a recommended label. A null support_pct_of_scored means the rate was omitted (could not look / not assessed / no claims) — never treat that as 0% authentic. document_count is page volume and is not corroboration.
 """
 
 
@@ -287,6 +288,21 @@ def _structured_view(envelope: RunEnvelope) -> dict:
         "evidence_llm_temperature": envelope.corroboration.evidence_llm_temperature,
         "evidence_llm_temperature_pinned": envelope.corroboration.evidence_llm_temperature_pinned,
         "disagreements": envelope.classification.disagreements,
+        "support_rate": {
+            "label": "independent_reporting_support_not_authenticity",
+            "scored_claim_count": envelope.corroboration.support_rate.scored_claim_count,
+            "backed_claim_count": envelope.corroboration.support_rate.backed_claim_count,
+            "contested_claim_count": envelope.corroboration.support_rate.contested_claim_count,
+            "unassessed_claim_count": envelope.corroboration.support_rate.unassessed_claim_count,
+            "support_pct_of_scored": envelope.corroboration.support_rate.support_pct_of_scored,
+            "omitted_because": envelope.corroboration.support_rate.omitted_because,
+            "note": (
+                "Share of scored claims with independent backing after wire/owner "
+                "collapse. Not an authenticity, trust, or true/false score. "
+                "Do not round this into a verdict. document_count is page volume "
+                "and is not corroboration."
+            ),
+        },
     }
     if retrieval is None:
         return view

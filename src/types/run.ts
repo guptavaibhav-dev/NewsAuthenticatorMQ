@@ -89,6 +89,18 @@ export type ClaimCorroboration = {
   existence_class?: ExistenceClass | null
 }
 
+/** Share of scored claims with independent backing — not authenticity. */
+export type SupportRateOmitted = 'not_assessed' | 'out_of_range' | 'no_claims'
+
+export type SupportRate = {
+  scored_claim_count: number
+  backed_claim_count: number
+  contested_claim_count: number
+  unassessed_claim_count: number
+  support_pct_of_scored: number | null
+  omitted_because: SupportRateOmitted | null
+}
+
 export type ExistenceClass =
   | 'exact_url'
   | 'title_match'
@@ -258,6 +270,7 @@ export type RunEnvelope = {
     overall_state: string
     independent_source_count: number
     claims: ClaimCorroboration[]
+    support_rate?: SupportRate
     pairs_scored?: boolean
     unscored_reason?: 'no_documents' | 'no_claims' | 'documents_filtered' | null
     existence_class?: ExistenceClass | null
@@ -395,6 +408,33 @@ export const PIPELINE_LAYERS = [
 
 export const EDITORIAL_LAYER = 6
 export const LAST_LAYER = 7
+
+export type StoredChatMessage = {
+  id: string
+  kind: 'question' | 'answer' | 'error'
+  layer: number
+  text: string
+  created_at: string
+  seq?: number
+}
+
+export type RunSummary = {
+  run_id: string
+  title: string
+  url: string
+  phase: string
+  completed_layer: number
+  created_at: string
+  updated_at: string
+}
+
+export type RunSession = {
+  envelope: RunEnvelope
+  original_text: string
+  original_url: string
+  messages: StoredChatMessage[]
+  snapshots: Record<string, RunEnvelope>
+}
 
 export type ChatMessage =
   | {

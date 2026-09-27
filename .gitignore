@@ -24,6 +24,9 @@ backend/__pycache__
 .env
 backend/.env
 backend/.runs/
+backend/.newsauth.db
+backend/.newsauth.db-wal
+backend/.newsauth.db-shm
 
 # Editor directories and files
 .vscode/*

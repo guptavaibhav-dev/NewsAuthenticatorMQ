@@ -274,6 +274,18 @@ const TABLE: Record<string, PlainEntry> = {
     label: 'No claims to score',
     gloss: 'There were no claims to score',
   },
+  support_rate_not_assessed: {
+    label: 'Not assessed',
+    gloss: 'Independent-reporting support was not scored — not a finding about the article',
+  },
+  support_rate_out_of_range: {
+    label: "Couldn't check",
+    gloss: 'We could not search other outlets, so there is no support rate',
+  },
+  support_rate_no_claims: {
+    label: 'No claims to score',
+    gloss: 'There were no claims, so there is no support rate',
+  },
   documents_filtered: {
     label: 'Pages had no scorable text',
     gloss: 'Pages were retrieved but none had text we could score',
@@ -457,6 +469,12 @@ export function existencePlain(code: string | null | undefined): PlainEntry {
     }
   }
   return plain(code)
+}
+
+export function supportRateOmittedPlain(code: string | null | undefined): PlainEntry {
+  if (code === 'out_of_range') return TABLE.support_rate_out_of_range
+  if (code === 'no_claims') return TABLE.support_rate_no_claims
+  return TABLE.support_rate_not_assessed
 }
 
 export function riskPlain(code: string | null | undefined): PlainEntry {

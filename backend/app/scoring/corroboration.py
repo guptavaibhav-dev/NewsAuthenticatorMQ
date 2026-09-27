@@ -7,9 +7,13 @@ from app.schemas.envelope import (
     EngineAgreement,
     GeminiClaimAnalysis,
     PairAnalysis,
+    SupportRate,
     UnscoredReason,
 )
 from app.schemas.retrieval import ExistenceClass
+
+BACKED_STATES = frozenset({"event_corroborated", "corroborated_coverage"})
+CONTESTED_STATES = frozenset({"contested_reporting", "contested"})
 
 # Unvalidated defaults inherited from pre-rewrite scoring. Candidates for
 # experimental determination, alongside Settings.nli_threshold (0.6), which
@@ -223,6 +227,44 @@ def reason_unscored(
     return "documents_filtered"
 
 
+def derive_support_rate(
+    claims: list[ClaimCorroboration],
+    *,
+    pairs_scored: bool,
+    existence_class: ExistenceClass | None,
+) -> SupportRate:
+    """Summarise independent-reporting support. The only writer of SupportRate.
+
+    Does not read document_count, NLI pair scores, relevance, or fetch status.
+    """
+    if not claims:
+        return SupportRate(omitted_because="no_claims")
+    if not pairs_scored or existence_class == "out_of_range":
+        omitted = "out_of_range" if existence_class == "out_of_range" else "not_assessed"
+        return SupportRate(
+            unassessed_claim_count=len(claims),
+            omitted_because=omitted,
+        )
+
+    scored = [row for row in claims if row.state != "not_assessed"]
+    backed = [row for row in scored if row.state in BACKED_STATES]
+    contested = [row for row in scored if row.state in CONTESTED_STATES]
+    unassessed = len(claims) - len(scored)
+    if not scored:
+        return SupportRate(
+            unassessed_claim_count=unassessed,
+            omitted_because="not_assessed",
+        )
+    return SupportRate(
+        scored_claim_count=len(scored),
+        backed_claim_count=len(backed),
+        contested_claim_count=len(contested),
+        unassessed_claim_count=unassessed,
+        support_pct_of_scored=round(100 * len(backed) / len(scored)),
+        omitted_because=None,
+    )
+
+
 def build_payload(
     *,
     claims: list[ClaimCorroboration],
@@ -242,6 +284,9 @@ def build_payload(
         overall_state=overall_state(claims, pairs_scored=pairs_scored),
         independent_source_count=independent_source_count,
         claims=claims,
+        support_rate=derive_support_rate(
+            claims, pairs_scored=pairs_scored, existence_class=existence_class
+        ),
         pairs_scored=pairs_scored,
         unscored_reason=unscored_reason,
         existence_class=existence_class,

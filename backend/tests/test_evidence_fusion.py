@@ -11,12 +11,13 @@ from app.layers.evidence import run_evidence
 from app.layers.uncertainty import rule_based_uncertainty
 from app.schemas.envelope import (
     Claim,
+    ClaimCorroboration,
     ClassificationPayload,
     PairAnalysis,
     RunEnvelope,
 )
 from app.schemas.retrieval import IndependentSource, RetrievalPayload, SearchHit
-from app.scoring.corroboration import build_payload, fuse_claim
+from app.scoring.corroboration import build_payload, derive_support_rate, fuse_claim
 from app.scoring.urls import grouping_url
 
 
@@ -424,3 +425,162 @@ def test_lexical_fallback_does_not_report_zero_contradictions_as_a_finding() -> 
     unknowns = " ".join(rule_based_uncertainty(envelope).unknowns)
     assert "Contradiction detection was unavailable" in unknowns
     assert "zero contradiction count is not a finding" in unknowns
+
+
+def _sr(cid: str, state: str) -> ClaimCorroboration:
+    return ClaimCorroboration(claim_id=cid, state=state)
+
+
+def test_support_rate_backed_of_scored():
+    claims = [
+        _sr("c1", "event_corroborated"),
+        _sr("c2", "corroborated_coverage"),
+        _sr("c3", "single_source"),
+        _sr("c4", "no_corroboration_found"),
+        _sr("c5", "not_assessed"),
+    ]
+    rate = derive_support_rate(claims, pairs_scored=True, existence_class="title_match")
+    assert rate.scored_claim_count == 4
+    assert rate.backed_claim_count == 2
+    assert rate.contested_claim_count == 0
+    assert rate.unassessed_claim_count == 1
+    assert rate.support_pct_of_scored == 50
+    assert rate.omitted_because is None
+    payload = build_payload(
+        claims=claims,
+        independent_source_count=2,
+        pairs_scored=True,
+        unscored_reason=None,
+        existence_class="title_match",
+    )
+    assert payload.support_rate == rate
+
+
+def test_support_rate_omits_when_all_unassessed():
+    claims = [_sr("c1", "not_assessed"), _sr("c2", "not_assessed")]
+    rate = derive_support_rate(claims, pairs_scored=True, existence_class="title_match")
+    assert rate.support_pct_of_scored is None
+    assert rate.omitted_because == "not_assessed"
+    assert rate.unassessed_claim_count == 2
+    assert rate.scored_claim_count == 0
+
+
+def test_support_rate_omits_when_pairs_not_scored():
+    claims = [_sr("c1", "event_corroborated"), _sr("c2", "single_source")]
+    rate = derive_support_rate(claims, pairs_scored=False, existence_class="title_match")
+    assert rate.support_pct_of_scored is None
+    assert rate.omitted_because == "not_assessed"
+    assert rate.unassessed_claim_count == 2
+    assert rate.backed_claim_count == 0
+
+
+def test_support_rate_omits_out_of_range():
+    claims = [_sr("c1", "event_corroborated")]
+    rate = derive_support_rate(claims, pairs_scored=True, existence_class="out_of_range")
+    assert rate.support_pct_of_scored is None
+    assert rate.omitted_because == "out_of_range"
+    assert rate.unassessed_claim_count == 1
+
+
+def test_support_rate_omits_no_claims():
+    rate = derive_support_rate([], pairs_scored=True, existence_class="title_match")
+    assert rate.support_pct_of_scored is None
+    assert rate.omitted_because == "no_claims"
+    assert rate.scored_claim_count == 0
+
+
+def test_support_rate_single_source_is_not_backed():
+    claims = [_sr("c1", "single_source"), _sr("c2", "single_source")]
+    rate = derive_support_rate(claims, pairs_scored=True, existence_class="title_match")
+    assert rate.scored_claim_count == 2
+    assert rate.backed_claim_count == 0
+    assert rate.support_pct_of_scored == 0
+    assert rate.omitted_because is None
+
+
+def test_support_rate_contested_only():
+    claims = [
+        _sr("c1", "contested_reporting"),
+        _sr("c2", "contested"),
+    ]
+    rate = derive_support_rate(claims, pairs_scored=True, existence_class="title_match")
+    assert rate.scored_claim_count == 2
+    assert rate.backed_claim_count == 0
+    assert rate.contested_claim_count == 2
+    assert rate.support_pct_of_scored == 0
+
+
+def test_support_rate_ignores_document_count():
+    """Syndicated page volume is not an input; changing it must not move the rate."""
+    import inspect
+
+    assert "document_count" not in inspect.signature(derive_support_rate).parameters
+    claims = [
+        _sr("c1", "event_corroborated"),
+        _sr("c2", "event_corroborated"),
+        _sr("c3", "single_source"),
+    ]
+    expected = derive_support_rate(claims, pairs_scored=True, existence_class="title_match")
+    for document_count in (1, 99):
+        assert document_count  # fixture noise — not passed to derive
+        rate = derive_support_rate(claims, pairs_scored=True, existence_class="title_match")
+        assert rate.model_dump() == expected.model_dump()
+    assert expected.backed_claim_count == 2
+    assert expected.scored_claim_count == 3
+    assert expected.support_pct_of_scored == 67
+
+
+def test_record_quotes_derived_support_rate():
+    claims = [_sr("c1", "event_corroborated"), _sr("c2", "single_source")]
+    envelope = RunEnvelope(
+        run_id="sr-record",
+        classification=ClassificationPayload(
+            claims=[
+                Claim(id="c1", text="Ministers announced a plan."),
+                Claim(id="c2", text="The programme starts next year."),
+            ]
+        ),
+        retrieval=RetrievalPayload(existence_class="title_match"),
+        corroboration=build_payload(
+            claims=claims,
+            independent_source_count=2,
+            pairs_scored=True,
+            unscored_reason=None,
+            existence_class="title_match",
+        ),
+    )
+    note = template_record(envelope).evidence_summary
+    assert "1 of 2 scored claims" in note
+    assert "(50%)" in note
+    assert "not an authenticity score" in note
+    assert envelope.corroboration.support_rate.support_pct_of_scored == 50
+
+
+def test_record_omits_support_percentage_when_out_of_range():
+    envelope = RunEnvelope(
+        run_id="sr-oor",
+        classification=ClassificationPayload(
+            claims=[Claim(id="c1", text="Ministers announced a plan.")]
+        ),
+        retrieval=RetrievalPayload(existence_class="out_of_range"),
+        corroboration=build_payload(
+            claims=[_sr("c1", "event_corroborated")],
+            independent_source_count=0,
+            pairs_scored=True,
+            unscored_reason=None,
+            existence_class="out_of_range",
+        ),
+    )
+    note = template_record(envelope).evidence_summary
+    assert envelope.corroboration.support_rate.support_pct_of_scored is None
+    assert "couldn't check" in note
+    assert "(50%)" not in note
+    assert "(0%)" not in note
+
+
+def test_ask_system_refuses_authenticity_percentage():
+    from app.pipeline.ask import ASK_SYSTEM
+
+    assert "support_rate" in ASK_SYSTEM
+    assert "authenticity" in ASK_SYSTEM
+    assert "refuse" in ASK_SYSTEM

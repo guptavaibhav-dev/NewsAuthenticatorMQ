@@ -85,6 +85,12 @@ UnscoredReason = Literal["no_documents", "no_claims", "documents_filtered"]
 - no_claims: there were no claims to score.
 - documents_filtered: pages were retrieved but none had scorable text.
 """
+SupportRateOmitted = Literal["not_assessed", "out_of_range", "no_claims"]
+"""Why support_pct_of_scored is null.
+
+Share of scored claims with independent backing, not authenticity.
+A null percentage must stay null — never coerce to 0.
+"""
 EngineAgreement = Literal["convergent", "contested", "nli_only", "llm_only", "none"]
 SourceBand = Literal["known_legacy", "aggregator", "unknown"]
 EditorialDecision = Literal[
@@ -505,10 +511,28 @@ class ClaimCorroboration(BaseModel):
     )
 
 
+class SupportRate(BaseModel):
+    """Share of scored claims backed by independent reporting.
+
+    Derived only from ClaimCorroboration.state after Layer 3 collapse.
+    Not an authenticity, trust, or true/false score. support_pct_of_scored
+    is null when a percentage would flatten 'could not look' or 'not assessed'
+    into a number.
+    """
+
+    scored_claim_count: int = 0
+    backed_claim_count: int = 0
+    contested_claim_count: int = 0
+    unassessed_claim_count: int = 0
+    support_pct_of_scored: int | None = None
+    omitted_because: SupportRateOmitted | None = None
+
+
 class CorroborationPayload(BaseModel):
     overall_state: CorroborationState = "not_assessed"
     independent_source_count: int = 0
     claims: list[ClaimCorroboration] = Field(default_factory=list)
+    support_rate: SupportRate = Field(default_factory=SupportRate)
     pairs_scored: bool = Field(
         default=False,
         description=(
@@ -637,3 +661,32 @@ class RunEnvelope(BaseModel):
     trace: list[TraceEvent] = Field(default_factory=list)
     engines_used: dict[str, str] = Field(default_factory=dict)
     extra: dict[str, Any] = Field(default_factory=dict)
+
+
+class StoredChatMessage(BaseModel):
+    """Inspector Q&A or a layer error. Layer cards are rebuilt, not stored."""
+
+    id: str
+    kind: Literal["question", "answer", "error"]
+    layer: int
+    text: str
+    created_at: str
+    seq: int = 0
+
+
+class RunSummary(BaseModel):
+    run_id: str
+    title: str
+    url: str = ""
+    phase: str
+    completed_layer: int = 0
+    created_at: str
+    updated_at: str
+
+
+class RunSession(BaseModel):
+    envelope: RunEnvelope
+    original_text: str = ""
+    original_url: str = ""
+    messages: list[StoredChatMessage] = Field(default_factory=list)
+    snapshots: dict[str, Any] = Field(default_factory=dict)

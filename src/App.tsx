@@ -1,7 +1,20 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent } from 'react'
 import InspectorChat from './components/InspectorChat'
 import { LayerRail, scrollToLayerCard, toDeskStatus } from './components/desk'
-import { ApiError, fetchHealth, fetchRun, startRun, stepRun, submitDecision, askRun, subscribeRun } from './lib/api'
+import {
+  ApiError,
+  fetchHealth,
+  fetchRun,
+  fetchSession,
+  listRuns,
+  startRun,
+  stepRun,
+  submitDecision,
+  askRun,
+  subscribeRun,
+} from './lib/api'
+import { reconstructChat } from './lib/sessionChat'
+import SessionHistory from './components/SessionHistory'
 import SystemHealth from './SystemHealth'
 import type {
   ChatMessage,
@@ -9,6 +22,7 @@ import type {
   Health,
   RunEnvelope,
   RunPhase,
+  RunSummary,
   TraceEvent,
 } from './types/run'
 import { corroborationStateCopy } from './components/layerOutputs'
@@ -21,7 +35,7 @@ const SPLIT_MIN = 22
 const SPLIT_MAX = 78
 
 type Status = 'idle' | 'running' | 'done' | 'error'
-type Tab = 'authenticate' | 'system'
+type Tab = 'authenticate' | 'system' | 'history'
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('authenticate')
@@ -35,6 +49,10 @@ export default function App() {
   const [health, setHealth] = useState<Health | null>(null)
   const [healthLoading, setHealthLoading] = useState(false)
   const [healthError, setHealthError] = useState<string | null>(null)
+  const [history, setHistory] = useState<RunSummary[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [historyError, setHistoryError] = useState<string | null>(null)
+  const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null)
   const [decision, setDecision] = useState<EditorialDecision | null>(null)
   const [notes, setNotes] = useState('')
   const [busy, setBusy] = useState(false)
@@ -45,6 +63,17 @@ export default function App() {
   const splitRef = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
   const busyLock = useRef(false)
+
+  async function loadHistory() {
+    setHistoryLoading(true)
+    setHistoryError(null)
+    try {
+      setHistory(await listRuns())
+    } catch (err) {
+      setHistoryError(err instanceof Error ? err.message : 'Could not load session history')
+    }
+    setHistoryLoading(false)
+  }
 
   async function loadHealth(probe: boolean) {
     setHealthLoading(true)
@@ -89,6 +118,9 @@ export default function App() {
   useEffect(() => {
     if (tab === 'system') {
       void loadHealth(true)
+    }
+    if (tab === 'history') {
+      void loadHistory()
     }
   }, [tab])
 
@@ -139,6 +171,30 @@ export default function App() {
     }
   }, [recordOpen])
 
+  async function handleOpenSession(runId: string) {
+    if (busyLock.current) return
+    busyLock.current = true
+    setBusy(true)
+    setHistoryError(null)
+    try {
+      const session = await fetchSession(runId)
+      setSelectedHistoryId(runId)
+      setText(session.original_text)
+      setUrl(session.original_url)
+      setDecision(session.envelope.human_decision?.decision ?? null)
+      setNotes(session.envelope.human_decision?.notes ?? '')
+      setRecordOpen(false)
+      setInputOpen(false)
+      applyEnvelope(session.envelope)
+      setMessages(reconstructChat(session))
+    } catch (err) {
+      setHistoryError(err instanceof Error ? err.message : 'Could not open session')
+    } finally {
+      busyLock.current = false
+      setBusy(false)
+    }
+  }
+
   function applyEnvelope(envelope: RunEnvelope) {
     setRun(envelope)
     setTrace(envelope.trace)
@@ -187,6 +243,7 @@ export default function App() {
     setDecision(null)
     setNotes('')
     setRecordOpen(false)
+    setSelectedHistoryId(null)
     setStatus('running')
     try {
       const result = await startRun(text, url)
@@ -317,6 +374,7 @@ export default function App() {
     setPendingLayer(null)
     setRecordOpen(false)
     setInputOpen(true)
+    setSelectedHistoryId(null)
   }
 
   const layerState = useMemo(
@@ -363,6 +421,13 @@ export default function App() {
             >
               System
             </button>
+            <button
+              type="button"
+              className={tab === 'history' ? 'tab on' : 'tab'}
+              onClick={() => setTab('history')}
+            >
+              History
+            </button>
           </nav>
         </header>
 
@@ -373,6 +438,18 @@ export default function App() {
               loading={healthLoading}
               error={healthError}
               onRefresh={() => void loadHealth(true)}
+            />
+          </div>
+        ) : tab === 'history' ? (
+          <div className="pane-body">
+            <SessionHistory
+              runs={history}
+              loading={historyLoading}
+              error={historyError}
+              selectedId={selectedHistoryId}
+              busy={busy}
+              onRefresh={() => void loadHistory()}
+              onOpen={(runId) => void handleOpenSession(runId)}
             />
           </div>
         ) : (

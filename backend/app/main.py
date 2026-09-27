@@ -27,6 +27,8 @@ from app.schemas.envelope import (
     HumanDecision,
     RunEnvelope,
     RunRequest,
+    RunSession,
+    RunSummary,
     StepRequest,
     utc_now,
 )
@@ -124,6 +126,19 @@ async def create_run(body: RunRequest) -> dict:
     )
     await _run_exclusive(state, layer=1, restore=False, settings=settings)
     return _step_payload(state, layer=1)
+
+
+@app.get("/api/runs")
+async def list_runs() -> list[RunSummary]:
+    return store.list_runs()
+
+
+@app.get("/api/runs/{run_id}/session")
+async def get_session(run_id: str) -> RunSession:
+    session = store.session(run_id)
+    if not session:
+        raise HTTPException(404, "Unknown run")
+    return session
 
 
 @app.get("/api/runs/{run_id}")
@@ -241,6 +256,8 @@ async def ask_run(run_id: str, body: AskRequest) -> dict:
     except Exception as exc:
         log.exception("run %s ask failed: %s", run_id[:8], exc)
         raise HTTPException(502, "Could not answer the question") from exc
+    store.append_message(run_id, kind="question", layer=layer, text=question)
+    store.append_message(run_id, kind="answer", layer=layer, text=answer)
     return {"layer": layer, "answer": answer}
 
 

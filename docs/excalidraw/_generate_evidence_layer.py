@@ -95,19 +95,20 @@ def build() -> Diagram:
         60,
         860,
         1880,
-        248,
+        380,
         "Deterministic fusion — a rule, not a third model",
         "Count support and contradiction by independent source, not by URL or masthead (twenty syndicated copies are one newsroom).\n"
         "Join misses against Layer 3 groups are counted: a miss inflates the independent-source count, which is then an upper bound.\n"
         "Agreement: convergent · contested · NLI-only · LLM-only · none. Contradiction counts are withheld when Engine A could not detect polarity.\n"
         "Empty paths are not_assessed, never no_corroboration_found. not_found (looked, nothing) and out_of_range (never looked) stay distinct.\n"
+        "derive_support_rate writes SupportRate: backed / scored claims (event_corroborated or corroborated_coverage). single_source is not backed. Percentage omitted when pairs were not scored, existence is out_of_range, or there are no claims. Not authenticity. document_count is not an input.\n"
         "Fusion is a pure function of its input. Engine B sampling may be unpinned, so the layer is not reproducible even though fusion is.",
         fill=GREEN,
         title_size=18,
         body_size=15,
     )
 
-    d.text("out-label", 60, 1140, "What this layer produces", size=16, color="#495057")
+    d.text("out-label", 60, 1272, "What this layer produces", size=16, color="#495057")
     cards = [
         ("out-matrix", "Claim–evidence matrix", "Each cell: NLI label\nplus LLM stance"),
         ("out-agree", "Engine agreement", "convergent, contested,\nor one engine only"),
@@ -118,13 +119,26 @@ def build() -> Diagram:
     ]
     x = 60
     for key, title, body in cards:
-        d.box(key, x, 1168, 292, 120, title, body, fill=PALE_BLUE, title_size=15, body_size=13)
+        d.box(key, x, 1300, 292, 120, title, body, fill=PALE_BLUE, title_size=15, body_size=13)
         x += 308
+
+    d.box(
+        "out-rate",
+        60,
+        1448,
+        1880,
+        88,
+        "Independent-reporting support rate",
+        "SupportRate on the payload: backed / scored after wire and owner collapse. single_source is not backed. Percentage omitted when pairs were not scored, existence is out_of_range, or there are no claims. Not an authenticity score. document_count is not an input.",
+        fill=PALE_BLUE,
+        title_size=16,
+        body_size=15,
+    )
 
     d.box(
         "gate",
         60,
-        1320,
+        1564,
         900,
         120,
         "Journalist reviews this layer, then chooses",
@@ -137,7 +151,7 @@ def build() -> Diagram:
     d.box(
         "next",
         996,
-        1320,
+        1564,
         360,
         120,
         "Next: Layer 5",
@@ -149,11 +163,11 @@ def build() -> Diagram:
     d.box(
         "not",
         1388,
-        1320,
+        1564,
         492,
         120,
         "This layer does not",
-        "Emit a true/false score or an editorial decision. Disagreement is shown, not hidden.",
+        "Emit an authenticity percentage, a true/false score, or an editorial decision. Disagreement is shown, not hidden.",
         fill=RED,
         title_size=17,
         body_size=15,
@@ -162,10 +176,10 @@ def build() -> Diagram:
     d.text(
         "footer",
         60,
-        1472,
+        1716,
         "Source of truth: backend/app/layers/evidence.py, backend/app/scoring/corroboration.py, backend/app/engines/nli.py,\n"
         "backend/app/engines/llm_router.py, backend/app/scoring/urls.py (grouping_url), backend/app/retrieval/independence.py,\n"
-        "backend/app/schemas/envelope.py (CorroborationPayload, GeminiClaimAnalysis), src/components/layerOutputs.tsx. "
+        "backend/app/schemas/envelope.py (CorroborationPayload, SupportRate, GeminiClaimAnalysis), src/components/layerOutputs.tsx. "
         "Tests: backend/tests/test_evidence_blinding.py, test_evidence_fusion.py, test_nli_engine.py, test_evidence_visibility.py.",
         size=12,
         color="#868e96",
@@ -179,7 +193,8 @@ def build() -> Diagram:
     d.arrow("a-nli-fuse", "nli", "fuse", drop="src")
     d.arrow("a-llm-fuse", "llm", "fuse", drop="src")
     d.arrow("a-fuse-matrix", "fuse", "out-matrix", drop="dst")
-    d.arrow("a-matrix-gate", "out-matrix", "gate", drop="src")
+    d.arrow("a-fuse-rate", "fuse", "out-rate", drop="src")
+    d.arrow("a-rate-gate", "out-rate", "gate", drop="src")
     d.arrow("a-gate-next", "gate", "next", src_side="right", dst_side="left")
 
     return d

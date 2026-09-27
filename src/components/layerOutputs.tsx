@@ -24,6 +24,7 @@ import {
   plainLabel,
   queryKindPlain,
   riskPlain,
+  supportRateOmittedPlain,
   titleMatchPlain,
 } from '../lib/plainLanguage'
 
@@ -780,41 +781,14 @@ function EvidenceOutput({ run }: { run: RunEnvelope }) {
   const [openId, setOpenId] = useState<string | null>(null)
   const gemini = run.gemini_analysis ?? []
 
-  const backed = rows.filter((row) =>
-    ['event_corroborated', 'corroborated_coverage'].includes(row.state),
-  ).length
   const contested = rows.filter((row) =>
     ['contested_reporting', 'contested'].includes(row.state),
   )
   const contradicted = rows.filter(
     (row) => (row.independent_contradict_outlets ?? 0) > 0 && canDetectContradiction,
   )
-  const allUnassessed =
-    rows.length > 0 && rows.every((row) => row.state === 'not_assessed')
   const total = claims.length
-
-  let answer: string
-  if (total === 0) {
-    answer = 'There were no claims to score.'
-  } else if (allUnassessed || run.corroboration.pairs_scored === false) {
-    const why = run.corroboration.existence_class ?? run.retrieval?.existence_class
-    if (why === 'out_of_range') {
-      answer = `We could not assess these ${total} claim${total === 1 ? '' : 's'} — we couldn't check other outlets.`
-    } else if (run.corroboration.unscored_reason === 'no_claims') {
-      answer = 'There were no claims to score.'
-    } else if (run.corroboration.unscored_reason === 'documents_filtered') {
-      answer = `We could not assess these ${total} claim${total === 1 ? '' : 's'} — pages were retrieved but none had text we could score.`
-    } else {
-      answer = `We did not assess whether these ${total} claim${total === 1 ? '' : 's'} are backed by independent reporting.`
-    }
-  } else if (backed === 0) {
-    answer =
-      total === 1
-        ? 'This claim is not backed by independent reporting.'
-        : `None of the ${total} claims are backed by independent reporting.`
-  } else {
-    answer = `${backed} of ${total} claims ${backed === 1 ? 'is' : 'are'} backed by independent reporting.`
-  }
+  const support = supportRateCopy(run, total)
 
   let second = ''
   if (contradicted.length > 0) {
@@ -846,6 +820,10 @@ function EvidenceOutput({ run }: { run: RunEnvelope }) {
   }
 
   const techFields: TechField[] = [
+    {
+      label: 'Independent-reporting support',
+      value: support.techValue,
+    },
     {
       label: 'Overall corroboration',
       value: corroborationStateCopy(run.corroboration.overall_state, {
@@ -902,7 +880,8 @@ function EvidenceOutput({ run }: { run: RunEnvelope }) {
       extraCount={techFields.length + rows.length + outlets.length + slotCount + 1}
       answer={
         <>
-          {answer}
+          {support.sentence}
+          <p className="tier-answer-sub">{support.gloss}</p>
           {second && <p className="tier-answer-sub">{second}</p>}
         </>
       }
@@ -1132,6 +1111,8 @@ function UncertaintyOutput({ run }: { run: RunEnvelope }) {
   const rec = u.recommended_decision
   const unsure = [...u.unknowns, ...u.weak_evidence]
   const recPlain = rec ? plain(rec) : null
+  const support = supportRateCopy(run, run.classification.claims.length)
+  const joinMisses = run.corroboration.group_join_misses ?? 0
 
   const techFields: TechField[] = [
     {
@@ -1167,6 +1148,11 @@ function UncertaintyOutput({ run }: { run: RunEnvelope }) {
       }
       evidence={
         <>
+          <p>
+            <strong>Independent-reporting support.</strong> {support.sentence}
+            <span className="gloss">{support.gloss}</span>
+          </p>
+          {joinMisses > 0 && <p>The independent-source count may be too high.</p>}
           <p>
             <strong>Publication risk.</strong>{' '}
             <span title={u.publication_risk}>{riskPlain(u.publication_risk).label}</span>
@@ -1576,6 +1562,49 @@ function recordDate(run: RunEnvelope) {
   const date = new Date(raw)
   if (Number.isNaN(date.getTime())) return raw
   return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+}
+
+const SUPPORT_RATE_GLOSS = 'This is not an authenticity score.'
+
+function supportRateCopy(run: RunEnvelope, claimCount: number) {
+  const rate = run.corroboration.support_rate
+  const pct = rate?.support_pct_of_scored
+  if (rate && pct != null) {
+    const verb = rate.backed_claim_count === 1 ? 'is' : 'are'
+    const unassessed =
+      rate.unassessed_claim_count > 0
+        ? ` ${rate.unassessed_claim_count} claim${
+            rate.unassessed_claim_count === 1 ? ' was' : 's were'
+          } not scored.`
+        : ''
+    const sentence = `${rate.backed_claim_count} of ${rate.scored_claim_count} scored claims ${verb} backed by independent reporting (${pct}%).${unassessed}`
+    return {
+      sentence,
+      gloss: SUPPORT_RATE_GLOSS,
+      techValue: `${rate.backed_claim_count} of ${rate.scored_claim_count} scored (${pct}%); ${rate.unassessed_claim_count} unassessed, ${rate.contested_claim_count} contested`,
+    }
+  }
+
+  const why = rate?.omitted_because
+  const omitted = supportRateOmittedPlain(why)
+  const existence = run.corroboration.existence_class ?? run.retrieval?.existence_class
+  let sentence = omitted.label
+  if (why === 'no_claims' || claimCount === 0) {
+    sentence = 'There were no claims to score.'
+  } else if (why === 'out_of_range' || existence === 'out_of_range') {
+    sentence = `We could not assess these ${claimCount} claim${claimCount === 1 ? '' : 's'} — we couldn't check other outlets.`
+  } else if (run.corroboration.unscored_reason === 'documents_filtered') {
+    sentence = `We could not assess these ${claimCount} claim${claimCount === 1 ? '' : 's'} — pages were retrieved but none had text we could score.`
+  } else {
+    sentence = `We did not assess whether these ${claimCount} claim${
+      claimCount === 1 ? '' : 's'
+    } are backed by independent reporting.`
+  }
+  return {
+    sentence,
+    gloss: SUPPORT_RATE_GLOSS,
+    techValue: `${omitted.label} (${why ?? 'not_assessed'})`,
+  }
 }
 
 export function corroborationStateCopy(
