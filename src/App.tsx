@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent } from 'react'
 import InspectorChat from './components/InspectorChat'
+import { LayerRail, scrollToLayerCard, toDeskStatus } from './components/desk'
 import { ApiError, fetchHealth, fetchRun, startRun, stepRun, submitDecision, askRun, subscribeRun } from './lib/api'
 import SystemHealth from './SystemHealth'
 import type {
@@ -11,7 +12,7 @@ import type {
   TraceEvent,
 } from './types/run'
 import { corroborationStateCopy } from './components/layerOutputs'
-import { LAST_LAYER, LAYERS } from './types/run'
+import { EDITORIAL_LAYER, LAST_LAYER, LAYERS } from './types/run'
 
 const SHOW_PROCESS_LOG = false
 const SPLIT_STORAGE_KEY = 'newsauth-split-left'
@@ -479,90 +480,101 @@ export default function App() {
 
       <section className="pane pane-right" aria-labelledby="inspector-heading">
         <div className="inspector">
-          <h2 id="inspector-heading">Verification inspector</h2>
-          <p className="caveat">
-            Decision support only. Outputs are signals, not a true/false verdict.
-            Final editorial judgement stays with the journalist.
-          </p>
-
-          {status === 'idle' && !runStarted && (
-            <p className="muted">
-              No run yet. Submit text or a URL. Each layer will pause for your
-              decision before the next one runs.
+          <header className="desk-case-head">
+            <p className="desk-label" id="inspector-heading">
+              Verification inspector
             </p>
-          )}
-
-          {status !== 'idle' && (
-            <ol className="stepper" aria-label="Framework layers">
-              {LAYERS.map((layer) => (
-                <li key={layer.id} className={layerState[layer.id] || 'idle'}>
-                  <span className="step-name">{layer.label}</span>
-                  <span className="step-state">{layerState[layer.id] || 'idle'}</span>
-                </li>
-              ))}
-            </ol>
-          )}
-
-          {busy && (
-            <p className="muted pulse">
-              {pendingLayer
-                ? `Running layer ${pendingLayer}…`
-                : 'Examining content through the current layer…'}
+            <h2>Case</h2>
+            <p className="caveat">
+              Decision support only. Outputs are signals, not a true/false verdict.
+              Final editorial judgement stays with the journalist.
             </p>
-          )}
-          {error && <p className="error">{error}</p>}
-
-          <InspectorChat
-            messages={messages}
-            phase={phase}
-            currentLayer={run?.current_layer ?? null}
-            busy={busy}
-            busyLabel={
-              pendingLayer ? `Running layer ${pendingLayer}…` : 'Working…'
-            }
-            pendingLayer={pendingLayer}
-            liveTrace={trace}
-            decision={decision}
-            notes={notes}
-            onDecision={setDecision}
-            onNotes={setNotes}
-            onConfirmDecision={() => void handleDecision()}
-            onProceed={() => void handleProceed()}
-            onRerun={() => void handleRerun()}
-            onAsk={(question) => void handleAsk(question)}
-          />
-
-          {SHOW_PROCESS_LOG && trace.length > 0 && (
-            <div className="timeline-wrap">
-              <h3>Process log</h3>
-              <ol className="timeline">
-                {trace.map((event, index) => (
-                  <li key={`${event.ts}-${index}`} className={`evt ${event.status}`}>
-                    <span className="evt-layer">{event.layer}</span>
-                    <span className="evt-process">{event.process}</span>
-                    <span className="evt-param">parameter: {event.parameter}</span>
-                    {event.tool && <span className="evt-tool">tool: {event.tool}</span>}
-                    {event.detail && <span className="evt-detail">{event.detail}</span>}
-                  </li>
-                ))}
-              </ol>
-            </div>
-          )}
-
-          {recordReady && (
-            <div className="record-launch">
-              <button
-                type="button"
-                className="primary"
-                onClick={() => setRecordOpen(true)}
-              >
-                View verification summary
-              </button>
+            {status === 'idle' && !runStarted && (
               <p className="muted">
-                Full claims, evidence, uncertainty, and the verification record.
+                No run yet. Submit text or a URL. Each layer will pause for your
+                decision before the next one runs.
               </p>
+            )}
+            {error && <p className="error">{error}</p>}
+          </header>
+
+          <div className={`desk-workspace${runStarted ? '' : ' is-empty'}`}>
+            {runStarted && (
+              <LayerRail
+                current={run?.current_layer ?? pendingLayer}
+                onSelect={scrollToLayerCard}
+                layers={LAYERS.map((layer) => ({
+                  n: layer.n,
+                  name: layer.label,
+                  status: toDeskStatus(
+                    layerState[layer.id] || 'idle',
+                    phase === 'awaiting_decision' && layer.n === EDITORIAL_LAYER,
+                  ),
+                }))}
+              />
+            )}
+            <div className="desk-thread-col">
+              <InspectorChat
+                messages={messages}
+                phase={phase}
+                currentLayer={run?.current_layer ?? null}
+                busy={busy}
+                busyLabel={
+                  pendingLayer ? `Running layer ${pendingLayer}…` : 'Working…'
+                }
+                pendingLayer={pendingLayer}
+                liveTrace={trace}
+                decision={decision}
+                notes={notes}
+                onDecision={setDecision}
+                onNotes={setNotes}
+                onConfirmDecision={() => void handleDecision()}
+                onProceed={() => void handleProceed()}
+                onRerun={() => void handleRerun()}
+                onAsk={(question) => void handleAsk(question)}
+                layerStatus={(n) => {
+                  const layer = LAYERS.find((row) => row.n === n)
+                  return toDeskStatus(
+                    (layer && layerState[layer.id]) || 'idle',
+                    phase === 'awaiting_decision' && n === EDITORIAL_LAYER,
+                  )
+                }}
+                footer={
+                  recordReady ? (
+                    <div className="record-launch">
+                      <button
+                        type="button"
+                        className="primary"
+                        onClick={() => setRecordOpen(true)}
+                      >
+                        View verification summary
+                      </button>
+                      <p className="muted">
+                        Full claims, evidence, uncertainty, and the verification record.
+                      </p>
+                    </div>
+                  ) : null
+                }
+              />
+
+              {SHOW_PROCESS_LOG && trace.length > 0 && (
+                <div className="timeline-wrap">
+                  <h3>Process log</h3>
+                  <ol className="timeline">
+                    {trace.map((event, index) => (
+                      <li key={`${event.ts}-${index}`} className={`evt ${event.status}`}>
+                        <span className="evt-layer">{event.layer}</span>
+                        <span className="evt-process">{event.process}</span>
+                        <span className="evt-param">parameter: {event.parameter}</span>
+                        {event.tool && <span className="evt-tool">tool: {event.tool}</span>}
+                        {event.detail && <span className="evt-detail">{event.detail}</span>}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </section>
 

@@ -2,14 +2,21 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { LayerProcess } from './layerProcess'
 import { SystemMessage } from './processKit'
 import { enginesForLayer, LayerOutput, layerTitle } from './layerOutputs'
+import { ComposerDock, LayerChrome, UserBubble, type DeskStatus } from './desk'
+import { MarkdownText } from '../lib/markdown'
 import type {
   ChatMessage,
   EditorialDecision,
-  RunEnvelope,
   RunPhase,
   TraceEvent,
 } from '../types/run'
-import { DECISIONS, EDITORIAL_LAYER, LAST_LAYER } from '../types/run'
+import { EDITORIAL_LAYER, LAST_LAYER } from '../types/run'
+
+const ASK_SUGGESTIONS = [
+  'What could we not check?',
+  'Which claims need a closer look?',
+  'Explain this in one sentence',
+]
 
 type Props = {
   messages: ChatMessage[]
@@ -27,6 +34,8 @@ type Props = {
   onProceed: () => void
   onRerun: () => void
   onAsk: (question: string) => void
+  layerStatus?: (layer: number) => DeskStatus
+  footer?: ReactNode
 }
 
 export default function InspectorChat({
@@ -45,88 +54,139 @@ export default function InspectorChat({
   onProceed,
   onRerun,
   onAsk,
+  layerStatus,
+  footer,
 }: Props) {
   const scroller = useRef<HTMLDivElement>(null)
-  const [askOpen, setAskOpen] = useState(false)
   const [draft, setDraft] = useState('')
 
   useEffect(() => {
     const node = scroller.current
     if (!node) return
     node.scrollTop = node.scrollHeight
-  }, [messages, busy, askOpen, busyLabel, liveTrace])
+  }, [messages, busy, busyLabel, liveTrace])
 
   useEffect(() => {
-    setAskOpen(false)
     setDraft('')
   }, [messages.length, currentLayer])
 
-  const latestId = messages.at(-1)?.id
+  const currentCard = [...messages]
+    .reverse()
+    .find(
+      (row) =>
+        (row.kind === 'layer' || row.kind === 'error') &&
+        !row.superseded &&
+        (currentLayer == null || row.layer === currentLayer),
+    )
+  const lastMessage = messages.at(-1)
+  const followUpAfterLayer =
+    Boolean(currentCard) &&
+    lastMessage != null &&
+    lastMessage.id !== currentCard?.id &&
+    (lastMessage.kind === 'question' || lastMessage.kind === 'answer')
   const editorialActive =
     phase === 'awaiting_decision' && currentLayer === EDITORIAL_LAYER && !busy
+  const canAsk = Boolean(currentLayer) && !busy && phase !== 'idle'
 
   function submitAsk() {
     const question = draft.trim()
     if (!question || busy) return
     onAsk(question)
     setDraft('')
-    setAskOpen(false)
+  }
+
+  function focusComposer() {
+    document.getElementById('desk-composer-input')?.focus()
   }
 
   return (
-    <div className="chat-panel" ref={scroller}>
-      <div className="chat-scroll">
-        {messages.length === 0 && !busy && (
-          <p className="muted">Layer output will appear here after you run verification.</p>
-        )}
-        {messages.map((message) => {
-          const active = message.id === latestId && !busy
-          return (
-            <article
-              key={message.id}
-              className={`chat-msg${message.kind === 'layer' && message.superseded ? ' superseded' : ''}${message.kind === 'error' && message.superseded ? ' superseded' : ''}`}
-            >
-              <MessageBody
-                message={message}
-                active={active}
-                editorialActive={editorialActive && message.kind === 'layer' && message.layer === EDITORIAL_LAYER}
-                decision={decision}
-                notes={notes}
-                busy={busy}
-                onDecision={onDecision}
-                onNotes={onNotes}
-                onConfirmDecision={onConfirmDecision}
+    <div className="chat-shell">
+      <div className="chat-panel" ref={scroller}>
+        <div className="chat-scroll">
+          {messages.length === 0 && !busy && (
+            <p className="muted">Layer output will appear here after you run verification.</p>
+          )}
+          {messages.map((message) => {
+            const active = currentCard?.id === message.id && !busy
+            const latestForLayer = [...messages]
+              .reverse()
+              .find((row) => row.kind === 'layer' && row.layer === message.layer)
+            const cardId =
+              message.kind === 'layer' && latestForLayer?.id === message.id
+                ? `layer-card-${message.layer}`
+                : undefined
+            const superseded =
+              (message.kind === 'layer' || message.kind === 'error') && message.superseded
+            return (
+              <article
+                key={message.id}
+                id={cardId}
+                className={`chat-msg${superseded ? ' superseded' : ''}`}
+              >
+                <MessageBody
+                  message={message}
+                  active={active}
+                  editorialActive={
+                    editorialActive && message.kind === 'layer' && message.layer === EDITORIAL_LAYER
+                  }
+                  decision={decision}
+                  notes={notes}
+                  busy={busy}
+                  status={layerStatus?.(message.layer) ?? (superseded ? 'pending' : 'done')}
+                  phase={phase}
+                  currentLayer={currentLayer}
+                  onDecision={onDecision}
+                  onNotes={onNotes}
+                  onConfirmDecision={onConfirmDecision}
+                  onProceed={onProceed}
+                  onRerun={onRerun}
+                  onAsk={focusComposer}
+                />
+              </article>
+            )
+          })}
+          {busy && (
+            <div className="chat-live">
+              <LayerChrome
+                layer={pendingLayer || currentLayer || 1}
+                name={layerTitle(pendingLayer || currentLayer || 1)}
+                status="running"
+                running
               />
-              <MessageActions
-                message={message}
-                active={active}
-                phase={phase}
-                currentLayer={currentLayer}
-                busy={busy}
-                askOpen={askOpen && active}
-                draft={draft}
-                onDraft={setDraft}
-                onToggleAsk={() => setAskOpen((open) => !open)}
-                onSubmitAsk={submitAsk}
-                onProceed={onProceed}
-                onRerun={onRerun}
+              <LayerProcess
+                run={null}
+                layer={pendingLayer || currentLayer || 1}
+                liveTrace={liveTrace}
+                live
+                defaultOpen
               />
-            </article>
-          )
-        })}
-        {busy && (
-          <div className="chat-live">
-            <LayerProcess
-              run={null}
-              layer={pendingLayer || currentLayer || 1}
-              liveTrace={liveTrace}
-              live
-              defaultOpen
-            />
-            <p className="muted pulse chat-busy">{busyLabel || 'Running layer…'}</p>
-          </div>
-        )}
+              <p className="muted pulse chat-busy">{busyLabel || 'Running layer…'}</p>
+            </div>
+          )}
+        </div>
       </div>
+      {followUpAfterLayer && currentCard && (
+        <div className="desk-proceed-bar">
+          <LayerActions
+            message={currentCard}
+            active={!busy}
+            phase={phase}
+            currentLayer={currentLayer}
+            busy={busy}
+            onProceed={onProceed}
+            onRerun={onRerun}
+            onAsk={focusComposer}
+          />
+        </div>
+      )}
+      {footer}
+      <ComposerDock
+        value={draft}
+        onChange={setDraft}
+        onSend={submitAsk}
+        disabled={!canAsk}
+        suggestions={ASK_SUGGESTIONS}
+      />
     </div>
   )
 }
@@ -138,9 +198,15 @@ function MessageBody({
   decision,
   notes,
   busy,
+  status,
+  phase,
+  currentLayer,
   onDecision,
   onNotes,
   onConfirmDecision,
+  onProceed,
+  onRerun,
+  onAsk,
 }: {
   message: ChatMessage
   active: boolean
@@ -148,66 +214,85 @@ function MessageBody({
   decision: EditorialDecision | null
   notes: string
   busy: boolean
+  status: DeskStatus
+  phase: RunPhase
+  currentLayer: number | null
   onDecision: (value: EditorialDecision) => void
   onNotes: (value: string) => void
   onConfirmDecision: () => void
+  onProceed: () => void
+  onRerun: () => void
+  onAsk: () => void
 }) {
   if (message.kind === 'question') {
-    return (
-      <>
-        <p className="chat-kicker">Journalist · layer {message.layer}</p>
-        <p>{message.text}</p>
-      </>
-    )
+    return <UserBubble>{message.text}</UserBubble>
   }
   if (message.kind === 'answer') {
     return (
-      <>
-        <p className="chat-kicker">Read-only answer · layer {message.layer}</p>
-        <p className="chat-answer">{message.text}</p>
-      </>
+      <LayerChrome layer={message.layer} name="Read-only answer" status="done" meta={`Layer ${message.layer}`}>
+        <MarkdownText text={message.text} />
+      </LayerChrome>
     )
   }
 
   const collapsed = Boolean(message.superseded)
-  const header = (
-    <header className="chat-head">
-      <p className="chat-kicker">
-        Layer {message.layer} · {layerTitle(message.layer)}
-        {message.kind === 'layer' ? ` · ${enginesForLayer(message.envelope, message.layer)}` : ''}
-        {collapsed ? ' · superseded' : ''}
-      </p>
-    </header>
+  const meta = message.kind === 'layer' ? enginesForLayer(message.envelope, message.layer) : undefined
+  const chromeStatus: DeskStatus = collapsed ? 'pending' : status
+  const actions = (
+    <LayerActions
+      message={message}
+      active={active}
+      phase={phase}
+      currentLayer={currentLayer}
+      busy={busy}
+      onProceed={onProceed}
+      onRerun={onRerun}
+      onAsk={onAsk}
+    />
   )
 
   if (message.kind === 'error') {
     const body = (
-      <>
-        {header}
+      <LayerChrome
+        layer={message.layer}
+        name={layerTitle(message.layer)}
+        status="flagged"
+        meta="Did not complete"
+        actions={collapsed ? undefined : actions}
+      >
         <SystemMessage variant="error">{message.detail}</SystemMessage>
         <p className="muted">This layer did not complete. It will not advance until it succeeds.</p>
-      </>
+      </LayerChrome>
     )
     return collapsed ? <details className="chat-fold">{wrap(body)}</details> : body
   }
 
   const layerBody = (
-    <>
-      {header}
-      <LayerOutput layer={message.layer} run={message.envelope} processOpen={!collapsed} />
-      {message.layer === EDITORIAL_LAYER && (
-        <EditorialControls
-          envelope={message.envelope}
-          active={editorialActive && active}
-          decision={decision}
-          notes={notes}
-          busy={busy}
-          onDecision={onDecision}
-          onNotes={onNotes}
-          onConfirm={onConfirmDecision}
-        />
-      )}
-    </>
+    <LayerChrome
+      layer={message.layer}
+      name={layerTitle(message.layer)}
+      status={chromeStatus}
+      meta={meta}
+      actions={collapsed ? undefined : actions}
+    >
+      <LayerOutput
+        layer={message.layer}
+        run={message.envelope}
+        editorial={
+          message.layer === EDITORIAL_LAYER
+            ? {
+                active: editorialActive && active,
+                decision,
+                notes,
+                busy,
+                onDecision,
+                onNotes,
+                onConfirm: onConfirmDecision,
+              }
+            : undefined
+        }
+      />
+    </LayerChrome>
   )
   if (!collapsed) return layerBody
   return (
@@ -229,152 +314,49 @@ function wrap(body: ReactNode) {
   )
 }
 
-function EditorialControls({
-  envelope,
-  active,
-  decision,
-  notes,
-  busy,
-  onDecision,
-  onNotes,
-  onConfirm,
-}: {
-  envelope: RunEnvelope
-  active: boolean
-  decision: EditorialDecision | null
-  notes: string
-  busy: boolean
-  onDecision: (value: EditorialDecision) => void
-  onNotes: (value: string) => void
-  onConfirm: () => void
-}) {
-  const recorded = envelope.human_decision.decision
-  const locked = !active || Boolean(recorded)
-  return (
-    <div className="chat-decision">
-      <p className="muted">
-        Choose the newsroom outcome. The recommendation above is not auto-committed.
-      </p>
-      <div className="decision-grid">
-        {DECISIONS.map((option) => {
-          const selected = (active ? decision : recorded) === option
-          return (
-            <button
-              key={option}
-              type="button"
-              className={selected ? 'primary' : 'ghost'}
-              disabled={locked || busy}
-              onClick={() => onDecision(option)}
-            >
-              {option.replaceAll('_', ' ')}
-            </button>
-          )
-        })}
-      </div>
-      <label className="field-label" htmlFor="chat-decision-notes">
-        Editorial notes
-      </label>
-      <textarea
-        id="chat-decision-notes"
-        className="content-input"
-        rows={3}
-        value={active ? notes : envelope.human_decision.notes}
-        disabled={locked || busy}
-        onChange={(e) => onNotes(e.target.value)}
-      />
-      {active && (
-        <div className="actions">
-          <button
-            type="button"
-            className="primary"
-            disabled={!decision || busy}
-            onClick={onConfirm}
-          >
-            Confirm editorial decision
-          </button>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function MessageActions({
+function LayerActions({
   message,
   active,
   phase,
   currentLayer,
   busy,
-  askOpen,
-  draft,
-  onDraft,
-  onToggleAsk,
-  onSubmitAsk,
   onProceed,
   onRerun,
+  onAsk,
 }: {
   message: ChatMessage
   active: boolean
   phase: RunPhase
   currentLayer: number | null
   busy: boolean
-  askOpen: boolean
-  draft: string
-  onDraft: (value: string) => void
-  onToggleAsk: () => void
-  onSubmitAsk: () => void
   onProceed: () => void
   onRerun: () => void
+  onAsk: () => void
 }) {
-  if (message.kind === 'question') return null
-  const layer = message.layer
-  if (layer === EDITORIAL_LAYER && message.kind === 'layer') return null
+  if (message.kind === 'question' || message.kind === 'answer') return null
+  if (message.layer === EDITORIAL_LAYER && message.kind === 'layer') return null
 
   const failed = message.kind === 'error' || (active && phase === 'error')
   const complete = active && phase === 'complete' && currentLayer === LAST_LAYER
   const disabled = !active || busy
 
+  if (complete) {
+    return <p className="muted chat-complete">Pipeline complete. Decision support only.</p>
+  }
+
   return (
-    <div className="chat-actions-wrap">
-      <div className="chat-actions">
-        {complete ? (
-          <p className="muted chat-complete">Pipeline complete. Decision support only.</p>
-        ) : failed ? null : (
-          <button type="button" className="primary" disabled={disabled} onClick={onProceed}>
-            Ready to proceed?
-          </button>
-        )}
-        <button type="button" className="ghost" disabled={disabled} onClick={onRerun}>
-          Generate response again
+    <>
+      {failed ? null : (
+        <button type="button" className="primary" disabled={disabled} onClick={onProceed}>
+          Proceed
         </button>
-        <button type="button" className="ghost" disabled={disabled} onClick={onToggleAsk}>
-          Questions or comments?
-        </button>
-      </div>
-      {askOpen && active && (
-        <div className="chat-ask">
-          <label className="field-label" htmlFor="chat-ask-input">
-            Question about this layer
-          </label>
-          <textarea
-            id="chat-ask-input"
-            className="content-input"
-            rows={3}
-            value={draft}
-            onChange={(e) => onDraft(e.target.value)}
-            placeholder="Ask about this layer’s output. The answer cannot change the run."
-          />
-          <div className="actions">
-            <button
-              type="button"
-              className="primary"
-              disabled={busy || !draft.trim()}
-              onClick={onSubmitAsk}
-            >
-              Submit question
-            </button>
-          </div>
-        </div>
       )}
-    </div>
+      <button type="button" className="ghost" disabled={disabled} onClick={onRerun}>
+        Generate again
+      </button>
+      <button type="button" className="ghost" disabled={disabled} onClick={onAsk}>
+        Ask a question
+      </button>
+    </>
   )
 }

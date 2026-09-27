@@ -56,7 +56,24 @@ export type PairAnalysis = {
   source_id: string
   nli_label: 'entailment' | 'contradiction' | 'neutral'
   nli_score: number
+  nli_probs?: Record<string, number>
   gemini_stance: string | null
+}
+
+export type Inconsistency = {
+  slot: 'date' | 'place' | 'number' | 'actor' | 'other'
+  summary: string
+  source_ids: string[]
+}
+
+export type GeminiClaimAnalysis = {
+  claim_id: string
+  supported_by: string[]
+  contradicted_by: string[]
+  unrelated: string[]
+  inconsistencies: Inconsistency[]
+  missing_slots: string[]
+  dropped_source_ids?: string[]
 }
 
 export type ClaimCorroboration = {
@@ -194,6 +211,8 @@ export type RunEnvelope = {
   current_layer: number | null
   completed_layer: number
   error: string | null
+  created_at?: string
+  completed_at?: string
   input: {
     raw_text: string
     url: string | null
@@ -234,6 +253,7 @@ export type RunEnvelope = {
   tool_results: { tool: string; status: string; detail: string; hit_count: number }[]
   retrieval?: RetrievalPayload | null
   analysis: PairAnalysis[]
+  gemini_analysis?: GeminiClaimAnalysis[]
   corroboration: {
     overall_state: string
     independent_source_count: number
