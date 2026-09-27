@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent } from 'react'
 import InspectorChat from './components/InspectorChat'
 import { ApiError, fetchHealth, fetchRun, startRun, stepRun, submitDecision, askRun, subscribeRun } from './lib/api'
 import SystemHealth from './SystemHealth'
@@ -14,6 +14,10 @@ import { corroborationStateCopy } from './components/layerOutputs'
 import { LAST_LAYER, LAYERS } from './types/run'
 
 const SHOW_PROCESS_LOG = false
+const SPLIT_STORAGE_KEY = 'newsauth-split-left'
+const SPLIT_DEFAULT = 50
+const SPLIT_MIN = 22
+const SPLIT_MAX = 78
 
 type Status = 'idle' | 'running' | 'done' | 'error'
 type Tab = 'authenticate' | 'system'
@@ -35,6 +39,10 @@ export default function App() {
   const [busy, setBusy] = useState(false)
   const [pendingLayer, setPendingLayer] = useState<number | null>(null)
   const [recordOpen, setRecordOpen] = useState(false)
+  const [inputOpen, setInputOpen] = useState(true)
+  const [leftPct, setLeftPct] = useState(readStoredSplit)
+  const splitRef = useRef<HTMLDivElement>(null)
+  const dragging = useRef(false)
   const busyLock = useRef(false)
 
   async function loadHealth(probe: boolean) {
@@ -51,6 +59,30 @@ export default function App() {
 
   useEffect(() => {
     void loadHealth(false)
+  }, [])
+
+  useEffect(() => {
+    window.localStorage.setItem(SPLIT_STORAGE_KEY, String(leftPct))
+  }, [leftPct])
+
+  useEffect(() => {
+    function onMove(event: PointerEvent) {
+      if (!dragging.current) return
+      const box = splitRef.current?.getBoundingClientRect()
+      if (!box || box.width <= 0) return
+      setLeftPct(clampSplit(((event.clientX - box.left) / box.width) * 100))
+    }
+    function onUp() {
+      if (!dragging.current) return
+      dragging.current = false
+      document.body.classList.remove('is-resizing')
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+    return () => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+    }
   }, [])
 
   useEffect(() => {
@@ -283,222 +315,289 @@ export default function App() {
     setNotes('')
     setPendingLayer(null)
     setRecordOpen(false)
+    setInputOpen(true)
   }
 
   const layerState = useMemo(
     () => layerStatuses(run, trace, status, pendingLayer),
     [run, trace, status, pendingLayer],
   )
+  const runStarted = status !== 'idle' || messages.length > 0
+
+  function beginResize(event: PointerEvent<HTMLButtonElement>) {
+    event.preventDefault()
+    dragging.current = true
+    document.body.classList.add('is-resizing')
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
+  function nudgeSplit(delta: number) {
+    setLeftPct((value) => clampSplit(value + delta))
+  }
 
   return (
-    <div className="app">
-      <header className="header">
-        <p className="brand">NewsAuth</p>
-        <p className="tagline">
-          A journalist-centred framework for authenticating news content
-        </p>
-        <nav className="tabs" aria-label="Main">
-          <button
-            type="button"
-            className={tab === 'authenticate' ? 'tab on' : 'tab'}
-            onClick={() => setTab('authenticate')}
-          >
-            Authenticate
-          </button>
-          <button
-            type="button"
-            className={tab === 'system' ? 'tab on' : 'tab'}
-            onClick={() => setTab('system')}
-          >
-            System
-          </button>
-        </nav>
-      </header>
+    <div
+      className="app"
+      ref={splitRef}
+      style={{ '--split-left': `${leftPct}%` } as CSSProperties}
+    >
+      <aside className="pane pane-left">
+        <header className="header">
+          <p className="brand">NewsAuth</p>
+          <p className="tagline">
+            A journalist-centred framework for authenticating news content
+          </p>
+          <nav className="tabs" aria-label="Main">
+            <button
+              type="button"
+              className={tab === 'authenticate' ? 'tab on' : 'tab'}
+              onClick={() => setTab('authenticate')}
+            >
+              Authenticate
+            </button>
+            <button
+              type="button"
+              className={tab === 'system' ? 'tab on' : 'tab'}
+              onClick={() => setTab('system')}
+            >
+              System
+            </button>
+          </nav>
+        </header>
 
-      <main className="main">
         {tab === 'system' ? (
-          <SystemHealth
-            health={health}
-            loading={healthLoading}
-            error={healthError}
-            onRefresh={() => void loadHealth(true)}
-          />
+          <div className="pane-body">
+            <SystemHealth
+              health={health}
+              loading={healthLoading}
+              error={healthError}
+              onRefresh={() => void loadHealth(true)}
+            />
+          </div>
         ) : (
-          <>
-            <section className="panel input-panel" aria-labelledby="input-heading">
-              <h1 id="input-heading">Authenticate</h1>
-              <p className="lede">
-                Paste a claim or article, or provide a public URL. Each layer uses a
-                different engine. The system collects evidence; it does not decide
-                authenticity.
-              </p>
-
-              <label className="field-label" htmlFor="news-url">
-                Article URL
-              </label>
-              <input
-                id="news-url"
-                className="content-input url-input"
-                type="url"
-                placeholder="https://…"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-              />
-
-              <label className="field-label" htmlFor="news-content">
-                News content
-              </label>
-              <textarea
-                id="news-content"
-                className="content-input"
-                placeholder="Paste a headline, claim, or article text…"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                rows={8}
-              />
-
-              <div className="actions">
-                <button
-                  type="button"
-                  className="primary"
-                  onClick={() => void handleRun()}
-                  disabled={!canRun || busy || runInProgress}
-                >
-                  {busy && !run ? 'Starting…' : 'Run verification'}
-                </button>
-                <button type="button" className="ghost" onClick={handleClear} disabled={busy}>
-                  Clear
-                </button>
+          <section
+            className={`panel input-panel${inputOpen ? '' : ' is-collapsed'}`}
+            aria-labelledby="input-heading"
+          >
+            <div className="input-panel-bar">
+              <div className="input-panel-copy">
+                <h1 id="input-heading">Authenticate</h1>
+                {inputOpen ? (
+                  <p className="lede">
+                    Paste a claim or article, or provide a public URL. Each layer uses a
+                    different engine. The system collects evidence; it does not decide
+                    authenticity.
+                  </p>
+                ) : (
+                  <p className="input-summary">{inputSummary(url, text)}</p>
+                )}
               </div>
-            </section>
+              <button
+                type="button"
+                className="ghost"
+                aria-expanded={inputOpen}
+                aria-controls="authenticate-fields"
+                onClick={() => setInputOpen((open) => !open)}
+              >
+                {inputOpen ? 'Collapse' : 'Expand'}
+              </button>
+            </div>
 
-            <section className="inspector" aria-labelledby="inspector-heading">
-              <h2 id="inspector-heading">Verification inspector</h2>
-              <p className="caveat">
-                Decision support only. Outputs are signals, not a true/false verdict.
-                Final editorial judgement stays with the journalist.
-              </p>
-
-              {status === 'idle' && (
-                <p className="muted">
-                  No run yet. Submit text or a URL. Each layer will pause for your
-                  decision before the next one runs.
-                </p>
-              )}
-
-              {status !== 'idle' && (
-                <ol className="stepper" aria-label="Framework layers">
-                  {LAYERS.map((layer) => (
-                    <li key={layer.id} className={layerState[layer.id] || 'idle'}>
-                      <span className="step-name">{layer.label}</span>
-                      <span className="step-state">{layerState[layer.id] || 'idle'}</span>
-                    </li>
-                  ))}
-                </ol>
-              )}
-
-              {busy && (
-                <p className="muted pulse">
-                  {pendingLayer
-                    ? `Running layer ${pendingLayer}…`
-                    : 'Examining content through the current layer…'}
-                </p>
-              )}
-              {error && <p className="error">{error}</p>}
-
-              {(status !== 'idle' || messages.length > 0) && (
-                <InspectorChat
-                  messages={messages}
-                  phase={phase}
-                  currentLayer={run?.current_layer ?? null}
-                  busy={busy}
-                  busyLabel={
-                    pendingLayer ? `Running layer ${pendingLayer}…` : 'Working…'
-                  }
-                  pendingLayer={pendingLayer}
-                  liveTrace={trace}
-                  decision={decision}
-                  notes={notes}
-                  onDecision={setDecision}
-                  onNotes={setNotes}
-                  onConfirmDecision={() => void handleDecision()}
-                  onProceed={() => void handleProceed()}
-                  onRerun={() => void handleRerun()}
-                  onAsk={(question) => void handleAsk(question)}
+            {inputOpen && (
+              <div id="authenticate-fields">
+                <label className="field-label" htmlFor="news-url">
+                  Article URL
+                </label>
+                <input
+                  id="news-url"
+                  className="content-input url-input"
+                  type="url"
+                  placeholder="https://…"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
                 />
-              )}
 
-              {SHOW_PROCESS_LOG && trace.length > 0 && (
-                <div className="timeline-wrap">
-                  <h3>Process log</h3>
-                  <ol className="timeline">
-                    {trace.map((event, index) => (
-                      <li key={`${event.ts}-${index}`} className={`evt ${event.status}`}>
-                        <span className="evt-layer">{event.layer}</span>
-                        <span className="evt-process">{event.process}</span>
-                        <span className="evt-param">parameter: {event.parameter}</span>
-                        {event.tool && <span className="evt-tool">tool: {event.tool}</span>}
-                        {event.detail && <span className="evt-detail">{event.detail}</span>}
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              )}
+                <label className="field-label" htmlFor="news-content">
+                  News content
+                </label>
+                <textarea
+                  id="news-content"
+                  className="content-input"
+                  placeholder="Paste a headline, claim, or article text…"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  rows={8}
+                />
 
-              {recordReady && (
-                <div className="record-launch">
+                <div className="actions">
                   <button
                     type="button"
                     className="primary"
-                    onClick={() => setRecordOpen(true)}
+                    onClick={() => void handleRun()}
+                    disabled={!canRun || busy || runInProgress}
                   >
-                    View verification summary
+                    {busy && !run ? 'Starting…' : 'Run verification'}
                   </button>
-                  <p className="muted">
-                    Full claims, evidence, uncertainty, and the verification record.
-                  </p>
-                </div>
-              )}
-            </section>
-            {recordOpen && run && (
-              <div
-                className="modal-backdrop"
-                onClick={() => setRecordOpen(false)}
-                role="presentation"
-              >
-                <div
-                  className="modal"
-                  role="dialog"
-                  aria-modal="true"
-                  aria-labelledby="record-modal-heading"
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  <header className="modal-head">
-                    <h2 id="record-modal-heading">Verification summary</h2>
-                    <button
-                      type="button"
-                      className="ghost"
-                      onClick={() => setRecordOpen(false)}
-                    >
-                      Close
-                    </button>
-                  </header>
-                  <p className="caveat modal-caveat">
-                    Decision support only. Outputs are signals, not a true/false verdict.
-                  </p>
-                  <div className="modal-body">
-                    <RunResults run={run} completedLayer={run.completed_layer} />
-                  </div>
+                  <button type="button" className="ghost" onClick={handleClear} disabled={busy}>
+                    Clear
+                  </button>
                 </div>
               </div>
             )}
-          </>
+          </section>
         )}
-      </main>
 
-      <footer className="footer">
-        <p>Thesis prototype · COMP4092 · Macquarie University</p>
-      </footer>
+        <footer className="footer">
+          <p>Thesis prototype · COMP4092 · Macquarie University</p>
+        </footer>
+      </aside>
+
+      <button
+        type="button"
+        className="split-handle"
+        aria-label="Resize left and right panels"
+        aria-orientation="vertical"
+        role="separator"
+        aria-valuemin={SPLIT_MIN}
+        aria-valuemax={SPLIT_MAX}
+        aria-valuenow={Math.round(leftPct)}
+        onPointerDown={beginResize}
+        onDoubleClick={() => setLeftPct(SPLIT_DEFAULT)}
+        onKeyDown={(event) => {
+          if (event.key === 'ArrowLeft') {
+            event.preventDefault()
+            nudgeSplit(-2)
+          } else if (event.key === 'ArrowRight') {
+            event.preventDefault()
+            nudgeSplit(2)
+          } else if (event.key === 'Home') {
+            event.preventDefault()
+            setLeftPct(SPLIT_DEFAULT)
+          }
+        }}
+      />
+
+      <section className="pane pane-right" aria-labelledby="inspector-heading">
+        <div className="inspector">
+          <h2 id="inspector-heading">Verification inspector</h2>
+          <p className="caveat">
+            Decision support only. Outputs are signals, not a true/false verdict.
+            Final editorial judgement stays with the journalist.
+          </p>
+
+          {status === 'idle' && !runStarted && (
+            <p className="muted">
+              No run yet. Submit text or a URL. Each layer will pause for your
+              decision before the next one runs.
+            </p>
+          )}
+
+          {status !== 'idle' && (
+            <ol className="stepper" aria-label="Framework layers">
+              {LAYERS.map((layer) => (
+                <li key={layer.id} className={layerState[layer.id] || 'idle'}>
+                  <span className="step-name">{layer.label}</span>
+                  <span className="step-state">{layerState[layer.id] || 'idle'}</span>
+                </li>
+              ))}
+            </ol>
+          )}
+
+          {busy && (
+            <p className="muted pulse">
+              {pendingLayer
+                ? `Running layer ${pendingLayer}…`
+                : 'Examining content through the current layer…'}
+            </p>
+          )}
+          {error && <p className="error">{error}</p>}
+
+          <InspectorChat
+            messages={messages}
+            phase={phase}
+            currentLayer={run?.current_layer ?? null}
+            busy={busy}
+            busyLabel={
+              pendingLayer ? `Running layer ${pendingLayer}…` : 'Working…'
+            }
+            pendingLayer={pendingLayer}
+            liveTrace={trace}
+            decision={decision}
+            notes={notes}
+            onDecision={setDecision}
+            onNotes={setNotes}
+            onConfirmDecision={() => void handleDecision()}
+            onProceed={() => void handleProceed()}
+            onRerun={() => void handleRerun()}
+            onAsk={(question) => void handleAsk(question)}
+          />
+
+          {SHOW_PROCESS_LOG && trace.length > 0 && (
+            <div className="timeline-wrap">
+              <h3>Process log</h3>
+              <ol className="timeline">
+                {trace.map((event, index) => (
+                  <li key={`${event.ts}-${index}`} className={`evt ${event.status}`}>
+                    <span className="evt-layer">{event.layer}</span>
+                    <span className="evt-process">{event.process}</span>
+                    <span className="evt-param">parameter: {event.parameter}</span>
+                    {event.tool && <span className="evt-tool">tool: {event.tool}</span>}
+                    {event.detail && <span className="evt-detail">{event.detail}</span>}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+
+          {recordReady && (
+            <div className="record-launch">
+              <button
+                type="button"
+                className="primary"
+                onClick={() => setRecordOpen(true)}
+              >
+                View verification summary
+              </button>
+              <p className="muted">
+                Full claims, evidence, uncertainty, and the verification record.
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {recordOpen && run && (
+        <div
+          className="modal-backdrop"
+          onClick={() => setRecordOpen(false)}
+          role="presentation"
+        >
+          <div
+            className="modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="record-modal-heading"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className="modal-head">
+              <h2 id="record-modal-heading">Verification summary</h2>
+              <button
+                type="button"
+                className="ghost"
+                onClick={() => setRecordOpen(false)}
+              >
+                Close
+              </button>
+            </header>
+            <p className="caveat modal-caveat">
+              Decision support only. Outputs are signals, not a true/false verdict.
+            </p>
+            <div className="modal-body">
+              <RunResults run={run} completedLayer={run.completed_layer} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -884,6 +983,29 @@ function cloneRun(run: RunEnvelope): RunEnvelope {
 
 function newId() {
   return crypto.randomUUID()
+}
+
+function clampSplit(value: number) {
+  return Math.min(SPLIT_MAX, Math.max(SPLIT_MIN, value))
+}
+
+function readStoredSplit() {
+  const raw = window.localStorage.getItem(SPLIT_STORAGE_KEY)
+  const value = raw == null ? SPLIT_DEFAULT : Number(raw)
+  return Number.isFinite(value) ? clampSplit(value) : SPLIT_DEFAULT
+}
+
+function inputSummary(url: string, text: string) {
+  const trimmedUrl = url.trim()
+  const trimmedText = text.trim()
+  const parts: string[] = []
+  if (trimmedUrl) {
+    parts.push(trimmedUrl.length > 72 ? `${trimmedUrl.slice(0, 69)}…` : trimmedUrl)
+  }
+  if (trimmedText) {
+    parts.push(`${trimmedText.length} character${trimmedText.length === 1 ? '' : 's'} pasted`)
+  }
+  return parts.join(' · ') || 'No URL or pasted text recorded'
 }
 
 function evidenceColumns(run: RunEnvelope) {

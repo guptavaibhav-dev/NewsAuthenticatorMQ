@@ -75,56 +75,58 @@ export default function InspectorChat({
 
   return (
     <div className="chat-panel" ref={scroller}>
-      {messages.length === 0 && !busy && (
-        <p className="muted">Layer output will appear here after you run verification.</p>
-      )}
-      {messages.map((message) => {
-        const active = message.id === latestId && !busy
-        return (
-          <article
-            key={message.id}
-            className={`chat-msg${message.kind === 'layer' && message.superseded ? ' superseded' : ''}${message.kind === 'error' && message.superseded ? ' superseded' : ''}`}
-          >
-            <MessageBody
-              message={message}
-              active={active}
-              editorialActive={editorialActive && message.kind === 'layer' && message.layer === EDITORIAL_LAYER}
-              decision={decision}
-              notes={notes}
-              busy={busy}
-              onDecision={onDecision}
-              onNotes={onNotes}
-              onConfirmDecision={onConfirmDecision}
+      <div className="chat-scroll">
+        {messages.length === 0 && !busy && (
+          <p className="muted">Layer output will appear here after you run verification.</p>
+        )}
+        {messages.map((message) => {
+          const active = message.id === latestId && !busy
+          return (
+            <article
+              key={message.id}
+              className={`chat-msg${message.kind === 'layer' && message.superseded ? ' superseded' : ''}${message.kind === 'error' && message.superseded ? ' superseded' : ''}`}
+            >
+              <MessageBody
+                message={message}
+                active={active}
+                editorialActive={editorialActive && message.kind === 'layer' && message.layer === EDITORIAL_LAYER}
+                decision={decision}
+                notes={notes}
+                busy={busy}
+                onDecision={onDecision}
+                onNotes={onNotes}
+                onConfirmDecision={onConfirmDecision}
+              />
+              <MessageActions
+                message={message}
+                active={active}
+                phase={phase}
+                currentLayer={currentLayer}
+                busy={busy}
+                askOpen={askOpen && active}
+                draft={draft}
+                onDraft={setDraft}
+                onToggleAsk={() => setAskOpen((open) => !open)}
+                onSubmitAsk={submitAsk}
+                onProceed={onProceed}
+                onRerun={onRerun}
+              />
+            </article>
+          )
+        })}
+        {busy && (
+          <div className="chat-live">
+            <LayerProcess
+              run={null}
+              layer={pendingLayer || currentLayer || 1}
+              liveTrace={liveTrace}
+              live
+              defaultOpen
             />
-            <MessageActions
-              message={message}
-              active={active}
-              phase={phase}
-              currentLayer={currentLayer}
-              busy={busy}
-              askOpen={askOpen && active}
-              draft={draft}
-              onDraft={setDraft}
-              onToggleAsk={() => setAskOpen((open) => !open)}
-              onSubmitAsk={submitAsk}
-              onProceed={onProceed}
-              onRerun={onRerun}
-            />
-          </article>
-        )
-      })}
-      {busy && (
-        <div className="chat-live">
-          <LayerProcess
-            run={null}
-            layer={pendingLayer || currentLayer || 1}
-            liveTrace={liveTrace}
-            live
-            defaultOpen
-          />
-          <p className="muted pulse chat-busy">{busyLabel || 'Running layer…'}</p>
-        </div>
-      )}
+            <p className="muted pulse chat-busy">{busyLabel || 'Running layer…'}</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
